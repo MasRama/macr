@@ -94,7 +94,7 @@ fi
 # Inside the private bus from here on.
 SHELL_PID=""
 cleanup() {
-    [ -n "$SHELL_PID" ] && kill "$SHELL_PID" 2>/dev/null || true
+    if [ -n "$SHELL_PID" ]; then kill "$SHELL_PID" 2>/dev/null || true; fi
     rm -f "$STATE/bus" "$STATE/run.pid"
 }
 trap cleanup EXIT
