@@ -4,7 +4,8 @@
 # real session or its settings. Your fonts are linked in so SF Pro renders.
 # Stays in the foreground; stop it with stop.sh or Ctrl-C.
 #
-# Usage: tools/devshell/run.sh [--light]
+# Usage: tools/devshell/run.sh [--light] [--dual]
+# --dual adds a second 1920x1080 monitor to the right of the first.
 # Needs the packed extension (npm run pack). Then use app.sh, eval.sh,
 # shot.sh and stop.sh.
 set -eu
@@ -17,9 +18,11 @@ ZIP="$ROOT/build/$UUID.shell-extension.zip"
 
 if [ -z "${MACR_DEVSHELL_INNER:-}" ]; then
     SCHEME=prefer-dark
+    MONITORS=1
     for arg in "$@"; do
         case "$arg" in
             --light) SCHEME=default ;;
+            --dual) MONITORS=2 ;;
             *) echo "unknown option: $arg" >&2; exit 2 ;;
         esac
     done
@@ -94,7 +97,7 @@ KEYFILE
 BUSCONF
 
     exec env -u DISPLAY -u WAYLAND_DISPLAY -u GNOME_SETUP_DISPLAY \
-        MACR_DEVSHELL_INNER=1 \
+        MACR_DEVSHELL_INNER=1 MACR_DEVSHELL_MONITORS="$MONITORS" \
         XDG_CONFIG_HOME="$STATE/config" XDG_DATA_HOME="$STATE/data" \
         XDG_CACHE_HOME="$STATE/cache" XDG_RUNTIME_DIR="$STATE/runtime" \
         GSETTINGS_BACKEND=keyfile \
@@ -112,8 +115,10 @@ trap 'exit 0' INT TERM
 echo "$$" > "$STATE/run.pid"
 
 # The shell's system bus is this bus too: it never talks to the real logind.
+set -- --virtual-monitor 1920x1080
+[ "${MACR_DEVSHELL_MONITORS:-1}" = 2 ] && set -- "$@" --virtual-monitor 1920x1080
 DBUS_SYSTEM_BUS_ADDRESS="$DBUS_SESSION_BUS_ADDRESS" gnome-shell --headless --wayland --no-x11 \
-    --virtual-monitor 1920x1080 --wayland-display macr-devshell > "$STATE/shell.log" 2>&1 &
+    "$@" --wayland-display macr-devshell > "$STATE/shell.log" 2>&1 &
 SHELL_PID=$!
 
 i=0
