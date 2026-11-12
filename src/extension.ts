@@ -6,6 +6,7 @@ import { ControlCenterModule } from './features/controlcenter/index.js';
 import { DockModule } from './features/dock/index.js';
 import { LaunchpadModule } from './features/launchpad/index.js';
 import { MenuBar } from './features/menubar/index.js';
+import { OsdModule } from './features/osd/index.js';
 import { SpotlightModule } from './features/spotlight/index.js';
 import type { Module, ModuleEntry } from './shared/module.js';
 
@@ -16,6 +17,7 @@ const MODULES: ModuleEntry[] = [
     { key: 'spotlight-enabled', create: (context) => new SpotlightModule(context) },
     { key: 'control-center-enabled', create: () => new ControlCenterModule() },
     { key: 'app-icon-tiles', create: () => new AppIconsModule() },
+    { key: 'osd-enabled', create: () => new OsdModule() },
 ];
 
 export default class Macr extends Extension {

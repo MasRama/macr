@@ -913,3 +913,70 @@
   background-color: rgba(0, 0, 0, 0.06) !important;
   color: #1d1d1f !important;
 }
+
+/* ---------- OSD ---------- */
+/* A frosted pill at the top right. !important where shell themes
+   (MacTahoe) style .osd-window. */
+
+.osd-window.macr-osd {
+  min-width: 0 !important;
+  margin: 0 !important;
+  padding: 10px 16px 10px 14px !important;
+  spacing: 12px !important;
+  border: 1px solid rgba(255, 255, 255, 0.13) !important;
+  border-radius: 99px !important;
+  background-color: rgba(36, 36, 40, 0.74) !important;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3) !important;
+  color: #ffffff !important;
+  font-family: "SF Pro Text", "SF Pro", system-ui, sans-serif;
+  text-align: left;
+}
+
+.osd-window.macr-osd > StBoxLayout {
+  spacing: 4px !important;
+}
+
+.osd-window.macr-osd StIcon {
+  icon-size: 20px !important;
+  color: #ffffff !important;
+}
+
+.osd-window.macr-osd StLabel {
+  margin: 0 !important;
+  font-size: 12px !important;
+  font-weight: bold !important;
+  color: #ffffff !important;
+}
+
+.osd-window.macr-osd .level {
+  min-width: 180px !important;
+  height: 6px !important;
+  margin: 0 !important;
+  border-radius: 3px !important;
+  background-color: transparent !important;
+  color: #ffffff !important;
+  -barlevel-height: 6px;
+  -barlevel-border-width: 0;
+  -barlevel-background-color: rgba(255, 255, 255, 0.18);
+  -barlevel-active-background-color: #ffffff;
+  -barlevel-overdrive-color: #ff9f0a;
+  -barlevel-overdrive-separator-width: 2px;
+}
+
+.osd-window.macr-osd.macr-light {
+  border-color: rgba(0, 0, 0, 0.08) !important;
+  background-color: rgba(246, 246, 248, 0.8) !important;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.16) !important;
+  color: #1d1d1f !important;
+}
+
+.osd-window.macr-osd.macr-light StIcon,
+.osd-window.macr-osd.macr-light StLabel {
+  color: #1d1d1f !important;
+}
+
+.osd-window.macr-osd.macr-light .level {
+  color: #1d1d1f !important;
+  -barlevel-background-color: rgba(0, 0, 0, 0.1);
+  -barlevel-active-background-color: #1d1d1f;
+}

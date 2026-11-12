@@ -72,5 +72,10 @@
       <summary>Give app icons the icon theme lacks a macOS tile</summary>
       <description>The original icon on a light macOS squircle, in the dock, Launchpad, Spotlight and the app switcher.</description>
     </key>
+    <key name="osd-enabled" type="b">
+      <default>true</default>
+      <summary>Show volume and brightness as a macOS pill</summary>
+      <description>GNOME's on-screen display moves under the menu bar at the top right, as a small frosted pill.</description>
+    </key>
   </schema>
 </schemalist>

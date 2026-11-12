@@ -50,6 +50,10 @@ export default class MacrPreferences extends ExtensionPreferences {
         const icons = new Adw.PreferencesGroup({ title: _('App icons') });
         icons.add(switchRow(settings, 'app-icon-tiles', _('macOS tiles for other icons'), _('Apps your icon theme does not cover get their icon on a macOS tile')));
         page.add(icons);
+
+        const osd = new Adw.PreferencesGroup({ title: _('On-screen display') });
+        osd.add(switchRow(settings, 'osd-enabled', _('macOS volume and brightness'), _('A small pill under the menu bar at the top right')));
+        page.add(osd);
         window.add(page);
     }
 }
