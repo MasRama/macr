@@ -4,8 +4,9 @@
 # real session or its settings. Your fonts are linked in so SF Pro renders.
 # Stays in the foreground; stop it with stop.sh or Ctrl-C.
 #
-# Usage: tools/devshell/run.sh [--light] [--dual]
+# Usage: tools/devshell/run.sh [--light] [--dual] [--gdm]
 # --dual adds a second 1920x1080 monitor to the right of the first.
+# --gdm starts the shell as the login screen (GDM's greeter mode).
 # Needs the packed extension (npm run pack). Then use app.sh, eval.sh,
 # shot.sh and stop.sh.
 set -eu
@@ -19,10 +20,12 @@ ZIP="$ROOT/build/$UUID.shell-extension.zip"
 if [ -z "${MACR_DEVSHELL_INNER:-}" ]; then
     SCHEME=prefer-dark
     MONITORS=1
+    MODE=user
     for arg in "$@"; do
         case "$arg" in
             --light) SCHEME=default ;;
             --dual) MONITORS=2 ;;
+            --gdm) MODE=gdm ;;
             *) echo "unknown option: $arg" >&2; exit 2 ;;
         esac
     done
@@ -41,6 +44,7 @@ if [ -z "${MACR_DEVSHELL_INNER:-}" ]; then
     # Your icon theme too, so the dock looks like it does in your session.
     [ -d "$HOME/.local/share/icons" ] && ln -s "$HOME/.local/share/icons" "$STATE/data/icons"
     ICON_THEME=$(gsettings get org.gnome.desktop.interface icon-theme 2>/dev/null || echo "'Adwaita'")
+    WALLPAPER=$(gsettings get org.gnome.desktop.background picture-uri 2>/dev/null || echo "''")
     # Dock favourites: the stock GNOME apps that are installed.
     FAVORITES=""
     for app in org.gnome.Nautilus org.gnome.TextEditor org.gnome.Calculator org.gnome.Terminal org.gnome.Software org.gnome.Settings; do
@@ -74,6 +78,11 @@ color-scheme='$SCHEME'
 icon-theme=$ICON_THEME
 clock-format='24h'
 clock-show-weekday=true
+
+# The login screen's wallpaper, as Ubuntu's GDM reads it.
+[com/ubuntu/login-screen]
+background-picture-uri=$WALLPAPER
+background-size='cover'
 KEYFILE
 
     # A bare session bus: no system service directories, so the shell does
@@ -97,7 +106,7 @@ KEYFILE
 BUSCONF
 
     exec env -u DISPLAY -u WAYLAND_DISPLAY -u GNOME_SETUP_DISPLAY \
-        MACR_DEVSHELL_INNER=1 MACR_DEVSHELL_MONITORS="$MONITORS" \
+        MACR_DEVSHELL_INNER=1 MACR_DEVSHELL_MONITORS="$MONITORS" MACR_DEVSHELL_MODE="$MODE" \
         XDG_CONFIG_HOME="$STATE/config" XDG_DATA_HOME="$STATE/data" \
         XDG_CACHE_HOME="$STATE/cache" XDG_RUNTIME_DIR="$STATE/runtime" \
         GSETTINGS_BACKEND=keyfile \
@@ -117,6 +126,7 @@ echo "$$" > "$STATE/run.pid"
 # The shell's system bus is this bus too: it never talks to the real logind.
 set -- --virtual-monitor 1920x1080
 [ "${MACR_DEVSHELL_MONITORS:-1}" = 2 ] && set -- "$@" --virtual-monitor 1920x1080
+[ "${MACR_DEVSHELL_MODE:-user}" = gdm ] && set -- "$@" --mode=gdm
 DBUS_SYSTEM_BUS_ADDRESS="$DBUS_SESSION_BUS_ADDRESS" gnome-shell --headless --wayland --no-x11 \
     "$@" --wayland-display macr-devshell > "$STATE/shell.log" 2>&1 &
 SHELL_PID=$!
