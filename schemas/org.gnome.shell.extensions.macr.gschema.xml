@@ -77,5 +77,10 @@
       <summary>Show volume and brightness as a macOS pill</summary>
       <description>GNOME's on-screen display moves under the menu bar at the top right, as a small frosted pill.</description>
     </key>
+    <key name="switcher-enabled" type="b">
+      <default>true</default>
+      <summary>Show Alt+Tab as the macOS app switcher</summary>
+      <description>A frosted panel with big icons, a soft highlight and the chosen app's name. Alt+Tab keeps working as before.</description>
+    </key>
   </schema>
 </schemalist>

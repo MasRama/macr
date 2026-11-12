@@ -980,3 +980,95 @@
   -barlevel-background-color: rgba(0, 0, 0, 0.1);
   -barlevel-active-background-color: #1d1d1f;
 }
+
+/* ---------- App switcher ---------- */
+/* GNOME's switcher popups (Alt+Tab, Alt+`, Ctrl+Alt+Tab, input sources). */
+
+.macr-switcher .switcher-list {
+  padding: 14px !important;
+  border: 1px solid rgba(255, 255, 255, 0.13) !important;
+  border-radius: 28px !important;
+  background-color: rgba(36, 36, 40, 0.72) !important;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.4) !important;
+  color: #ffffff !important;
+  font-family: "SF Pro Text", "SF Pro", system-ui, sans-serif;
+}
+
+.macr-switcher .switcher-list .switcher-list-item-container {
+  spacing: 6px !important;
+}
+
+.macr-switcher .switcher-list .item-box {
+  padding: 10px 10px 6px !important;
+  border: none !important;
+  border-radius: 18px !important;
+  box-shadow: none !important;
+  background-color: transparent !important;
+  background-gradient-direction: none !important;
+  color: transparent !important;
+}
+
+.macr-switcher .switcher-list .item-box:outlined {
+  background-color: rgba(255, 255, 255, 0.08) !important;
+}
+
+.macr-switcher .switcher-list .item-box:selected {
+  background-color: rgba(255, 255, 255, 0.18) !important;
+  color: #ffffff !important;
+}
+
+/* Only the chosen app shows its name, as on macOS. */
+.macr-switcher .alt-tab-app {
+  spacing: 6px;
+  font-size: 13px;
+  font-weight: bold;
+}
+
+.macr-switcher .input-source-switcher-symbol {
+  color: #ffffff;
+}
+
+.macr-switcher .switcher-list .separator {
+  background: rgba(255, 255, 255, 0.14) !important;
+}
+
+.macr-switcher .switcher-arrow {
+  border-color: transparent !important;
+  color: rgba(255, 255, 255, 0.45) !important;
+}
+
+.macr-switcher .switcher-arrow:highlighted {
+  color: #ffffff !important;
+}
+
+.macr-switcher.macr-light .switcher-list {
+  border-color: rgba(0, 0, 0, 0.08) !important;
+  background-color: rgba(246, 246, 248, 0.78) !important;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.2) !important;
+  color: #1d1d1f !important;
+}
+
+.macr-switcher.macr-light .switcher-list .item-box:outlined {
+  background-color: rgba(0, 0, 0, 0.05) !important;
+}
+
+.macr-switcher.macr-light .switcher-list .item-box:selected {
+  background-color: rgba(0, 0, 0, 0.1) !important;
+  color: #1d1d1f !important;
+}
+
+.macr-switcher.macr-light .input-source-switcher-symbol {
+  color: #1d1d1f;
+}
+
+.macr-switcher.macr-light .switcher-list .separator {
+  background: rgba(0, 0, 0, 0.12) !important;
+}
+
+.macr-switcher.macr-light .switcher-arrow {
+  color: rgba(0, 0, 0, 0.35) !important;
+}
+
+.macr-switcher.macr-light .switcher-arrow:highlighted {
+  color: #1d1d1f !important;
+}

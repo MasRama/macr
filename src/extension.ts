@@ -8,6 +8,7 @@ import { LaunchpadModule } from './features/launchpad/index.js';
 import { MenuBar } from './features/menubar/index.js';
 import { OsdModule } from './features/osd/index.js';
 import { SpotlightModule } from './features/spotlight/index.js';
+import { SwitcherModule } from './features/switcher/index.js';
 import type { Module, ModuleEntry } from './shared/module.js';
 
 const MODULES: ModuleEntry[] = [
@@ -18,6 +19,7 @@ const MODULES: ModuleEntry[] = [
     { key: 'control-center-enabled', create: () => new ControlCenterModule() },
     { key: 'app-icon-tiles', create: () => new AppIconsModule() },
     { key: 'osd-enabled', create: () => new OsdModule() },
+    { key: 'switcher-enabled', create: () => new SwitcherModule() },
 ];
 
 export default class Macr extends Extension {

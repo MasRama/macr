@@ -54,6 +54,10 @@ export default class MacrPreferences extends ExtensionPreferences {
         const osd = new Adw.PreferencesGroup({ title: _('On-screen display') });
         osd.add(switchRow(settings, 'osd-enabled', _('macOS volume and brightness'), _('A small pill under the menu bar at the top right')));
         page.add(osd);
+
+        const switcher = new Adw.PreferencesGroup({ title: _('App switcher') });
+        switcher.add(switchRow(settings, 'switcher-enabled', _('macOS app switcher'), _('Alt+Tab as a frosted panel with big icons')));
+        page.add(switcher);
         window.add(page);
     }
 }
