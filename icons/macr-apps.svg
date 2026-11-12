@@ -10,15 +10,15 @@
     </linearGradient>
   </defs>
   <rect x="8" y="8" width="112" height="112" rx="26" fill="url(#tile)"/>
-  <rect x="31" y="31" width="22" height="22" rx="6.5" fill="#ff5f57"/>
-  <rect x="61" y="31" width="22" height="22" rx="6.5" fill="#febc2e"/>
-  <rect x="91" y="31" width="22" height="22" rx="6.5" fill="#28c840"/>
-  <rect x="31" y="61" width="22" height="22" rx="6.5" fill="#0a84ff"/>
-  <rect x="61" y="61" width="22" height="22" rx="6.5" fill="#5e5ce6"/>
-  <rect x="91" y="61" width="22" height="22" rx="6.5" fill="#bf5af2"/>
-  <rect x="31" y="91" width="22" height="22" rx="6.5" fill="#ff375f"/>
-  <rect x="61" y="91" width="22" height="22" rx="6.5" fill="#64d2ff"/>
-  <rect x="91" y="91" width="22" height="22" rx="6.5" fill="#ff9f0a"/>
+  <rect x="23" y="23" width="22" height="22" rx="6.5" fill="#ff5f57"/>
+  <rect x="53" y="23" width="22" height="22" rx="6.5" fill="#febc2e"/>
+  <rect x="83" y="23" width="22" height="22" rx="6.5" fill="#28c840"/>
+  <rect x="23" y="53" width="22" height="22" rx="6.5" fill="#0a84ff"/>
+  <rect x="53" y="53" width="22" height="22" rx="6.5" fill="#5e5ce6"/>
+  <rect x="83" y="53" width="22" height="22" rx="6.5" fill="#bf5af2"/>
+  <rect x="23" y="83" width="22" height="22" rx="6.5" fill="#ff375f"/>
+  <rect x="53" y="83" width="22" height="22" rx="6.5" fill="#64d2ff"/>
+  <rect x="83" y="83" width="22" height="22" rx="6.5" fill="#ff9f0a"/>
   <rect x="8" y="8" width="112" height="112" rx="26" fill="url(#shine)"/>
   <rect x="8.5" y="8.5" width="111" height="111" rx="25.5" fill="none" stroke="#000000" stroke-opacity="0.08"/>
 </svg>
