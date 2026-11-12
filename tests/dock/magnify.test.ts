@@ -47,3 +47,12 @@ test('the extra width is the sum of every icon growth', () => {
     assert.ok(Math.abs(m.extra - growth) < 1e-9);
     assert.ok(m.extraLeft > 0 && m.extraLeft < m.extra);
 });
+
+test('fixed items such as separators keep their size but still make room', () => {
+    const fixed = [false, false, true, false, false];
+    const m = magnify(centers, width, 72, { ...opts, fixed });
+    assert.equal(m.scales[2], 1);
+    assert.ok(m.shifts[2] > 0, 'the separator moves away from the pointer');
+    const growth = m.scales.reduce((sum: number, s: number, i: number) => sum + (fixed[i] ? 0 : (s - 1) * width), 0);
+    assert.ok(Math.abs(m.extra - growth) < 1e-9);
+});

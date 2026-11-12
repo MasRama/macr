@@ -3,6 +3,8 @@ export interface MagnifyOptions {
     maxScale: number;
     /** How far the effect spreads, in icon widths from the pointer. */
     reach: number;
+    /** Items that never grow, such as separators; they only move. */
+    fixed?: boolean[];
 }
 
 export interface Magnified {
@@ -26,7 +28,8 @@ export function magnify(centers: number[], width: number, pointer: number | null
         return { scales: centers.map(() => 1), shifts: zeros, extra: 0, extraLeft: 0 };
     }
     const range = opts.reach * width;
-    const scales = centers.map((center) => {
+    const scales = centers.map((center, i) => {
+        if (opts.fixed?.[i]) return 1;
         const t = Math.abs(center - pointer) / range;
         return t >= 1 ? 1 : 1 + ((opts.maxScale - 1) * (Math.cos(Math.PI * t) + 1)) / 2;
     });

@@ -5,7 +5,7 @@ cd "$(dirname "$0")/.."
 
 rm -rf dist
 npm run build
-cp metadata.json stylesheet.css dist/
+cp -r metadata.json stylesheet.css icons dist/
 
 # gnome-extensions pack only takes the well-known files by itself.
 set --

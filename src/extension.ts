@@ -1,10 +1,14 @@
 import type Gio from 'gi://Gio';
 import { Extension } from 'resource:///org/gnome/shell/extensions/extension.js';
 
+import { DockModule } from './features/dock/index.js';
 import { MenuBar } from './features/menubar/index.js';
 import type { Module, ModuleEntry } from './shared/module.js';
 
-const MODULES: ModuleEntry[] = [{ key: 'menubar-enabled', create: (context) => new MenuBar(context) }];
+const MODULES: ModuleEntry[] = [
+    { key: 'menubar-enabled', create: (context) => new MenuBar(context) },
+    { key: 'dock-enabled', create: (context) => new DockModule(context) },
+];
 
 export default class Macr extends Extension {
     private settings: Gio.Settings | null = null;

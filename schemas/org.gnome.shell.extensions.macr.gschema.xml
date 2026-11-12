@@ -10,5 +10,24 @@
       <summary>Hide the distribution's menu button (such as Zorin Menu) from the top bar</summary>
       <description>The Super key keeps opening it.</description>
     </key>
+    <key name="dock-enabled" type="b">
+      <default>true</default>
+      <summary>Show the macOS dock at the bottom of the screen</summary>
+      <description>Replaces the overview's dash. Turn off Dash to Dock while it is on.</description>
+    </key>
+    <key name="dock-icon-size" type="i">
+      <range min="32" max="96"/>
+      <default>48</default>
+      <summary>Size of the dock's icons, in pixels</summary>
+    </key>
+    <key name="dock-autohide" type="b">
+      <default>true</default>
+      <summary>Hide the dock when a window covers it</summary>
+      <description>Move the pointer to the bottom edge of the screen to bring it back.</description>
+    </key>
+    <key name="dock-magnification" type="b">
+      <default>true</default>
+      <summary>Magnify dock icons under the pointer</summary>
+    </key>
   </schema>
 </schemalist>

@@ -324,3 +324,94 @@
 .macr-force-quit-row-box {
   spacing: 10px;
 }
+
+/* Dock */
+.macr-dock-background {
+    border-radius: 22px;
+    background-color: rgba(28, 28, 32, 0.38);
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.32);
+}
+
+#macrDock.macr-light .macr-dock-background {
+    background-color: rgba(255, 255, 255, 0.36);
+    border-color: rgba(255, 255, 255, 0.6);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.18);
+}
+
+#macrDash {
+    margin: 0;
+    padding: 0 4px;
+}
+
+#macrDash .dash-background {
+    background: none;
+    border: none;
+    box-shadow: none;
+    padding: 0;
+    margin: 0;
+}
+
+#macrDash .dash-item-container .show-apps,
+#macrDash .dash-item-container .overview-tile {
+    background: none;
+    border: none;
+    box-shadow: none;
+    border-radius: 0;
+    margin: 0;
+    padding: 5px 3px 9px;
+}
+
+#macrDash .dash-item-container .show-apps .overview-icon,
+#macrDash .dash-item-container .overview-tile .overview-icon,
+#macrDash .dash-item-container .show-apps:hover .overview-icon,
+#macrDash .dash-item-container .overview-tile:hover .overview-icon,
+#macrDash .dash-item-container .show-apps:focus .overview-icon,
+#macrDash .dash-item-container .overview-tile:focus .overview-icon,
+#macrDash .dash-item-container .show-apps:active .overview-icon,
+#macrDash .dash-item-container .overview-tile:active .overview-icon,
+#macrDash .dash-item-container .show-apps:checked .overview-icon,
+#macrDash .dash-item-container .overview-tile:checked .overview-icon {
+    background: none;
+    box-shadow: none;
+    border: none;
+    border-radius: 0;
+    padding: 0;
+    spacing: 0;
+    color: #ffffff;
+}
+
+#macrDash .app-grid-running-dot {
+    width: 4px;
+    height: 4px;
+    border-radius: 2px;
+    margin-bottom: 1px;
+    background-color: rgba(255, 255, 255, 0.85);
+}
+
+#macrDock.macr-light #macrDash .app-grid-running-dot {
+    background-color: rgba(0, 0, 0, 0.6);
+}
+
+#macrDash .dash-separator,
+#macrDock .macr-dock-divider {
+    width: 1px;
+    margin: 0 5px;
+    background-color: rgba(255, 255, 255, 0.22);
+}
+
+#macrDock.macr-light #macrDash .dash-separator,
+#macrDock.macr-light .macr-dock-divider {
+    background-color: rgba(0, 0, 0, 0.16);
+}
+
+.dash-label.macr-dock-label {
+    -y-offset: 10px;
+    font-family: "SF Pro Text", "SF Pro", system-ui, sans-serif;
+    font-size: 13px;
+    color: #f5f5f7;
+    background-color: rgba(40, 40, 44, 0.86);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 8px;
+    padding: 4px 10px;
+}
