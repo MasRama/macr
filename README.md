@@ -21,8 +21,11 @@ stack of tweak extensions that each fix one corner. It ships module by module.
 | **Mission Control**: the overview's windows spread over the dimmed wallpaper with the Spaces bar always at the top | GNOME's overview look | done |
 | **Hot corners**: each screen corner can open Mission Control, Launchpad, the desktop or the Notification Center, or lock the screen | GNOME's top-left hot corner | done |
 | **Window corners**: rounded macOS corners on windows that do not round their own, such as frameless (Electron) and older X11 apps, with a soft shadow on frameless ones; square when maximized | Rounded Window Corners | done |
+| **Traffic lights**: red, yellow and green window buttons first on the left of app windows, grey in windows in the background, with their symbols on hover; in GTK and libadwaita apps, Chrome and X11 apps (Qt 6 apps on Wayland and Electron apps with their own title bar draw their own buttons) | a macOS GTK theme's window buttons | done |
 
-Macr leaves your GTK theme alone. It pairs well with a macOS-style theme such
+Macr leaves your GTK theme alone, apart from the window buttons it draws as
+traffic lights (a stylesheet it adds to `~/.config/gtk-3.0` and `gtk-4.0` and
+takes out again when turned off). It pairs well with a macOS-style theme such
 as [MacTahoe](https://github.com/vinceliuice/MacTahoe-gtk-theme), and with
 [Nokta](https://github.com/MasRama/nokta) for a dynamic island in the middle
 of the bar.

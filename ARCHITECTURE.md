@@ -245,3 +245,31 @@ schemas/                GSettings schema
   minimize animations.
 - Plans are redone on allocation, size, maximize, full-screen and pivot
   changes; disable removes every effect and shadow.
+
+## Traffic lights
+
+- Window buttons are drawn by the apps, not the shell, so the module sets
+  what apps read. It puts `close,minimize,maximize` first on the left of
+  `org.gnome.desktop.wm.preferences button-layout` (`logic/layout.ts`; other
+  buttons keep their side), saving the old layout in
+  `traffic-lights-saved-layout` and putting it back on disable unless the
+  user changed it since.
+- It writes `macr-traffic-lights.css` and a `macr-traffic-lights/` folder of
+  SVG lights (each light at rest, hovered, pressed and in the background)
+  into `~/.config/gtk-3.0` and `gtk-4.0`, and imports the stylesheet from the
+  first line of `gtk.css` (`logic/stylesheet.ts`). The SVGs are files because
+  GTK 3 cannot draw an SVG from a `data:` URL, and are drawn large so they
+  stay sharp at fractional scales. Every rule carries `:not(#macr)`, whose id
+  specificity beats any theme's window-button rules.
+- GTK 4 rules style `windowcontrols > button`, which covers libadwaita and
+  the frames Mutter draws around X11 windows; the whole group shows its
+  symbols on hover, as on macOS, and each button does too for Chrome, which
+  renders GTK 4 buttons one by one. GTK 3 rules style `button.titlebutton`.
+- A `gtk.css` that is a symbolic link (MacTahoe links it to its own
+  stylesheet) is never written through: the link is replaced by a file that
+  imports its target, and put back on disable. A `gtk.css` Macr created is
+  removed again; one of the user's only loses Macr's line.
+- GTK reads the user stylesheet once at start, so open apps change when they
+  are reopened. Qt 6 apps on Wayland (the bradient decoration) and Electron
+  apps with a custom title bar draw their own buttons and are left as they
+  are.
