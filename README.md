@@ -9,9 +9,9 @@ stack of tweak extensions that each fix one corner. It ships module by module.
 
 | Module | Replaces | Status |
 |---|---|---|
-| **Menu bar**: logo menu, the focused app's name and menu, a Window menu, a macOS clock, a translucent bar | Just Perfection, Blur my Shell (top bar) | in progress |
+| **Menu bar**: logo menu, the focused app's name and menu, a Window menu, a macOS clock, a translucent bar | Just Perfection, Blur my Shell (top bar) | done |
+| **Dock**: frosted glass, magnification, running dots, Trash, hides when a window covers it, genie minimize | Dash to Dock, Magic Lamp | done |
 | Control Center | GNOME quick settings | planned |
-| Dock | Dash to Dock, Magic Lamp | planned |
 | Launchpad and Spotlight | the distribution's app menu, Ulauncher | planned |
 
 Macr leaves your GTK theme alone. It pairs well with a macOS-style theme such
@@ -42,8 +42,10 @@ npm run pack
 gnome-extensions install --force build/macr@masrama.github.io.shell-extension.zip
 ```
 
-Log out and back in, then turn Macr on in Extensions. When the menu bar is
-on, you can turn off Just Perfection and Blur my Shell's top bar blur.
+Log out and back in, then turn Macr on in Extensions. Turn off the
+extensions Macr replaces, or the two will fight over the same UI: Just
+Perfection and Blur my Shell's top bar blur for the menu bar, Dash to Dock and
+Magic Lamp for the dock. Each module can be turned off in Macr's settings.
 
 ## Development
 

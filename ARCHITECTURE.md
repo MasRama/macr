@@ -11,7 +11,7 @@ src/
   extension.ts          turns modules on and off from GSettings
   prefs.ts              settings window (separate GTK 4 process)
   shared/               code used by more than one module
-  features/<module>/    one folder per module (menubar, later dock, ...)
+  features/<module>/    one folder per module (menubar, dock, ...)
     index.ts            the Module: enable() / disable()
     logic/              pure functions, no gi:// imports, unit tested
 tests/                  node --test tests for the logic folders
@@ -42,3 +42,27 @@ schemas/                GSettings schema
   Apple artwork); without that font it falls back to a generic symbol.
 - Menus only offer items that work for every app. Real per-app menus are a
   later tier.
+
+## Dock
+
+- GNOME's own `Dash` (favourites, running apps, drag to reorder, app menus),
+  subclassed to take its icon size from the `dock-icon-size` setting and
+  placed in a chrome actor at the bottom of the primary monitor. Show Apps
+  moves to the start; a divider and the Trash follow the apps.
+- `Dash` never disconnects what it connects on `AppSystem`, `AppFavorites`
+  and `Main.overview`, and GNOME 46 never destroys an app icon's menu. The
+  dock records those handlers while the dash is built and destroys the menus
+  with their icons, so turning Macr off leaves nothing behind.
+- The overview's own dash is hidden (not destroyed) and restored on disable.
+- Magnification moves and scales the icons with `translation_x` and
+  `set_scale`; the background grows with them. The maths is in
+  `logic/magnify.ts`.
+- Autohide: the dock hides when the focused window overlaps it or is
+  fullscreen, and a 1 px strip at the bottom edge brings it back.
+- Clicking the focused app minimizes its window, or cycles its windows on the
+  workspace (`logic/rules.ts`). Everything else is GNOME's default.
+- Genie: GNOME's minimize and unminimize handlers on `global.window_manager`
+  are blocked, and a `Clutter.DeformEffect` bends the window into its dock
+  icon (`logic/genie.ts`). A window with no icon in the dock gets GNOME's
+  animation. The headless devshell does not paint deform effects, so the
+  genie can only be seen in a real session.
