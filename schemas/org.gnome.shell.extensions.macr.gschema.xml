@@ -10,6 +10,11 @@
       <summary>Hide the distribution's menu button (such as Zorin Menu) from the top bar</summary>
       <description>The Super key keeps opening it.</description>
     </key>
+    <key name="menubar-app-menus" type="b">
+      <default>true</default>
+      <summary>Show the focused app's own menus in the menu bar</summary>
+      <description>File, Edit, View and the rest, for apps that share their menus (GTK apps with a menu bar, LibreOffice).</description>
+    </key>
     <key name="menubar-all-monitors" type="b">
       <default>true</default>
       <summary>Show the menu bar on every monitor</summary>

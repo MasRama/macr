@@ -1524,3 +1524,23 @@
 .macr-window-shadow {
   box-shadow: 0 12px 36px rgba(0, 0, 0, 0.38);
 }
+
+/* App menus: keyboard shortcuts on the right of an item */
+.macr-menu .macr-accel {
+  padding-left: 24px;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.macr-menu .popup-menu-item:hover .macr-accel,
+.macr-menu .popup-menu-item:focus .macr-accel {
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.macr-menu.macr-light .macr-accel {
+  color: rgba(0, 0, 0, 0.45);
+}
+
+.macr-menu.macr-light .popup-menu-item:hover .macr-accel,
+.macr-menu.macr-light .popup-menu-item:focus .macr-accel {
+  color: rgba(255, 255, 255, 0.85);
+}

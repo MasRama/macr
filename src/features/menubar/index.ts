@@ -4,6 +4,7 @@ import type * as PanelMenu from 'resource:///org/gnome/shell/ui/panelMenu.js';
 
 import type { Module, ModuleContext } from '../../shared/module.js';
 import { AppMenu } from './app-menu.js';
+import { AppMenus } from './app-menus.js';
 import { Clock } from './clock.js';
 import { FocusTracker } from './focus.js';
 import { logoMenu } from './logo-menu.js';
@@ -11,7 +12,7 @@ import { PanelTweaks } from './panel-tweaks.js';
 import { SecondaryBar } from './secondary-bar.js';
 import { windowMenu } from './window-menu.js';
 
-type Boxes = { _rightBox: St.BoxLayout };
+type Boxes = { _leftBox: St.BoxLayout; _rightBox: St.BoxLayout };
 type Disconnectable = { disconnect(id: number): void };
 
 /**
@@ -26,6 +27,8 @@ export class MenuBar implements Module {
     private buttons: PanelMenu.Button[] = [];
     private rightAddedId = 0;
     private appMenu: AppMenu | null = null;
+    private appMenus: AppMenus | null = null;
+    private appMenuCount = 0;
     private bars: SecondaryBar[] = [];
     private ids: [Disconnectable, number][] = [];
 
@@ -55,6 +58,11 @@ export class MenuBar implements Module {
 
         const settings = this.context.settings;
         this.ids.push([settings, settings.connect('changed::menubar-all-monitors', () => this.buildBars())]);
+        this.ids.push([settings, settings.connect('changed::menubar-app-menus', () => {
+            this.buildAppMenus();
+            this.buildBars();
+        })]);
+        this.buildAppMenus();
         const layout = Main.layoutManager as unknown as { connect(signal: string, callback: () => void): number } & Disconnectable;
         this.ids.push([layout, layout.connect('monitors-changed', () => this.buildBars())]);
         this.buildBars();
@@ -64,6 +72,8 @@ export class MenuBar implements Module {
         for (const [target, id] of this.ids) target.disconnect(id);
         this.ids = [];
         this.destroyBars();
+        this.appMenus?.destroy();
+        this.appMenus = null;
         this.appMenu = null;
         if (this.rightAddedId) (Main.panel as unknown as Boxes)._rightBox.disconnect(this.rightAddedId);
         this.rightAddedId = 0;
@@ -84,7 +94,7 @@ export class MenuBar implements Module {
         if (!focus || !this.context.settings.get_boolean('menubar-all-monitors')) return;
         const { monitors, primaryIndex } = Main.layoutManager;
         monitors.forEach((_monitor, index) => {
-            if (index !== primaryIndex) this.bars.push(new SecondaryBar(index, focus));
+            if (index !== primaryIndex) this.bars.push(new SecondaryBar(index, focus, this.context.settings.get_boolean('menubar-app-menus')));
         });
     }
 
@@ -95,7 +105,23 @@ export class MenuBar implements Module {
 
     private syncAppMenus(): void {
         this.appMenu?.sync();
-        for (const bar of this.bars) bar.appMenu.sync();
+        this.appMenus?.sync();
+        for (const bar of this.bars) bar.sync();
+    }
+
+    /** The focused app's own menus, placed around the Window menu. */
+    private buildAppMenus(): void {
+        this.appMenus?.destroy();
+        this.appMenus = null;
+        const focus = this.focus;
+        if (!focus || !this.context.settings.get_boolean('menubar-app-menus')) return;
+        this.appMenus = new AppMenus(focus, (button, afterWindow) => {
+            const left = (Main.panel as unknown as Boxes)._leftBox;
+            const windowButton = (Main.panel.statusArea as Record<string, PanelMenu.Button | undefined>)['macr-window'];
+            const at = windowButton ? left.get_children().indexOf(windowButton.container) : -1;
+            const index = at < 0 ? left.get_n_children() : at + (afterWindow ? 1 : 0);
+            Main.panel.addToStatusArea(`macr-app-menu-${this.appMenuCount++}`, button, index, 'left');
+        });
     }
 
     private keepClockLast(): void {
