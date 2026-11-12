@@ -1,4 +1,3 @@
-import Clutter from 'gi://Clutter';
 import Gio from 'gi://Gio';
 import Shell from 'gi://Shell';
 import St from 'gi://St';
@@ -8,18 +7,18 @@ import * as PopupMenu from 'resource:///org/gnome/shell/ui/popupMenu.js';
 
 import { isLight } from '../../shared/scheme.js';
 import { AppMenu } from './app-menu.js';
-import { BorrowedMenu } from './borrowed-menu.js';
 import { Clock } from './clock.js';
 import type { FocusTracker } from './focus.js';
 import { logoMenu } from './logo-menu.js';
+import { StatusMirror } from './status-mirror.js';
 import { windowMenu } from './window-menu.js';
 
 type Disconnectable = { disconnect(id: number): void };
 
 /**
  * The menu bar on a monitor that has no GNOME top bar: the same logo, app
- * and Window menus and clock, plus a live copy of the main bar's status
- * icons that opens the quick settings here. It reserves its height like the
+ * and Window menus and clock, plus live copies of the main bar's status and
+ * app tray icons that act on the real ones. It reserves its height like the
  * top bar and hides over full-screen windows.
  */
 export class SecondaryBar {
@@ -27,8 +26,7 @@ export class SecondaryBar {
     private readonly actor: St.BoxLayout;
     private readonly menus: PopupMenu.PopupMenuManager;
     private readonly buttons: PanelMenu.Button[];
-    private readonly status: PanelMenu.Button;
-    private readonly quickSettings: BorrowedMenu | null;
+    private readonly status: StatusMirror;
     private readonly clock: Clock;
     private readonly interface = new Gio.Settings({ schema_id: 'org.gnome.desktop.interface' });
     private readonly ids: [Disconnectable, number][] = [];
@@ -50,20 +48,8 @@ export class SecondaryBar {
             if (button.menu) this.menus.addMenu(button.menu as PopupMenu.PopupMenu, -1);
         }
 
-        this.status = new PanelMenu.Button(0.0, 'Macr Status', true);
-        const owner = (Main.panel.statusArea as unknown as Record<string, PanelMenu.Button | undefined>).quickSettings;
-        const icons = (owner as unknown as { _indicators?: Clutter.Actor } | undefined)?._indicators;
-        if (owner && icons) {
-            const clone = new Clutter.Clone({ source: icons });
-            this.status.add_child(clone);
-            // A clone scales the source to its own size, measured when it is
-            // laid out: lay it out again when the source's size changes.
-            this.ids.push([icons, icons.connect('notify::allocation', () => clone.queue_relayout())]);
-            this.quickSettings = new BorrowedMenu(this.status, owner);
-        } else {
-            this.quickSettings = null;
-        }
-        right.add_child(this.status.container);
+        this.status = new StatusMirror();
+        right.add_child(this.status.actor);
         this.clock = new Clock();
         right.add_child(this.clock.button.container);
 
@@ -79,7 +65,6 @@ export class SecondaryBar {
     destroy(): void {
         for (const [target, id] of this.ids) target.disconnect(id);
         this.ids.length = 0;
-        this.quickSettings?.destroy();
         this.clock.destroy();
         this.status.destroy();
         for (const button of this.buttons) button.destroy();
