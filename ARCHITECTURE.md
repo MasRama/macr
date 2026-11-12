@@ -167,3 +167,16 @@ schemas/                GSettings schema
   chosen app's name shows, as on macOS. The input source symbol keeps its
   colour.
 - Disable takes the classes and blur off any popup still open.
+
+## Notifications
+
+- Banners: `Main.messageTray.bannerAlignment` is set to END (restored on
+  disable), so GNOME's own banners show at the top right under the bar. The
+  tray gets `macr-notifications` (+ `macr-light`) and each banner a
+  background blur as it joins `_bannerBin`.
+- Notification Center: the hidden dateMenu's popover (the one Macr's clock
+  opens) gets `macr-nc` and a blur on its box, like the Control Center. The
+  layout stays GNOME's: notifications on the left, the date, calendar
+  (today in red), world clocks and weather as widget cards on the right.
+- GNOME's message list, Do Not Disturb and the Focus toggle keep working
+  unchanged; only classes and effects are added and taken off on disable.
