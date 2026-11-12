@@ -15,6 +15,7 @@ stack of tweak extensions that each fix one corner. It ships module by module.
 | **Spotlight**: Ctrl+Space search over apps, files, settings and the calculator, using GNOME's search providers | Ulauncher | done |
 | **Control Center**: GNOME's quick settings as macOS tiles, toggles first, titled Display and Sound sliders, a Focus (Do Not Disturb) toggle with a moon in the bar | GNOME quick settings styling | done |
 | **App icon tiles**: apps your icon theme does not cover get their icon on a macOS squircle tile, in the dock, Launchpad, Spotlight and the app switcher | mixed icon styles | done |
+| **Volume and brightness**: a small frosted pill under the menu bar at the top right, like macOS, on every monitor | GNOME's on-screen display at the bottom | done |
 
 Macr leaves your GTK theme alone. It pairs well with a macOS-style theme such
 as [MacTahoe](https://github.com/vinceliuice/MacTahoe-gtk-theme), and with

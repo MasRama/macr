@@ -144,3 +144,15 @@ schemas/                GSettings schema
   its modification time: the original icon as embedded PNG, cut to a
   squircle when it is already a square tile, else framed on a light one
   (`logic/tile.ts`). Bump `VERSION` in `tiles.ts` when the drawing changes.
+
+## OSD
+
+- GNOME's own `OsdWindow`s stay in charge of volume, brightness and the
+  other media-key popups. `Main.osdWindowManager._showOsdWindow` is wrapped
+  on the instance (deleted on disable, so the prototype's shows again):
+  before a window shows, Macr styles it once and places it.
+- Placement: the window is aligned to the top right of its monitor, with
+  margins from `logic/place.ts`: under whatever the work area leaves out at
+  the top (the menu bar, or Macr's secondary bar), plus a gap. Windows GNOME
+  makes later on `monitors-changed` are styled when first shown.
+- Disable puts back each window's alignment, margins, style classes and blur.
