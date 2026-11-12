@@ -2,7 +2,9 @@
   "uuid": "macr@masrama.github.io",
   "name": "Macr",
   "description": "The complete macOS experience for your Linux desktop.\n\nA macOS menu bar for GNOME: the Apple-style logo menu, the focused app's name and menu, a Window menu and a macOS clock, on a translucent bar.",
-  "shell-version": ["46"],
+  "shell-version": [
+    "46"
+  ],
   "url": "https://github.com/MasRama/macr",
   "settings-schema": "org.gnome.shell.extensions.macr",
   "gettext-domain": "macr@masrama.github.io",
