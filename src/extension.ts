@@ -4,6 +4,7 @@ import { Extension } from 'resource:///org/gnome/shell/extensions/extension.js';
 import { AppIconsModule } from './features/appicons/index.js';
 import { ControlCenterModule } from './features/controlcenter/index.js';
 import { DockModule } from './features/dock/index.js';
+import { HotCornersModule } from './features/hotcorners/index.js';
 import { LaunchpadModule } from './features/launchpad/index.js';
 import { MenuBar } from './features/menubar/index.js';
 import { MissionControlModule } from './features/missioncontrol/index.js';
@@ -24,6 +25,7 @@ const MODULES: ModuleEntry[] = [
     { key: 'switcher-enabled', create: () => new SwitcherModule() },
     { key: 'notifications-enabled', create: () => new NotificationsModule() },
     { key: 'mission-control-enabled', create: () => new MissionControlModule() },
+    { key: 'hot-corners-enabled', create: (context) => new HotCornersModule(context.settings) },
 ];
 
 export default class Macr extends Extension {

@@ -65,9 +65,45 @@ export default class MacrPreferences extends ExtensionPreferences {
 
         const spaces = new Adw.PreferencesGroup({ title: _('Mission Control') });
         spaces.add(switchRow(settings, 'mission-control-enabled', _('macOS Mission Control'), _('Windows over the dimmed wallpaper, Spaces always at the top')));
+        spaces.add(switchRow(settings, 'hot-corners-enabled', _('Hot corners'), _('Push the pointer into a screen corner')));
+        const actions: [string, string][] = [
+            ['none', _('Nothing')],
+            ['mission-control', _('Mission Control')],
+            ['launchpad', _('Launchpad')],
+            ['desktop', _('Desktop')],
+            ['notification-center', _('Notification Center')],
+            ['lock-screen', _('Lock Screen')],
+        ];
+        const corners: [string, string][] = [
+            ['hot-corner-top-left', _('Top left')],
+            ['hot-corner-top-right', _('Top right')],
+            ['hot-corner-bottom-left', _('Bottom left')],
+            ['hot-corner-bottom-right', _('Bottom right')],
+        ];
+        for (const [key, title] of corners) {
+            const row = comboRow(settings, key, title, actions);
+            settings.bind('hot-corners-enabled', row, 'sensitive', Gio.SettingsBindFlags.GET);
+            spaces.add(row);
+        }
         page.add(spaces);
         window.add(page);
     }
+}
+
+/** A drop-down for a string setting with fixed choices: [value, label] pairs. */
+function comboRow(settings: Gio.Settings, key: string, title: string, choices: [string, string][]): Adw.ComboRow {
+    const row = new Adw.ComboRow({ title, model: Gtk.StringList.new(choices.map(([, label]) => label)) });
+    const sync = () => {
+        const index = choices.findIndex(([value]) => value === settings.get_string(key));
+        if (index >= 0 && row.selected !== index) row.selected = index;
+    };
+    sync();
+    settings.connect(`changed::${key}`, sync);
+    row.connect('notify::selected', () => {
+        const choice = choices[row.selected];
+        if (choice && choice[0] !== settings.get_string(key)) settings.set_string(key, choice[0]);
+    });
+    return row;
 }
 
 function switchRow(settings: Gio.Settings, key: string, title: string, subtitle: string): Adw.SwitchRow {
