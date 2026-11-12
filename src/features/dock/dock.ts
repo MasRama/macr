@@ -26,10 +26,10 @@ export interface DockOptions {
 }
 
 /**
- * The macOS dock: a glass shelf at the bottom of the primary monitor holding
- * Show Apps, the dash's apps and the Trash. It floats over windows (no
- * struts), slides away when a window covers it and magnifies icons under
- * the pointer.
+ * The macOS dock: a glass shelf at the bottom of one monitor holding Show
+ * Apps, the dash's apps and the Trash. It floats over windows (no struts),
+ * slides away when a window on its monitor covers it and magnifies icons
+ * under the pointer.
  */
 export class Dock {
     readonly actor: St.Widget;
@@ -48,7 +48,10 @@ export class Dock {
     private hideTimeout = 0;
     private placeLater = 0;
 
-    constructor(options: DockOptions) {
+    constructor(
+        options: DockOptions,
+        readonly monitorIndex: number,
+    ) {
         this.options = options;
         this.actor = new St.Widget({ name: 'macrDock', style_class: 'macr-dock', reactive: true, track_hover: true });
         (this.actor as unknown as { _delegate: Dock })._delegate = this;
@@ -79,7 +82,6 @@ export class Dock {
         this.edge.hide();
 
         this.listen(this.dash, 'notify::allocation', () => this.queuePlace());
-        this.listen(Main.layoutManager, 'monitors-changed', () => this.queuePlace());
         this.listen(this.actor, 'notify::hover', () => this.onHover());
         this.listen(this.actor, 'motion-event', (_actor: unknown, event: Clutter.Event) => this.onMotion(event));
         this.listen(this.actor, 'scroll-event', (_actor: unknown, event: Clutter.Event) => Main.wm.handleWorkspaceScroll(event));
@@ -152,7 +154,7 @@ export class Dock {
     }
 
     private place(): void {
-        const monitor = Main.layoutManager.primaryMonitor;
+        const monitor = Main.layoutManager.monitors[this.monitorIndex];
         if (!monitor) return;
         const [, width] = this.dash.get_preferred_width(-1);
         const [, height] = this.dash.get_preferred_height(width);
@@ -189,7 +191,6 @@ export class Dock {
     private covered(): boolean {
         const dock = this.restingRect();
         const workspace = global.workspace_manager.get_active_workspace();
-        const primary = Main.layoutManager.primaryIndex;
         return global
             .get_window_actors()
             .map((actor) => actor.meta_window)
@@ -198,7 +199,7 @@ export class Dock {
                     !window.minimized &&
                     window.showing_on_its_workspace() &&
                     window.located_on_workspace(workspace) &&
-                    window.get_monitor() === primary &&
+                    window.get_monitor() === this.monitorIndex &&
                     [Meta.WindowType.NORMAL, Meta.WindowType.DIALOG, Meta.WindowType.MODAL_DIALOG].includes(window.get_window_type()) &&
                     overlaps(dock, window.get_frame_rect()),
             );

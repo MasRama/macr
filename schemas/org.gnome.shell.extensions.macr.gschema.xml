@@ -20,6 +20,11 @@
       <summary>Show the macOS dock at the bottom of the screen</summary>
       <description>Replaces the overview's dash. Turn off Dash to Dock while it is on.</description>
     </key>
+    <key name="dock-all-monitors" type="b">
+      <default>true</default>
+      <summary>Show the dock on every monitor</summary>
+      <description>Off shows it on the primary monitor only.</description>
+    </key>
     <key name="dock-icon-size" type="i">
       <range min="32" max="96"/>
       <default>48</default>

@@ -67,7 +67,7 @@ export class Genie {
     private readonly ids: number[] = [];
     private readonly running = new Map<Meta.WindowActor, Running>();
 
-    constructor(private readonly iconOf: (app: Shell.App) => Clutter.Actor | null) {
+    constructor(private readonly iconOf: (app: Shell.App, window: Meta.Window) => Clutter.Actor | null) {
         const found = ['minimize', 'unminimize'].map((signalId) =>
             (GObject.signal_handler_find as unknown as (instance: object, match: { signalId: string }) => unknown)(this.wm, { signalId }),
         );
@@ -97,7 +97,7 @@ export class Genie {
     private target(actor: Meta.WindowActor): Clutter.Actor | null {
         if (actor.meta_window.is_monitor_sized()) return null;
         const app = Shell.WindowTracker.get_default().get_window_app(actor.meta_window);
-        const icon = app ? this.iconOf(app) : null;
+        const icon = app ? this.iconOf(app, actor.meta_window) : null;
         return icon?.mapped ? icon : null;
     }
 

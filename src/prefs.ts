@@ -23,6 +23,7 @@ export default class MacrPreferences extends ExtensionPreferences {
         });
         settings.bind('dock-icon-size', size, 'value', Gio.SettingsBindFlags.DEFAULT);
         const rows = [
+            switchRow(settings, 'dock-all-monitors', _('On every monitor'), _('Off shows it on the primary monitor only')),
             size,
             switchRow(settings, 'dock-magnification', _('Magnification'), _('Icons grow under the pointer')),
             switchRow(settings, 'dock-autohide', _('Hide when a window covers it'), _('Push the pointer to the bottom edge to show it again')),
