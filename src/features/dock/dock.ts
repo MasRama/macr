@@ -282,6 +282,9 @@ export class Dock {
     }
 
     private syncShowApps(): void {
+        // Named after what it opens.
+        const label = launchpad() ? 'Launchpad' : GLib.dgettext('gnome-shell', 'Show Apps');
+        (this.dash._showAppsIcon as unknown as { setLabelText(text: string): void }).setLabelText(label);
         this.dash.showAppsButton.checked = (launchpad()?.isOpen ?? false) || (Main.overview.visible && Main.overview.dash.showAppsButton.checked);
     }
 
