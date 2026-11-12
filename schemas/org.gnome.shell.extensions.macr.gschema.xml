@@ -29,5 +29,10 @@
       <default>true</default>
       <summary>Magnify dock icons under the pointer</summary>
     </key>
+    <key name="dock-genie" type="b">
+      <default>true</default>
+      <summary>Minimize windows into the dock with the genie effect</summary>
+      <description>Replaces GNOME's minimize animation. Turn off Magic Lamp while it is on.</description>
+    </key>
   </schema>
 </schemalist>
