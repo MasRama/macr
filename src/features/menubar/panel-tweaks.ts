@@ -13,7 +13,7 @@ const BLUR_NAME = 'macr-blur';
  * change is undone by destroy().
  */
 export class PanelTweaks {
-    private readonly hidden = new Map<St.Widget, number>();
+    private readonly hidden = new Map<St.Widget, number[]>();
     private readonly interface = new Gio.Settings({ schema_id: 'org.gnome.desktop.interface' });
     private readonly ids: [{ disconnect(id: number): void }, number][] = [];
 
@@ -57,18 +57,22 @@ export class PanelTweaks {
 
     // Hidden, never destroyed: other extensions (Nokta) still use these items.
     // If something shows one again (Just Perfection), it is hidden again.
+    // Zorin Menu destroys and rebuilds its button: forget a destroyed one.
     private hide(widget: St.Widget): void {
         widget.hide();
-        const id = widget.connect('notify::visible', () => {
-            if (widget.visible) widget.hide();
-        });
-        this.hidden.set(widget, id);
+        const ids = [
+            widget.connect('notify::visible', () => {
+                if (widget.visible) widget.hide();
+            }),
+            widget.connect('destroy', () => this.hidden.delete(widget)),
+        ];
+        this.hidden.set(widget, ids);
     }
 
     private unhide(widget: St.Widget): void {
-        const id = this.hidden.get(widget);
+        const ids = this.hidden.get(widget) ?? [];
         this.hidden.delete(widget);
-        if (id) widget.disconnect(id);
+        for (const id of ids) widget.disconnect(id);
         widget.show();
     }
 }
