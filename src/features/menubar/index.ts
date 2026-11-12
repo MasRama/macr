@@ -8,13 +8,16 @@ import { Clock } from './clock.js';
 import { FocusTracker } from './focus.js';
 import { logoMenu } from './logo-menu.js';
 import { PanelTweaks } from './panel-tweaks.js';
+import { SecondaryBar } from './secondary-bar.js';
 import { windowMenu } from './window-menu.js';
 
 type Boxes = { _rightBox: St.BoxLayout };
+type Disconnectable = { disconnect(id: number): void };
 
 /**
  * Turns GNOME's top bar into a macOS menu bar: logo, app and Window menus on
  * the left, Macr's clock at the right end. The centre stays free (Nokta).
+ * Other monitors get a menu bar of their own.
  */
 export class MenuBar implements Module {
     private tweaks: PanelTweaks | null = null;
@@ -22,14 +25,17 @@ export class MenuBar implements Module {
     private clock: Clock | null = null;
     private buttons: PanelMenu.Button[] = [];
     private rightAddedId = 0;
+    private appMenu: AppMenu | null = null;
+    private bars: SecondaryBar[] = [];
+    private ids: [Disconnectable, number][] = [];
 
     constructor(private readonly context: ModuleContext) {}
 
     enable(): void {
         this.tweaks = new PanelTweaks(this.context.settings);
-        let appMenu: AppMenu | null = null;
-        this.focus = new FocusTracker(() => appMenu?.sync());
-        appMenu = new AppMenu(this.focus);
+        this.focus = new FocusTracker(() => this.syncAppMenus());
+        const appMenu = new AppMenu(this.focus);
+        this.appMenu = appMenu;
 
         const left: [string, PanelMenu.Button][] = [
             ['macr-logo', logoMenu()],
@@ -46,9 +52,19 @@ export class MenuBar implements Module {
         Main.panel.addToStatusArea('macr-clock', this.clock.button, right.get_n_children(), 'right');
         // Indicators added later (AppIndicator icons) must not land after the clock.
         this.rightAddedId = right.connect('child-added', () => this.keepClockLast());
+
+        const settings = this.context.settings;
+        this.ids.push([settings, settings.connect('changed::menubar-all-monitors', () => this.buildBars())]);
+        const layout = Main.layoutManager as unknown as { connect(signal: string, callback: () => void): number } & Disconnectable;
+        this.ids.push([layout, layout.connect('monitors-changed', () => this.buildBars())]);
+        this.buildBars();
     }
 
     disable(): void {
+        for (const [target, id] of this.ids) target.disconnect(id);
+        this.ids = [];
+        this.destroyBars();
+        this.appMenu = null;
         if (this.rightAddedId) (Main.panel as unknown as Boxes)._rightBox.disconnect(this.rightAddedId);
         this.rightAddedId = 0;
         this.clock?.destroy();
@@ -59,6 +75,27 @@ export class MenuBar implements Module {
         this.focus = null;
         this.tweaks?.destroy();
         this.tweaks = null;
+    }
+
+    /** A menu bar on every other monitor while the setting is on. */
+    private buildBars(): void {
+        this.destroyBars();
+        const focus = this.focus;
+        if (!focus || !this.context.settings.get_boolean('menubar-all-monitors')) return;
+        const { monitors, primaryIndex } = Main.layoutManager;
+        monitors.forEach((_monitor, index) => {
+            if (index !== primaryIndex) this.bars.push(new SecondaryBar(index, focus));
+        });
+    }
+
+    private destroyBars(): void {
+        for (const bar of this.bars) bar.destroy();
+        this.bars = [];
+    }
+
+    private syncAppMenus(): void {
+        this.appMenu?.sync();
+        for (const bar of this.bars) bar.appMenu.sync();
     }
 
     private keepClockLast(): void {

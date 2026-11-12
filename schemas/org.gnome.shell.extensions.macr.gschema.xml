@@ -10,6 +10,11 @@
       <summary>Hide the distribution's menu button (such as Zorin Menu) from the top bar</summary>
       <description>The Super key keeps opening it.</description>
     </key>
+    <key name="menubar-all-monitors" type="b">
+      <default>true</default>
+      <summary>Show the menu bar on every monitor</summary>
+      <description>Off shows it on the primary monitor only.</description>
+    </key>
     <key name="dock-enabled" type="b">
       <default>true</default>
       <summary>Show the macOS dock at the bottom of the screen</summary>

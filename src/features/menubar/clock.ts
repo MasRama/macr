@@ -6,12 +6,11 @@ import St from 'gi://St';
 import * as Main from 'resource:///org/gnome/shell/ui/main.js';
 import * as PanelMenu from 'resource:///org/gnome/shell/ui/panelMenu.js';
 
+import { BorrowedMenu } from './borrowed-menu.js';
 import { clockFormat } from './logic/clock.js';
 
-type MutableMenu = { sourceActor: St.Widget; isOpen: boolean; toggle(): void; connect(name: string, cb: (...a: unknown[]) => void): number; disconnect(id: number): void };
-
 /**
- * The clock at the right end of the bar. Clicking it opens GNOME's calendar
+ * The clock at the right end of a bar. Clicking it opens GNOME's calendar
  * and notifications (the hidden dateMenu's own menu), anchored here.
  */
 export class Clock {
@@ -20,42 +19,21 @@ export class Clock {
     private readonly wallClock = new GnomeDesktop.WallClock();
     private readonly interface = new Gio.Settings({ schema_id: 'org.gnome.desktop.interface' });
     private readonly ids: [{ disconnect(id: number): void }, number][] = [];
-    private readonly menu: MutableMenu;
-    private readonly originalSource: St.Widget;
+    private readonly calendar: BorrowedMenu;
 
     constructor() {
         this.button.add_child(this.label);
-        this.menu = Main.panel.statusArea.dateMenu.menu as unknown as MutableMenu;
-        this.originalSource = this.menu.sourceActor;
-        this.menu.sourceActor = this.button;
-
+        this.calendar = new BorrowedMenu(this.button, Main.panel.statusArea.dateMenu as unknown as PanelMenu.Button);
         this.ids.push([this.wallClock, this.wallClock.connect('notify::clock', () => this.update())]);
         this.ids.push([this.interface, this.interface.connect('changed', () => this.update())]);
-        this.ids.push([this.menu, this.menu.connect('open-state-changed', (_m, open) => this.syncActive(open as boolean))]);
-        this.ids.push([this.button, this.button.connect('button-press-event', () => this.toggle())]);
-        this.ids.push([this.button, this.button.connect('touch-event', (_a, event) => {
-            if ((event as Clutter.Event).type() === Clutter.EventType.TOUCH_BEGIN) return this.toggle();
-            return Clutter.EVENT_PROPAGATE;
-        })]);
         this.update();
     }
 
     destroy(): void {
-        if (this.menu.isOpen) this.menu.toggle();
         for (const [object, id] of this.ids) object.disconnect(id);
         this.ids.length = 0;
-        this.menu.sourceActor = this.originalSource;
+        this.calendar.destroy();
         this.button.destroy();
-    }
-
-    private toggle(): boolean {
-        this.menu.toggle();
-        return Clutter.EVENT_STOP;
-    }
-
-    private syncActive(open: boolean): void {
-        if (open) this.button.add_style_pseudo_class('active');
-        else this.button.remove_style_pseudo_class('active');
     }
 
     private update(): void {
