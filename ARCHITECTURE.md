@@ -80,3 +80,34 @@ schemas/                GSettings schema
   icon in the dock on its monitor (`logic/genie.ts`). A window with no icon
   in the dock gets GNOME's animation. The headless devshell does not paint
   deform effects, so the genie can only be seen in a real session.
+
+## Launchpad
+
+- A modal overlay (`Main.pushModal`, POPUP mode) in `uiGroup` covering the
+  monitor under the pointer: the desktop blurred and dimmed behind
+  (`Shell.BlurEffect`), a search entry, pages of app cells and page dots.
+- Apps are `Shell.AppSystem.get_installed()` that `should_show()`, sorted by
+  name. Filtering (`logic/filter.ts`) and the grid size, paging and arrow-key
+  moves (`logic/grid.ts`) are pure.
+- `SuperKey` takes the Super key while `launchpad-super-key` is on: it blocks
+  the shell's own `overlay-key` handler on `global.display` (the overview),
+  connects Macr's, and allows `overlay-key` in POPUP mode so Super closes it
+  again. Zorin Menu's own `super-hotkey` is switched off meanwhile and back on
+  in `disable()`.
+- The dock's Apps icon reaches Launchpad through `src/shared/launchpad-link.ts`
+  (a registry the module fills while it runs), and falls back to GNOME's app
+  grid when Launchpad is off.
+
+## Spotlight
+
+- A modal panel near the top of the monitor under the pointer, bound to
+  `spotlight-shortcut` with `Main.wm.addKeybinding` (NORMAL, OVERVIEW and
+  POPUP modes, so the shortcut also closes it).
+- Results come from the overview's own search providers
+  (`Main.overview.searchController._searchResults._providers`, private in
+  GNOME 46): the app provider and every remote provider the user has turned
+  on in Settings. Each query gets its own `Gio.Cancellable`; providers fill in
+  as they answer, and stale answers are dropped.
+- `logic/results.ts` picks the Top Hit (the first app, else the first result)
+  and caps each provider's section. Activating a result calls the provider's
+  own `activateResult`.
