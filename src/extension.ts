@@ -1,5 +1,6 @@
 import type Gio from 'gi://Gio';
 import { Extension } from 'resource:///org/gnome/shell/extensions/extension.js';
+import * as Main from 'resource:///org/gnome/shell/ui/main.js';
 
 import { AppIconsModule } from './features/appicons/index.js';
 import { ControlCenterModule } from './features/controlcenter/index.js';
@@ -7,6 +8,7 @@ import { WindowCornersModule } from './features/corners/index.js';
 import { DockModule } from './features/dock/index.js';
 import { HotCornersModule } from './features/hotcorners/index.js';
 import { LaunchpadModule } from './features/launchpad/index.js';
+import { LockScreenModule } from './features/lockscreen/index.js';
 import { MenuBar } from './features/menubar/index.js';
 import { MissionControlModule } from './features/missioncontrol/index.js';
 import { NotificationsModule } from './features/notifications/index.js';
@@ -30,23 +32,33 @@ const MODULES: ModuleEntry[] = [
     { key: 'hot-corners-enabled', create: (context) => new HotCornersModule(context.settings) },
     { key: 'window-corners-enabled', create: (context) => new WindowCornersModule(context.settings) },
     { key: 'traffic-lights-enabled', create: (context) => new TrafficLightsModule(context.settings) },
+    { key: 'lock-screen-enabled', lockScreen: true, create: () => new LockScreenModule() },
 ];
 
+/**
+ * Macr also runs on the lock screen ("unlock-dialog" session mode), only so
+ * the lock screen module can shape it: every other module is turned off
+ * while the screen is locked, as GNOME would turn off the whole extension,
+ * and back on when it is unlocked.
+ */
 export default class Macr extends Extension {
     private settings: Gio.Settings | null = null;
     private running = new Map<string, Module>();
     private changedIds: number[] = [];
+    private sessionId = 0;
 
     override enable(): void {
         const settings = this.getSettings();
         this.settings = settings;
-        for (const entry of MODULES) {
+        for (const entry of MODULES)
             this.changedIds.push(settings.connect(`changed::${entry.key}`, () => this.sync(entry)));
-            this.sync(entry);
-        }
+        this.sessionId = Main.sessionMode.connect('updated', () => this.syncAll());
+        this.syncAll();
     }
 
     override disable(): void {
+        Main.sessionMode.disconnect(this.sessionId);
+        this.sessionId = 0;
         for (const id of this.changedIds) this.settings?.disconnect(id);
         this.changedIds = [];
         for (const module of [...this.running.values()].reverse()) module.disable();
@@ -54,10 +66,21 @@ export default class Macr extends Extension {
         this.settings = null;
     }
 
+    /** Modules stop in reverse order, then start in order. */
+    private syncAll(): void {
+        for (const entry of [...MODULES].reverse()) if (!this.wanted(entry)) this.sync(entry);
+        for (const entry of MODULES) if (this.wanted(entry)) this.sync(entry);
+    }
+
+    private wanted(entry: ModuleEntry): boolean {
+        const locked = Boolean(Main.sessionMode.isLocked);
+        return Boolean(this.settings?.get_boolean(entry.key)) && (!locked || Boolean(entry.lockScreen));
+    }
+
     private sync(entry: ModuleEntry): void {
         const settings = this.settings;
         if (!settings) return;
-        const wanted = settings.get_boolean(entry.key);
+        const wanted = this.wanted(entry);
         const module = this.running.get(entry.key);
         if (wanted && !module) {
             const created = entry.create({ settings, path: this.path });

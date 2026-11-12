@@ -100,6 +100,10 @@ export default class MacrPreferences extends ExtensionPreferences {
         settings.bind('window-corners-enabled', radius, 'sensitive', Gio.SettingsBindFlags.GET);
         windows.add(radius);
         page.add(windows);
+
+        const lock = new Adw.PreferencesGroup({ title: _('Lock screen') });
+        lock.add(switchRow(settings, 'lock-screen-enabled', _('macOS lock screen'), _('A big clock at the top, your picture and the password field below')));
+        page.add(lock);
         window.add(page);
     }
 }

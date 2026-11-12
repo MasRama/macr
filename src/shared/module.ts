@@ -19,5 +19,7 @@ export interface ModuleContext {
 export interface ModuleEntry {
     /** The boolean GSettings key that turns the module on. */
     key: string;
+    /** Keeps running on the lock screen; every other module stops there. */
+    lockScreen?: boolean;
     create(context: ModuleContext): Module;
 }

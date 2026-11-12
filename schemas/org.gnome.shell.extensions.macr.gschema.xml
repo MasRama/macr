@@ -154,6 +154,11 @@
       <summary>What the bottom right corner does</summary>
       <description>none, mission-control, launchpad, desktop, notification-center or lock-screen.</description>
     </key>
+    <key name="lock-screen-enabled" type="b">
+      <default>true</default>
+      <summary>macOS lock screen</summary>
+      <description>The date and a big time at the top of the lock screen, the user's avatar and name low in the middle with the password field under them, over the wallpaper unblurred.</description>
+    </key>
     <key name="traffic-lights-enabled" type="b">
       <default>true</default>
       <summary>macOS traffic lights on windows</summary>
