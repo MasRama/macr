@@ -159,6 +159,11 @@
       <summary>macOS lock screen</summary>
       <description>The date and a big time at the top of the lock screen, the user's avatar and name low in the middle with the password field under them, over the wallpaper unblurred.</description>
     </key>
+    <key name="login-screen-enabled" type="b">
+      <default>true</default>
+      <summary>macOS login screen</summary>
+      <description>Read by the copy of Macr installed for GDM (scripts/login-screen.sh): the login screen gets the lock screen's look, a big time at the top and the users low in the middle.</description>
+    </key>
     <key name="traffic-lights-enabled" type="b">
       <default>true</default>
       <summary>macOS traffic lights on windows</summary>

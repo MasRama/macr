@@ -8,7 +8,8 @@
   "url": "https://github.com/MasRama/macr",
   "session-modes": [
     "user",
-    "unlock-dialog"
+    "unlock-dialog",
+    "gdm"
   ],
   "settings-schema": "org.gnome.shell.extensions.macr",
   "gettext-domain": "macr@masrama.github.io",

@@ -9,6 +9,7 @@ import { DockModule } from './features/dock/index.js';
 import { HotCornersModule } from './features/hotcorners/index.js';
 import { LaunchpadModule } from './features/launchpad/index.js';
 import { LockScreenModule } from './features/lockscreen/index.js';
+import { LoginScreenModule } from './features/loginscreen/index.js';
 import { MenuBar } from './features/menubar/index.js';
 import { MissionControlModule } from './features/missioncontrol/index.js';
 import { NotificationsModule } from './features/notifications/index.js';
@@ -34,13 +35,15 @@ const MODULES: ModuleEntry[] = [
     { key: 'window-corners-enabled', create: (context) => new WindowCornersModule(context.settings) },
     { key: 'traffic-lights-enabled', create: (context) => new TrafficLightsModule(context.settings) },
     { key: 'lock-screen-enabled', screens: ['desktop', 'lock'], create: () => new LockScreenModule() },
+    { key: 'login-screen-enabled', screens: ['login'], create: () => new LoginScreenModule() },
 ];
 
 /**
- * Macr also runs on the lock screen ("unlock-dialog" session mode). There
- * only the modules that name that screen run: every other module is turned
- * off while the screen is locked, as GNOME would turn off the whole
- * extension, and back on when it is unlocked.
+ * Macr also runs on the lock screen ("unlock-dialog" session mode) and, when
+ * installed for GDM, on the login screen ("gdm" mode). There only the
+ * modules that name that screen run: every other module is turned off while
+ * the screen is locked, as GNOME would turn off the whole extension, and back
+ * on when it is unlocked.
  */
 export default class Macr extends Extension {
     private settings: Gio.Settings | null = null;
