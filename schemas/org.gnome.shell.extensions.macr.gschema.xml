@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schemalist>
+  <schema id="org.gnome.shell.extensions.macr" path="/org/gnome/shell/extensions/macr/">
+    <key name="menubar-enabled" type="b">
+      <default>true</default>
+      <summary>Turn the top bar into a macOS menu bar</summary>
+    </key>
+    <key name="hide-distro-menu-button" type="b">
+      <default>true</default>
+      <summary>Hide the distribution's menu button (such as Zorin Menu) from the top bar</summary>
+      <description>The Super key keeps opening it.</description>
+    </key>
+  </schema>
+</schemalist>
