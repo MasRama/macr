@@ -42,12 +42,22 @@ schemas/                GSettings schema
   Apple artwork); without that font it falls back to a generic symbol.
 - Menus only offer items that work for every app. Real per-app menus are a
   later tier.
+- Other monitors (`menubar-all-monitors`, on by default) get a
+  `SecondaryBar`: a chrome actor named `panel` (so the bar style applies)
+  that reserves its height and hides over full-screen windows. It has its own
+  logo, app and Window menus and clock, and a `Clutter.Clone` of the quick
+  settings indicators. App tray icons are not copied. The bars are rebuilt on
+  `monitors-changed`.
+- GNOME has one calendar and one quick settings menu. `BorrowedMenu` points
+  such a menu at the button that opens it, and back at its owner when the
+  button goes.
 
 ## Dock
 
 - GNOME's own `Dash` (favourites, running apps, drag to reorder, app menus),
   subclassed to take its icon size from the `dock-icon-size` setting and
-  placed in a chrome actor at the bottom of the primary monitor. Show Apps
+  placed in a chrome actor at the bottom of a monitor: one dock per monitor,
+  or only the primary with `dock-all-monitors` off. Show Apps
   moves to the start; a divider and the Trash follow the apps.
 - `Dash` never disconnects what it connects on `AppSystem`, `AppFavorites`
   and `Main.overview`, and GNOME 46 never destroys an app icon's menu. The
@@ -62,7 +72,7 @@ schemas/                GSettings schema
 - Clicking the focused app minimizes its window, or cycles its windows on the
   workspace (`logic/rules.ts`). Everything else is GNOME's default.
 - Genie: GNOME's minimize and unminimize handlers on `global.window_manager`
-  are blocked, and a `Clutter.DeformEffect` bends the window into its dock
-  icon (`logic/genie.ts`). A window with no icon in the dock gets GNOME's
-  animation. The headless devshell does not paint deform effects, so the
-  genie can only be seen in a real session.
+  are blocked, and a `Clutter.DeformEffect` bends the window into its app's
+  icon in the dock on its monitor (`logic/genie.ts`). A window with no icon
+  in the dock gets GNOME's animation. The headless devshell does not paint
+  deform effects, so the genie can only be seen in a real session.
