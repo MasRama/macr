@@ -129,3 +129,18 @@ schemas/                GSettings schema
   `org.gnome.desktop.notifications show-banners`, added with
   `addExternalIndicator` and moved after Bluetooth, with a moon indicator in
   the bar while it is on.
+
+## App icon tiles
+
+- `Shell.App.prototype.create_icon_texture` is replaced while the module
+  runs, so every shell surface that asks an app for its icon (dock,
+  Launchpad, Spotlight, app switcher, overview) gets the tile. Disabling puts
+  the original back and emits `icon-theme-changed` on the texture cache so
+  icons on screen are made again.
+- An icon keeps its own look when its file comes from the icon theme or a
+  variant of it that the theme inherits (`MacTahoe-dark` → `MacTahoe`);
+  hicolor, pixmaps and unrelated inherited themes get a tile.
+- The tile is an SVG in `~/.cache/macr/icons`, keyed by the source file and
+  its modification time: the original icon as embedded PNG, cut to a
+  squircle when it is already a square tile, else framed on a light one
+  (`logic/tile.ts`). Bump `VERSION` in `tiles.ts` when the drawing changes.

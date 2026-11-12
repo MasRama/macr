@@ -14,6 +14,7 @@ stack of tweak extensions that each fix one corner. It ships module by module.
 | **Launchpad**: every app in a full-screen grid with pages and search, on Super and the dock's Apps icon | the distribution's app menu | done |
 | **Spotlight**: Ctrl+Space search over apps, files, settings and the calculator, using GNOME's search providers | Ulauncher | done |
 | **Control Center**: GNOME's quick settings as macOS tiles, toggles first, titled Display and Sound sliders, a Focus (Do Not Disturb) toggle with a moon in the bar | GNOME quick settings styling | done |
+| **App icon tiles**: apps your icon theme does not cover get their icon on a macOS squircle tile, in the dock, Launchpad, Spotlight and the app switcher | mixed icon styles | done |
 
 Macr leaves your GTK theme alone. It pairs well with a macOS-style theme such
 as [MacTahoe](https://github.com/vinceliuice/MacTahoe-gtk-theme), and with
