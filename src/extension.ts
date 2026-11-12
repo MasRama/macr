@@ -3,6 +3,7 @@ import { Extension } from 'resource:///org/gnome/shell/extensions/extension.js';
 
 import { AppIconsModule } from './features/appicons/index.js';
 import { ControlCenterModule } from './features/controlcenter/index.js';
+import { WindowCornersModule } from './features/corners/index.js';
 import { DockModule } from './features/dock/index.js';
 import { HotCornersModule } from './features/hotcorners/index.js';
 import { LaunchpadModule } from './features/launchpad/index.js';
@@ -26,6 +27,7 @@ const MODULES: ModuleEntry[] = [
     { key: 'notifications-enabled', create: () => new NotificationsModule() },
     { key: 'mission-control-enabled', create: () => new MissionControlModule() },
     { key: 'hot-corners-enabled', create: (context) => new HotCornersModule(context.settings) },
+    { key: 'window-corners-enabled', create: (context) => new WindowCornersModule(context.settings) },
 ];
 
 export default class Macr extends Extension {

@@ -1517,3 +1517,10 @@
   font-size: 13px;
   font-weight: bold;
 }
+
+/* ---------- Window corners ---------- */
+/* The shadow behind a frameless window; its radius is set inline. */
+
+.macr-window-shadow {
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.38);
+}

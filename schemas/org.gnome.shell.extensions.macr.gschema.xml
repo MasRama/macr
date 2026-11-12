@@ -149,5 +149,16 @@
       <summary>What the bottom right corner does</summary>
       <description>none, mission-control, launchpad, desktop, notification-center or lock-screen.</description>
     </key>
+    <key name="window-corners-enabled" type="b">
+      <default>true</default>
+      <summary>Round window corners the macOS way</summary>
+      <description>Windows that do not round their own corners (Qt, Electron, X11 apps) get rounded corners, and frameless ones a shadow.</description>
+    </key>
+    <key name="window-corner-radius" type="i">
+      <range min="0" max="32"/>
+      <default>16</default>
+      <summary>Window corner radius</summary>
+      <description>In pixels.</description>
+    </key>
   </schema>
 </schemalist>

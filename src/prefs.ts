@@ -86,6 +86,18 @@ export default class MacrPreferences extends ExtensionPreferences {
             spaces.add(row);
         }
         page.add(spaces);
+
+        const windows = new Adw.PreferencesGroup({ title: _('Windows') });
+        windows.add(switchRow(settings, 'window-corners-enabled', _('Rounded corners'), _('For apps that do not round their own, such as Qt and Electron apps')));
+        const radius = new Adw.SpinRow({
+            title: _('Corner radius'),
+            subtitle: _('In pixels'),
+            adjustment: new Gtk.Adjustment({ lower: 0, upper: 32, step_increment: 1, page_increment: 4 }),
+        });
+        settings.bind('window-corner-radius', radius, 'value', Gio.SettingsBindFlags.DEFAULT);
+        settings.bind('window-corners-enabled', radius, 'sensitive', Gio.SettingsBindFlags.GET);
+        windows.add(radius);
+        page.add(windows);
         window.add(page);
     }
 }
