@@ -504,3 +504,140 @@
 .macr-launchpad-dot:checked {
   background-color: rgba(255, 255, 255, 0.95);
 }
+
+/* ---------- Spotlight ---------- */
+
+.macr-spotlight-backdrop {
+  border-radius: 18px;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  background-color: rgba(34, 34, 38, 0.7);
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.38);
+}
+
+.macr-spotlight-backdrop.macr-light {
+  border-color: rgba(255, 255, 255, 0.7);
+  background-color: rgba(246, 246, 248, 0.72);
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.22);
+}
+
+.macr-spotlight {
+  padding: 6px 8px;
+}
+
+.macr-spotlight-entry {
+  min-height: 34px;
+  padding: 8px 8px;
+  border: none;
+  background-color: transparent;
+  box-shadow: none;
+  color: rgba(255, 255, 255, 0.95);
+  font-size: 22px;
+  caret-color: rgba(255, 255, 255, 0.95);
+  selection-background-color: rgba(10, 132, 255, 0.6);
+  selected-color: #ffffff;
+}
+
+.macr-spotlight-entry:focus,
+.macr-spotlight-entry:hover {
+  border: none;
+  background-color: transparent;
+  box-shadow: none;
+}
+
+.macr-spotlight-entry StLabel.hint-text {
+  color: rgba(255, 255, 255, 0.42);
+}
+
+.macr-spotlight-icon {
+  icon-size: 22px;
+  padding-right: 10px;
+  color: rgba(255, 255, 255, 0.55);
+}
+
+.macr-spotlight-results {
+  margin-top: 4px;
+  padding: 4px 0 2px;
+  border-top: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.macr-spotlight-header {
+  padding: 8px 10px 3px;
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 11px;
+  font-weight: bold;
+}
+
+.macr-spotlight-row {
+  padding: 5px 10px;
+  border-radius: 8px;
+  /* Symbolic result icons take the text colour. */
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.macr-spotlight-row:selected {
+  background-color: rgba(10, 132, 255, 0.9);
+  color: #ffffff;
+}
+
+.macr-spotlight.macr-light .macr-spotlight-row {
+  color: rgba(0, 0, 0, 0.7);
+}
+
+.macr-spotlight.macr-light .macr-spotlight-row:selected {
+  color: #ffffff;
+}
+
+.macr-spotlight-row-box {
+  spacing: 10px;
+}
+
+.macr-spotlight-name {
+  color: rgba(255, 255, 255, 0.95);
+  font-size: 14px;
+}
+
+.macr-spotlight-top .macr-spotlight-name {
+  font-size: 16px;
+  font-weight: bold;
+}
+
+.macr-spotlight-description {
+  color: rgba(255, 255, 255, 0.55);
+  font-size: 11px;
+}
+
+.macr-spotlight-row:selected .macr-spotlight-name,
+.macr-spotlight-row:selected .macr-spotlight-description {
+  color: #ffffff;
+}
+
+.macr-spotlight.macr-light .macr-spotlight-entry {
+  color: rgba(0, 0, 0, 0.88);
+  caret-color: rgba(0, 0, 0, 0.88);
+}
+
+.macr-spotlight.macr-light .macr-spotlight-entry StLabel.hint-text,
+.macr-spotlight.macr-light .macr-spotlight-icon {
+  color: rgba(0, 0, 0, 0.4);
+}
+
+.macr-spotlight.macr-light .macr-spotlight-results {
+  border-top-color: rgba(0, 0, 0, 0.1);
+}
+
+.macr-spotlight.macr-light .macr-spotlight-header {
+  color: rgba(0, 0, 0, 0.45);
+}
+
+.macr-spotlight.macr-light .macr-spotlight-name {
+  color: rgba(0, 0, 0, 0.88);
+}
+
+.macr-spotlight.macr-light .macr-spotlight-description {
+  color: rgba(0, 0, 0, 0.5);
+}
+
+.macr-spotlight.macr-light .macr-spotlight-row:selected .macr-spotlight-name,
+.macr-spotlight.macr-light .macr-spotlight-row:selected .macr-spotlight-description {
+  color: #ffffff;
+}

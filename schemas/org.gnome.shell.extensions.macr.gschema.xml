@@ -54,5 +54,13 @@
       <summary>The Super key opens Launchpad</summary>
       <description>Instead of the overview or the distribution's app menu.</description>
     </key>
+    <key name="spotlight-enabled" type="b">
+      <default>true</default>
+      <summary>Search apps, files and settings with Spotlight</summary>
+    </key>
+    <key name="spotlight-shortcut" type="as">
+      <default><![CDATA[['<Control>space']]]></default>
+      <summary>Keyboard shortcut that opens Spotlight</summary>
+    </key>
   </schema>
 </schemalist>
