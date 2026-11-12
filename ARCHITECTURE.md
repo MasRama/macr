@@ -156,3 +156,14 @@ schemas/                GSettings schema
   the top (the menu bar, or Macr's secondary bar), plus a gap. Windows GNOME
   makes later on `monitors-changed` are styled when first shown.
 - Disable puts back each window's alignment, margins, style classes and blur.
+
+## App switcher
+
+- GNOME's switcher popups (Alt+Tab, Alt+`, Ctrl+Alt+Tab, input sources) are
+  restyled, not replaced. Every popup with `switcher-popup` that joins
+  `Main.uiGroup` gets `macr-switcher` (+ `macr-light`), and its
+  `switcher-list` gets a background blur when GNOME adds it on show.
+- Every item's text is transparent except the selected one, so only the
+  chosen app's name shows, as on macOS. The input source symbol keeps its
+  colour.
+- Disable takes the classes and blur off any popup still open.
