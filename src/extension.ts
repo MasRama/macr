@@ -16,6 +16,7 @@ import { OsdModule } from './features/osd/index.js';
 import { SpotlightModule } from './features/spotlight/index.js';
 import { SwitcherModule } from './features/switcher/index.js';
 import { TrafficLightsModule } from './features/trafficlights/index.js';
+import { runsOn, screenOf } from './shared/logic/screen.js';
 import type { Module, ModuleEntry } from './shared/module.js';
 
 const MODULES: ModuleEntry[] = [
@@ -32,14 +33,14 @@ const MODULES: ModuleEntry[] = [
     { key: 'hot-corners-enabled', create: (context) => new HotCornersModule(context.settings) },
     { key: 'window-corners-enabled', create: (context) => new WindowCornersModule(context.settings) },
     { key: 'traffic-lights-enabled', create: (context) => new TrafficLightsModule(context.settings) },
-    { key: 'lock-screen-enabled', lockScreen: true, create: () => new LockScreenModule() },
+    { key: 'lock-screen-enabled', screens: ['desktop', 'lock'], create: () => new LockScreenModule() },
 ];
 
 /**
- * Macr also runs on the lock screen ("unlock-dialog" session mode), only so
- * the lock screen module can shape it: every other module is turned off
- * while the screen is locked, as GNOME would turn off the whole extension,
- * and back on when it is unlocked.
+ * Macr also runs on the lock screen ("unlock-dialog" session mode). There
+ * only the modules that name that screen run: every other module is turned
+ * off while the screen is locked, as GNOME would turn off the whole
+ * extension, and back on when it is unlocked.
  */
 export default class Macr extends Extension {
     private settings: Gio.Settings | null = null;
@@ -73,8 +74,7 @@ export default class Macr extends Extension {
     }
 
     private wanted(entry: ModuleEntry): boolean {
-        const locked = Boolean(Main.sessionMode.isLocked);
-        return Boolean(this.settings?.get_boolean(entry.key)) && (!locked || Boolean(entry.lockScreen));
+        return Boolean(this.settings?.get_boolean(entry.key)) && runsOn(entry.screens, screenOf(Main.sessionMode));
     }
 
     private sync(entry: ModuleEntry): void {

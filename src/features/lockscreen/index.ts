@@ -43,8 +43,8 @@ export class LockScreenModule implements Module {
             module.locks.get(this)?.updateBackground();
         };
 
-        const showing = (Main as unknown as { screenShield?: { _dialog?: UnlockDialog | null } }).screenShield?._dialog;
-        if (showing) this.take(showing);
+        const showing = (Main as unknown as { screenShield?: { _dialog?: unknown } }).screenShield?._dialog;
+        if (showing instanceof UnlockDialog) this.take(showing);
     }
 
     disable(): void {

@@ -1,5 +1,7 @@
 import type Gio from 'gi://Gio';
 
+import type { Screen } from './logic/screen.js';
+
 /**
  * One Macr module (menu bar, later dock, launchpad...). The extension turns
  * it on and off as its GSettings switch changes; disable() must undo
@@ -19,7 +21,7 @@ export interface ModuleContext {
 export interface ModuleEntry {
     /** The boolean GSettings key that turns the module on. */
     key: string;
-    /** Keeps running on the lock screen; every other module stops there. */
-    lockScreen?: boolean;
+    /** Where it runs; the desktop only when left out. */
+    screens?: Screen[];
     create(context: ModuleContext): Module;
 }
