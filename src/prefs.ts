@@ -58,6 +58,10 @@ export default class MacrPreferences extends ExtensionPreferences {
         const switcher = new Adw.PreferencesGroup({ title: _('App switcher') });
         switcher.add(switchRow(settings, 'switcher-enabled', _('macOS app switcher'), _('Alt+Tab as a frosted panel with big icons')));
         page.add(switcher);
+
+        const notifications = new Adw.PreferencesGroup({ title: _('Notifications') });
+        notifications.add(switchRow(settings, 'notifications-enabled', _('macOS notifications'), _('Banners at the top right and a macOS Notification Center on the clock')));
+        page.add(notifications);
         window.add(page);
     }
 }

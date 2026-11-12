@@ -6,6 +6,7 @@ import { ControlCenterModule } from './features/controlcenter/index.js';
 import { DockModule } from './features/dock/index.js';
 import { LaunchpadModule } from './features/launchpad/index.js';
 import { MenuBar } from './features/menubar/index.js';
+import { NotificationsModule } from './features/notifications/index.js';
 import { OsdModule } from './features/osd/index.js';
 import { SpotlightModule } from './features/spotlight/index.js';
 import { SwitcherModule } from './features/switcher/index.js';
@@ -20,6 +21,7 @@ const MODULES: ModuleEntry[] = [
     { key: 'app-icon-tiles', create: () => new AppIconsModule() },
     { key: 'osd-enabled', create: () => new OsdModule() },
     { key: 'switcher-enabled', create: () => new SwitcherModule() },
+    { key: 'notifications-enabled', create: () => new NotificationsModule() },
 ];
 
 export default class Macr extends Extension {

@@ -1072,3 +1072,413 @@
 .macr-switcher.macr-light .switcher-arrow:highlighted {
   color: #1d1d1f !important;
 }
+
+/* ---------- Notifications ---------- */
+/* Banners (`macr-notifications` on the message tray) and the clock's
+   popover as the Notification Center (`macr-nc`). !important where shell
+   themes (MacTahoe) style the same nodes. */
+
+.macr-notifications .notification-banner,
+.macr-nc .message-list .message {
+  padding: 12px 12px 12px 14px !important;
+  border: 1px solid rgba(255, 255, 255, 0.12) !important;
+  border-radius: 20px !important;
+  box-shadow: none !important;
+  background-color: rgba(255, 255, 255, 0.09) !important;
+  background-gradient-direction: none !important;
+  color: #ffffff !important;
+  font-family: "SF Pro Text", "SF Pro", system-ui, sans-serif;
+  font-size: 13px;
+}
+
+.macr-notifications .notification-banner {
+  width: 360px !important;
+  min-width: 360px !important;
+  max-width: 360px !important;
+  margin: 6px 8px 8px 0 !important;
+  background-color: rgba(36, 36, 40, 0.76) !important;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35) !important;
+}
+
+.macr-notifications .notification-banner:hover,
+.macr-nc .message-list .message:hover,
+.macr-nc .message-list .message:focus {
+  background-color: rgba(255, 255, 255, 0.14) !important;
+}
+
+.macr-notifications .notification-banner:hover {
+  background-color: rgba(48, 48, 54, 0.82) !important;
+}
+
+.macr-notifications .message-header,
+.macr-nc .message-header {
+  spacing: 6px !important;
+  color: rgba(255, 255, 255, 0.6) !important;
+}
+
+.macr-notifications .message-source-title,
+.macr-nc .message-source-title {
+  font-size: 12px !important;
+  font-weight: bold !important;
+  color: rgba(255, 255, 255, 0.6) !important;
+}
+
+.macr-notifications .message-header .event-time,
+.macr-nc .message-header .event-time {
+  font-size: 11px !important;
+  color: rgba(255, 255, 255, 0.45) !important;
+}
+
+.macr-notifications .message-source-icon,
+.macr-nc .message-source-icon {
+  icon-size: 14px !important;
+  color: rgba(255, 255, 255, 0.6) !important;
+}
+
+.macr-notifications .message-title,
+.macr-nc .message-title {
+  font-size: 13px !important;
+  font-weight: bold !important;
+  color: #ffffff !important;
+}
+
+.macr-notifications .message-body,
+.macr-nc .message-body {
+  font-size: 13px !important;
+  color: rgba(255, 255, 255, 0.85) !important;
+}
+
+.macr-notifications .message-icon,
+.macr-nc .message-icon {
+  border-radius: 8px;
+}
+
+.macr-notifications .message-header .message-close-button,
+.macr-notifications .message-header .message-expand-button,
+.macr-nc .message-header .message-close-button,
+.macr-nc .message-header .message-expand-button {
+  min-width: 20px !important;
+  min-height: 20px !important;
+  padding: 2px !important;
+  border: none !important;
+  border-radius: 99px !important;
+  box-shadow: none !important;
+  background-color: rgba(255, 255, 255, 0.12) !important;
+  background-gradient-direction: none !important;
+  color: rgba(255, 255, 255, 0.8) !important;
+}
+
+.macr-notifications .message-header .message-close-button:hover,
+.macr-notifications .message-header .message-expand-button:hover,
+.macr-nc .message-header .message-close-button:hover,
+.macr-nc .message-header .message-expand-button:hover {
+  background-color: rgba(255, 255, 255, 0.22) !important;
+  color: #ffffff !important;
+}
+
+.macr-notifications .message-header .message-close-button StIcon,
+.macr-notifications .message-header .message-expand-button StIcon,
+.macr-nc .message-header .message-close-button StIcon,
+.macr-nc .message-header .message-expand-button StIcon {
+  icon-size: 12px !important;
+}
+
+.macr-notifications .notification-button,
+.macr-nc .notification-button {
+  border: none !important;
+  border-radius: 12px !important;
+  box-shadow: none !important;
+  background-color: rgba(255, 255, 255, 0.12) !important;
+  color: #ffffff !important;
+}
+
+/* The popover: one frosted sheet with widget cards. */
+
+.macr-nc .datemenu-popover {
+  margin: 4px !important;
+  padding: 12px !important;
+  border: 1px solid rgba(255, 255, 255, 0.13) !important;
+  border-radius: 22px !important;
+  background-color: rgba(36, 36, 40, 0.74) !important;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.35) !important;
+  color: #ffffff;
+  font-family: "SF Pro Text", "SF Pro", system-ui, sans-serif;
+}
+
+.macr-nc .message-list {
+  padding: 0 !important;
+  margin: 0 !important;
+  border: none !important;
+}
+
+.macr-nc .message-list-sections {
+  spacing: 8px !important;
+  margin: 0 !important;
+}
+
+.macr-nc .message-list-section-list {
+  spacing: 8px !important;
+}
+
+.macr-nc .message-list-placeholder {
+  color: rgba(255, 255, 255, 0.45) !important;
+}
+
+.macr-nc .datemenu-calendar-column {
+  spacing: 8px !important;
+  padding: 0 0 0 8px !important;
+  border: none !important;
+}
+
+.macr-nc .datemenu-today-button,
+.macr-nc .calendar,
+.macr-nc .world-clocks-button,
+.macr-nc .weather-button,
+.macr-nc .events-button {
+  margin: 0 !important;
+  border: none !important;
+  border-radius: 18px !important;
+  box-shadow: none !important;
+  background-color: rgba(255, 255, 255, 0.09) !important;
+  background-gradient-direction: none !important;
+  color: #ffffff !important;
+}
+
+.macr-nc .datemenu-today-button {
+  padding: 10px 14px !important;
+}
+
+.macr-nc .calendar {
+  padding: 8px !important;
+}
+
+.macr-nc .datemenu-today-button:hover,
+.macr-nc .datemenu-today-button:focus,
+.macr-nc .world-clocks-button:hover,
+.macr-nc .world-clocks-button:focus,
+.macr-nc .weather-button:hover,
+.macr-nc .weather-button:focus,
+.macr-nc .events-button:hover,
+.macr-nc .events-button:focus {
+  background-color: rgba(255, 255, 255, 0.14) !important;
+}
+
+.macr-nc .datemenu-today-button .day-label {
+  font-size: 12px !important;
+  font-weight: bold !important;
+  color: #ff453a !important;
+}
+
+.macr-nc .datemenu-today-button .date-label {
+  font-size: 20px !important;
+  font-weight: bold !important;
+  color: #ffffff !important;
+}
+
+.macr-nc .world-clocks-header,
+.macr-nc .weather-header,
+.macr-nc .events-title,
+.macr-nc .world-clocks-city,
+.macr-nc .world-clocks-time,
+.macr-nc .weather-forecast-time,
+.macr-nc .weather-forecast-temp,
+.macr-nc .event-summary {
+  color: #ffffff !important;
+}
+
+.macr-nc .world-clocks-timezone,
+.macr-nc .event-time,
+.macr-nc .calendar .pager-button {
+  color: rgba(255, 255, 255, 0.6) !important;
+}
+
+.macr-nc .calendar .calendar-month-label {
+  color: #ff453a !important;
+  font-weight: bold !important;
+}
+
+.macr-nc .calendar .calendar-day-heading {
+  color: rgba(255, 255, 255, 0.45) !important;
+  font-weight: bold !important;
+}
+
+.macr-nc .calendar .calendar-day,
+.macr-nc .calendar .calendar-day-base {
+  color: #ffffff !important;
+}
+
+.macr-nc .calendar .calendar-other-month,
+.macr-nc .calendar .calendar-other-month-day,
+.macr-nc .calendar .calendar-nonwork-day {
+  color: rgba(255, 255, 255, 0.35) !important;
+}
+
+.macr-nc .calendar .calendar-day:selected {
+  background-color: rgba(255, 255, 255, 0.16) !important;
+}
+
+/* Today is a red circle, as in the macOS calendar widget. */
+.macr-nc .calendar .calendar-today,
+.macr-nc .calendar .calendar-today:selected {
+  background-color: #ff453a !important;
+  color: #ffffff !important;
+  font-weight: bold !important;
+}
+
+.macr-nc .calendar .calendar-today:hover,
+.macr-nc .calendar .calendar-today:focus,
+.macr-nc .calendar .calendar-today:selected:hover {
+  background-color: #ff6961 !important;
+}
+
+.macr-nc .message-list-controls {
+  padding: 4px 4px 0 !important;
+  color: rgba(255, 255, 255, 0.8) !important;
+}
+
+.macr-nc .message-list-clear-button {
+  padding: 4px 12px !important;
+  border: none !important;
+  border-radius: 99px !important;
+  box-shadow: none !important;
+  background-color: rgba(255, 255, 255, 0.12) !important;
+  background-gradient-direction: none !important;
+  color: #ffffff !important;
+}
+
+.macr-nc .message-list-clear-button:hover {
+  background-color: rgba(255, 255, 255, 0.2) !important;
+}
+
+/* Light */
+
+.macr-notifications.macr-light .notification-banner,
+.macr-nc.macr-light .message-list .message {
+  border-color: rgba(0, 0, 0, 0.08) !important;
+  background-color: rgba(0, 0, 0, 0.05) !important;
+  color: #1d1d1f !important;
+}
+
+.macr-notifications.macr-light .notification-banner {
+  background-color: rgba(246, 246, 248, 0.82) !important;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.16) !important;
+}
+
+.macr-notifications.macr-light .notification-banner:hover {
+  background-color: rgba(238, 238, 242, 0.9) !important;
+}
+
+.macr-nc.macr-light .message-list .message:hover,
+.macr-nc.macr-light .message-list .message:focus {
+  background-color: rgba(0, 0, 0, 0.09) !important;
+}
+
+.macr-notifications.macr-light .message-header,
+.macr-notifications.macr-light .message-source-title,
+.macr-notifications.macr-light .message-source-icon,
+.macr-nc.macr-light .message-header,
+.macr-nc.macr-light .message-source-title,
+.macr-nc.macr-light .message-source-icon {
+  color: rgba(0, 0, 0, 0.5) !important;
+}
+
+.macr-notifications.macr-light .message-header .event-time,
+.macr-nc.macr-light .message-header .event-time,
+.macr-nc.macr-light .message-list-placeholder,
+.macr-nc.macr-light .calendar .calendar-day-heading {
+  color: rgba(0, 0, 0, 0.4) !important;
+}
+
+.macr-notifications.macr-light .message-title,
+.macr-nc.macr-light .message-title,
+.macr-nc.macr-light .datemenu-today-button .date-label,
+.macr-nc.macr-light .calendar .calendar-day,
+.macr-nc.macr-light .calendar .calendar-day-base {
+  color: #1d1d1f !important;
+}
+
+.macr-notifications.macr-light .message-body,
+.macr-nc.macr-light .message-body,
+.macr-nc.macr-light .message-list-controls {
+  color: rgba(0, 0, 0, 0.75) !important;
+}
+
+.macr-notifications.macr-light .message-header .message-close-button,
+.macr-notifications.macr-light .message-header .message-expand-button,
+.macr-nc.macr-light .message-header .message-close-button,
+.macr-nc.macr-light .message-header .message-expand-button,
+.macr-notifications.macr-light .notification-button,
+.macr-nc.macr-light .notification-button,
+.macr-nc.macr-light .message-list-clear-button {
+  background-color: rgba(0, 0, 0, 0.07) !important;
+  color: rgba(0, 0, 0, 0.7) !important;
+}
+
+.macr-notifications.macr-light .message-header .message-close-button:hover,
+.macr-notifications.macr-light .message-header .message-expand-button:hover,
+.macr-nc.macr-light .message-header .message-close-button:hover,
+.macr-nc.macr-light .message-header .message-expand-button:hover,
+.macr-nc.macr-light .message-list-clear-button:hover {
+  background-color: rgba(0, 0, 0, 0.13) !important;
+  color: #1d1d1f !important;
+}
+
+.macr-nc.macr-light .datemenu-popover {
+  border-color: rgba(0, 0, 0, 0.08) !important;
+  background-color: rgba(246, 246, 248, 0.8) !important;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.18) !important;
+  color: #1d1d1f;
+}
+
+.macr-nc.macr-light .datemenu-today-button,
+.macr-nc.macr-light .calendar,
+.macr-nc.macr-light .world-clocks-button,
+.macr-nc.macr-light .weather-button,
+.macr-nc.macr-light .events-button {
+  background-color: rgba(0, 0, 0, 0.05) !important;
+  color: #1d1d1f !important;
+}
+
+.macr-nc.macr-light .datemenu-today-button:hover,
+.macr-nc.macr-light .datemenu-today-button:focus,
+.macr-nc.macr-light .world-clocks-button:hover,
+.macr-nc.macr-light .world-clocks-button:focus,
+.macr-nc.macr-light .weather-button:hover,
+.macr-nc.macr-light .weather-button:focus,
+.macr-nc.macr-light .events-button:hover,
+.macr-nc.macr-light .events-button:focus {
+  background-color: rgba(0, 0, 0, 0.09) !important;
+}
+
+.macr-nc.macr-light .world-clocks-header,
+.macr-nc.macr-light .weather-header,
+.macr-nc.macr-light .events-title,
+.macr-nc.macr-light .world-clocks-city,
+.macr-nc.macr-light .world-clocks-time,
+.macr-nc.macr-light .weather-forecast-time,
+.macr-nc.macr-light .weather-forecast-temp,
+.macr-nc.macr-light .event-summary {
+  color: #1d1d1f !important;
+}
+
+.macr-nc.macr-light .world-clocks-timezone,
+.macr-nc.macr-light .event-time,
+.macr-nc.macr-light .calendar .pager-button {
+  color: rgba(0, 0, 0, 0.5) !important;
+}
+
+.macr-nc.macr-light .calendar .calendar-other-month,
+.macr-nc.macr-light .calendar .calendar-other-month-day,
+.macr-nc.macr-light .calendar .calendar-nonwork-day {
+  color: rgba(0, 0, 0, 0.3) !important;
+}
+
+.macr-nc.macr-light .calendar .calendar-day:selected {
+  background-color: rgba(0, 0, 0, 0.08) !important;
+}
+
+.macr-nc.macr-light .calendar .calendar-today,
+.macr-nc.macr-light .calendar .calendar-today:selected {
+  background-color: #ff3b30 !important;
+  color: #ffffff !important;
+}
