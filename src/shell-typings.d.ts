@@ -23,7 +23,7 @@ declare module '@girs/clutter-14/clutter-14' {
         }
 
         // Merging requires the class's exact type parameters, used or not.
-        // (Unused type parameters are required for the merge.)
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
         interface Actor<A extends LayoutManager = LayoutManager, B extends Content = Content> {
             /** GNOME Shell's wrapper around implicit transitions (ui/environment.js). */
             ease(params: EaseParams): void;
