@@ -89,6 +89,7 @@ export default class MacrPreferences extends ExtensionPreferences {
         page.add(spaces);
 
         const windows = new Adw.PreferencesGroup({ title: _('Windows') });
+        windows.add(switchRow(settings, 'traffic-lights-enabled', _('Traffic lights'), _('Red, yellow and green window buttons on the left; apps show them when reopened')));
         windows.add(switchRow(settings, 'window-corners-enabled', _('Rounded corners'), _('For apps that do not round their own, such as Qt and Electron apps')));
         const radius = new Adw.SpinRow({
             title: _('Corner radius'),

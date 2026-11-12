@@ -154,6 +154,16 @@
       <summary>What the bottom right corner does</summary>
       <description>none, mission-control, launchpad, desktop, notification-center or lock-screen.</description>
     </key>
+    <key name="traffic-lights-enabled" type="b">
+      <default>true</default>
+      <summary>macOS traffic lights on windows</summary>
+      <description>Close, minimize and maximize first on the left of app windows, drawn as the macOS red, yellow and green lights in GTK, libadwaita and X11 apps.</description>
+    </key>
+    <key name="traffic-lights-saved-layout" type="s">
+      <default>''</default>
+      <summary>Window button layout before Macr's traffic lights</summary>
+      <description>Put back when the traffic lights are turned off; empty when Macr did not change it.</description>
+    </key>
     <key name="window-corners-enabled" type="b">
       <default>true</default>
       <summary>Round window corners the macOS way</summary>

@@ -13,6 +13,7 @@ import { NotificationsModule } from './features/notifications/index.js';
 import { OsdModule } from './features/osd/index.js';
 import { SpotlightModule } from './features/spotlight/index.js';
 import { SwitcherModule } from './features/switcher/index.js';
+import { TrafficLightsModule } from './features/trafficlights/index.js';
 import type { Module, ModuleEntry } from './shared/module.js';
 
 const MODULES: ModuleEntry[] = [
@@ -28,6 +29,7 @@ const MODULES: ModuleEntry[] = [
     { key: 'mission-control-enabled', create: () => new MissionControlModule() },
     { key: 'hot-corners-enabled', create: (context) => new HotCornersModule(context.settings) },
     { key: 'window-corners-enabled', create: (context) => new WindowCornersModule(context.settings) },
+    { key: 'traffic-lights-enabled', create: (context) => new TrafficLightsModule(context.settings) },
 ];
 
 export default class Macr extends Extension {
