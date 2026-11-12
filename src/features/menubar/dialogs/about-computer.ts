@@ -8,7 +8,7 @@ import * as Config from 'resource:///org/gnome/shell/misc/config.js';
 import * as Main from 'resource:///org/gnome/shell/ui/main.js';
 import * as ModalDialog from 'resource:///org/gnome/shell/ui/modalDialog.js';
 
-import { dialogClass } from '../menu-kit.js';
+import { dialogClass } from '../../../shared/scheme.js';
 import { computerModel, graphicsNames, memoryLabel, osName, processorName } from '../logic/system-info.js';
 
 /** About This Computer: the machine at a glance, like About This Mac. */

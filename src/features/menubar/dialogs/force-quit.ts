@@ -5,7 +5,7 @@ import St from 'gi://St';
 import { gettext as _ } from 'resource:///org/gnome/shell/extensions/extension.js';
 import * as ModalDialog from 'resource:///org/gnome/shell/ui/modalDialog.js';
 
-import { dialogClass } from '../menu-kit.js';
+import { dialogClass } from '../../../shared/scheme.js';
 
 /** Force Quit Applications: pick a running app and kill its windows. */
 export const ForceQuitDialog = GObject.registerClass(

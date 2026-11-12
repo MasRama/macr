@@ -1,8 +1,9 @@
 import type Clutter from 'gi://Clutter';
-import Gio from 'gi://Gio';
 import Shell from 'gi://Shell';
 import * as PanelMenu from 'resource:///org/gnome/shell/ui/panelMenu.js';
 import * as PopupMenu from 'resource:///org/gnome/shell/ui/popupMenu.js';
+
+import { styleMenu, syncMenuScheme } from '../../shared/menu-style.js';
 
 type Connectable = { connect(signal: string, callback: (...args: never[]) => void): number };
 export type MenuLike = { addMenuItem(item: PopupMenu.PopupMenuBase.MenuItemType): void };
@@ -13,31 +14,16 @@ export function menuButton(name: string, child: Clutter.Actor, build: (menu: Pop
     button.add_style_class_name('macr-menu-button');
     button.add_child(child);
     const menu = button.menu as PopupMenu.PopupMenu;
-    menu.actor.add_style_class_name('macr-menu');
-    menu.box.add_effect(new Shell.BlurEffect({ mode: Shell.BlurMode.BACKGROUND, radius: 40, brightness: 1 }));
+    styleMenu(menu);
     (menu as unknown as Connectable).connect('open-state-changed', (_menu: unknown, open: boolean) => {
         if (!open) return;
-        if (isLight()) menu.actor.add_style_class_name('macr-light');
-        else menu.actor.remove_style_class_name('macr-light');
+        syncMenuScheme(menu);
         menu.removeAll();
         build(menu);
     });
     // A menu with no items never opens, so give it one before the first click.
     build(menu);
     return button;
-}
-
-let interfaceSettings: Gio.Settings | null = null;
-
-/** Menus follow the light or dark style, like the bar. */
-export function isLight(): boolean {
-    interfaceSettings ??= new Gio.Settings({ schema_id: 'org.gnome.desktop.interface' });
-    return interfaceSettings.get_string('color-scheme') !== 'prefer-dark';
-}
-
-/** Style classes for a Macr dialog in the current light or dark style. */
-export function dialogClass(classes: string): string {
-    return isLight() ? `${classes} macr-light` : classes;
 }
 
 export function item(menu: MenuLike, label: string, activate: () => void, sensitive = true): PopupMenu.PopupMenuItem {
