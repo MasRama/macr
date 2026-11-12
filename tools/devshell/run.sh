@@ -35,6 +35,14 @@ if [ -z "${MACR_DEVSHELL_INNER:-}" ]; then
     glib-compile-schemas "$EXT/$UUID/schemas"
     cp -r "$HERE/devtools@macr" "$EXT/"
     [ -d "$HOME/.local/share/fonts" ] && ln -s "$HOME/.local/share/fonts" "$STATE/data/fonts"
+    # Your icon theme too, so the dock looks like it does in your session.
+    [ -d "$HOME/.local/share/icons" ] && ln -s "$HOME/.local/share/icons" "$STATE/data/icons"
+    ICON_THEME=$(gsettings get org.gnome.desktop.interface icon-theme 2>/dev/null || echo "'Adwaita'")
+    # Dock favourites: the stock GNOME apps that are installed.
+    FAVORITES=""
+    for app in org.gnome.Nautilus org.gnome.TextEditor org.gnome.Calculator org.gnome.Terminal org.gnome.Software org.gnome.Settings; do
+        [ -f "/usr/share/applications/$app.desktop" ] && FAVORITES="$FAVORITES${FAVORITES:+, }'$app.desktop'"
+    done
     # A few recent files so Recent Items has something to show.
     mkdir -p "$STATE/home"
     for name in "Budget 2026.ods" "Trip notes.md" "Logo draft.svg"; do
@@ -56,9 +64,11 @@ PY
 enabled-extensions=['devtools@macr', '$UUID']
 disable-user-extensions=false
 welcome-dialog-last-shown-version='999'
+favorite-apps=[$FAVORITES]
 
 [org/gnome/desktop/interface]
 color-scheme='$SCHEME'
+icon-theme=$ICON_THEME
 clock-format='24h'
 clock-show-weekday=true
 KEYFILE
