@@ -35,9 +35,18 @@
   background-color: rgba(255, 255, 255, 0.12);
 }
 
-#panel.macr-bar .panel-button:active,
-#panel.macr-bar .panel-button:checked,
+/* No :focus highlight: macOS lights an item only while its menu is open. */
 #panel.macr-bar .panel-button:focus {
+  box-shadow: none;
+  background-color: transparent;
+}
+
+#panel.macr-bar .panel-button:hover:focus {
+  background-color: rgba(255, 255, 255, 0.12);
+}
+
+#panel.macr-bar .panel-button:active,
+#panel.macr-bar .panel-button:checked {
   box-shadow: none;
   background-color: rgba(255, 255, 255, 0.22);
 }
@@ -46,9 +55,12 @@
   background-color: rgba(0, 0, 0, 0.07);
 }
 
+#panel.macr-bar.macr-light .panel-button:hover:focus {
+  background-color: rgba(0, 0, 0, 0.07);
+}
+
 #panel.macr-bar.macr-light .panel-button:active,
-#panel.macr-bar.macr-light .panel-button:checked,
-#panel.macr-bar.macr-light .panel-button:focus {
+#panel.macr-bar.macr-light .panel-button:checked {
   background-color: rgba(0, 0, 0, 0.13);
 }
 
@@ -66,13 +78,14 @@
   font-weight: bold;
 }
 
+/* Even gaps between status icons, inside a group or across buttons. */
 #panel.macr-bar .system-status-icon {
   icon-size: 16px;
-  padding: 0 4px;
+  padding: 0;
 }
 
 #panel.macr-bar .panel-status-indicators-box {
-  spacing: 2px;
+  spacing: 16px;
 }
 
 /* ---------- Menus ---------- */
