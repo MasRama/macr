@@ -111,3 +111,21 @@ schemas/                GSettings schema
 - `logic/results.ts` picks the Top Hit (the first app, else the first result)
   and caps each provider's section. Activating a result calls the provider's
   own `activateResult`.
+
+## Control Center
+
+- Works on GNOME's own quick settings (`Main.panel.statusArea.quickSettings`),
+  so network, Bluetooth, sound, brightness and the rest keep GNOME's
+  backends, and the other monitors' bars, which borrow the same menu, get it
+  too. Quick settings fills itself in asynchronously at startup; the module
+  waits until `_backgroundApps` exists.
+- Look: `macr-cc` on the menu (plus `macr-light`, synced on open) and a blur
+  on its box. The rules use `!important` where shell themes such as MacTahoe
+  do, so the look holds with any theme.
+- Layout: the slider items move to just after GNOME's last own toggle, before
+  other extensions' toggles; each slider's box is wrapped with a title
+  (Display, Sound, Microphone). Both are undone on disable.
+- Focus is a `QuickToggle` bound inverted to
+  `org.gnome.desktop.notifications show-banners`, added with
+  `addExternalIndicator` and moved after Bluetooth, with a moon indicator in
+  the bar while it is on.

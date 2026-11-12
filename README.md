@@ -13,7 +13,7 @@ stack of tweak extensions that each fix one corner. It ships module by module.
 | **Dock**: frosted glass, magnification, running dots, Trash, hides when a window covers it, genie minimize, on every monitor | Dash to Dock, Magic Lamp | done |
 | **Launchpad**: every app in a full-screen grid with pages and search, on Super and the dock's Apps icon | the distribution's app menu | done |
 | **Spotlight**: Ctrl+Space search over apps, files, settings and the calculator, using GNOME's search providers | Ulauncher | done |
-| Control Center | GNOME quick settings | planned |
+| **Control Center**: GNOME's quick settings as macOS tiles, toggles first, titled Display and Sound sliders, a Focus (Do Not Disturb) toggle with a moon in the bar | GNOME quick settings styling | done |
 
 Macr leaves your GTK theme alone. It pairs well with a macOS-style theme such
 as [MacTahoe](https://github.com/vinceliuice/MacTahoe-gtk-theme), and with
