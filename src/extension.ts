@@ -1,6 +1,7 @@
 import type Gio from 'gi://Gio';
 import { Extension } from 'resource:///org/gnome/shell/extensions/extension.js';
 
+import { AppIconsModule } from './features/appicons/index.js';
 import { ControlCenterModule } from './features/controlcenter/index.js';
 import { DockModule } from './features/dock/index.js';
 import { LaunchpadModule } from './features/launchpad/index.js';
@@ -14,6 +15,7 @@ const MODULES: ModuleEntry[] = [
     { key: 'launchpad-enabled', create: (context) => new LaunchpadModule(context) },
     { key: 'spotlight-enabled', create: (context) => new SpotlightModule(context) },
     { key: 'control-center-enabled', create: () => new ControlCenterModule() },
+    { key: 'app-icon-tiles', create: () => new AppIconsModule() },
 ];
 
 export default class Macr extends Extension {

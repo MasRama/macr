@@ -67,5 +67,10 @@
       <summary>Show quick settings as the macOS Control Center</summary>
       <description>Toggles first, then titled sliders, a Focus toggle and Macr's look.</description>
     </key>
+    <key name="app-icon-tiles" type="b">
+      <default>true</default>
+      <summary>Give app icons the icon theme lacks a macOS tile</summary>
+      <description>The original icon on a light macOS squircle, in the dock, Launchpad, Spotlight and the app switcher.</description>
+    </key>
   </schema>
 </schemalist>

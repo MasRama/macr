@@ -46,6 +46,10 @@ export default class MacrPreferences extends ExtensionPreferences {
         const center = new Adw.PreferencesGroup({ title: _('Control Center') });
         center.add(switchRow(settings, 'control-center-enabled', _('macOS Control Center'), _('Quick settings with Focus, titled sliders and macOS tiles')));
         page.add(center);
+
+        const icons = new Adw.PreferencesGroup({ title: _('App icons') });
+        icons.add(switchRow(settings, 'app-icon-tiles', _('macOS tiles for other icons'), _('Apps your icon theme does not cover get their icon on a macOS tile')));
+        page.add(icons);
         window.add(page);
     }
 }
