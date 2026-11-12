@@ -208,3 +208,23 @@ schemas/                GSettings schema
   `_updateHotCorners` is wrapped on the instance, and a handler on
   `enable-hot-corners` destroys the one GNOME rebuilds from its own bound
   handler. Disable deletes the wrapper and lets GNOME rebuild.
+
+## Window corners
+
+- Windows that do not shape their own corners are cut to a rounded rectangle
+  by `CornerEffect`, a `Shell.GLSLEffect` on the window actor's first child
+  (the surface container): pixels inside the frame get an antialiased
+  rounded-rectangle coverage, the invisible borders around it are left as
+  they are. The radius is the `window-corner-radius` setting.
+- `logic/plan.ts` decides per window: normal windows and dialogs only, never
+  maximized or full-screen ones, and never a client-decorated window that
+  draws its own shadow (buffer larger than the frame: GTK and libadwaita
+  already round themselves). That leaves frameless windows (Electron and the
+  like) and server-decorated X11 windows.
+- A frameless window also gets `macr-window-shadow`, a widget below it in
+  `global.window_group` with the frame's size, restacked on `restacked`.
+  It is bound to the window actor's visibility, opacity, scale and
+  translation, with a matching pivot, so it follows GNOME's open, close and
+  minimize animations.
+- Plans are redone on allocation, size, maximize, full-screen and pivot
+  changes; disable removes every effect and shadow.
