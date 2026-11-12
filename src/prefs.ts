@@ -34,6 +34,13 @@ export default class MacrPreferences extends ExtensionPreferences {
             dock.add(row);
         }
         page.add(dock);
+
+        const apps = new Adw.PreferencesGroup({ title: _('Launchpad') });
+        apps.add(switchRow(settings, 'launchpad-enabled', _('Launchpad'), _('Every app in a full-screen grid, from the dock’s Apps icon')));
+        const superKey = switchRow(settings, 'launchpad-super-key', _('Super key opens Launchpad'), _('Instead of the overview or the distribution’s app menu'));
+        settings.bind('launchpad-enabled', superKey, 'sensitive', Gio.SettingsBindFlags.GET);
+        apps.add(superKey);
+        page.add(apps);
         window.add(page);
     }
 }

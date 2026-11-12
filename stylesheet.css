@@ -428,3 +428,79 @@
     border-radius: 8px;
     padding: 4px 10px;
 }
+
+/* ---------- Launchpad ---------- */
+
+.macr-launchpad-backdrop {
+  background-color: rgba(0, 0, 0, 0.22);
+}
+
+.macr-launchpad-search {
+  width: 240px;
+  min-height: 28px;
+  margin-top: 44px;
+  padding: 3px 10px;
+  border-radius: 9px;
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  background-color: rgba(255, 255, 255, 0.14);
+  box-shadow: none;
+  color: #ffffff;
+  font-size: 13px;
+  caret-color: #ffffff;
+  selection-background-color: rgba(255, 255, 255, 0.35);
+  selected-color: #ffffff;
+}
+
+.macr-launchpad-search:focus,
+.macr-launchpad-search:hover {
+  border-color: rgba(255, 255, 255, 0.3);
+  background-color: rgba(255, 255, 255, 0.18);
+  box-shadow: none;
+}
+
+.macr-launchpad-search StLabel.hint-text {
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.macr-launchpad-search-icon {
+  icon-size: 14px;
+  padding-right: 6px;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.macr-launchpad-app {
+  border-radius: 20px;
+  padding: 6px;
+}
+
+.macr-launchpad-app:selected {
+  background-color: rgba(255, 255, 255, 0.14);
+}
+
+.macr-launchpad-app:active {
+  background-color: rgba(255, 255, 255, 0.22);
+}
+
+.macr-launchpad-label {
+  max-width: 136px;
+  padding-top: 10px;
+  color: #ffffff;
+  font-size: 13px;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.6);
+}
+
+.macr-launchpad-dots {
+  spacing: 10px;
+  padding-top: 24px;
+}
+
+.macr-launchpad-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 4px;
+  background-color: rgba(255, 255, 255, 0.35);
+}
+
+.macr-launchpad-dot:checked {
+  background-color: rgba(255, 255, 255, 0.95);
+}

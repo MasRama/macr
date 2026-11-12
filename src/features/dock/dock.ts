@@ -5,6 +5,7 @@ import Shell from 'gi://Shell';
 import St from 'gi://St';
 import * as Main from 'resource:///org/gnome/shell/ui/main.js';
 
+import { launchpad, onLaunchpadChanged } from '../../shared/launchpad-link.js';
 import { MacrDash } from './dash.js';
 import { magnify } from './logic/magnify.js';
 import { overlaps, type Rect } from './logic/rules.js';
@@ -47,6 +48,7 @@ export class Dock {
     private dragging = false;
     private hideTimeout = 0;
     private placeLater = 0;
+    private unlinkLaunchpad: (() => void) | null = null;
 
     constructor(
         options: DockOptions,
@@ -92,11 +94,14 @@ export class Dock {
         const showApps = this.dash.showAppsButton;
         const overviewApps = Main.overview.dash.showAppsButton;
         this.listen(showApps, 'clicked', () => {
-            if (Main.overview.visible && overviewApps.checked) Main.overview.hide();
+            const pad = launchpad();
+            if (pad) pad.toggle();
+            else if (Main.overview.visible && overviewApps.checked) Main.overview.hide();
             else Main.overview.showApps();
             this.syncShowApps();
         });
         this.listen(overviewApps, 'notify::checked', () => this.syncShowApps());
+        this.unlinkLaunchpad = onLaunchpadChanged(() => this.syncShowApps());
 
         const overview = Main.overview as unknown as { connect(signal: string, callback: () => void): number } & Disconnectable;
         this.ids.push([overview, overview.connect('showing', () => this.updateVisibility())]);
@@ -134,6 +139,8 @@ export class Dock {
         for (const [target, id] of [...this.ids, ...this.focusIds]) target.disconnect(id);
         this.ids.length = 0;
         this.focusIds = [];
+        this.unlinkLaunchpad?.();
+        this.unlinkLaunchpad = null;
         this.edge.destroy();
         this.actor.destroy();
     }
@@ -275,7 +282,7 @@ export class Dock {
     }
 
     private syncShowApps(): void {
-        this.dash.showAppsButton.checked = Main.overview.visible && Main.overview.dash.showAppsButton.checked;
+        this.dash.showAppsButton.checked = (launchpad()?.isOpen ?? false) || (Main.overview.visible && Main.overview.dash.showAppsButton.checked);
     }
 
     private setDragging(dragging: boolean): void {

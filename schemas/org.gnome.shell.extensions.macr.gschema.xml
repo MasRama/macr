@@ -44,5 +44,15 @@
       <summary>Minimize windows into the dock with the genie effect</summary>
       <description>Replaces GNOME's minimize animation. Turn off Magic Lamp while it is on.</description>
     </key>
+    <key name="launchpad-enabled" type="b">
+      <default>true</default>
+      <summary>Show Launchpad from the dock's Apps icon</summary>
+      <description>A full-screen grid of every app.</description>
+    </key>
+    <key name="launchpad-super-key" type="b">
+      <default>true</default>
+      <summary>The Super key opens Launchpad</summary>
+      <description>Instead of the overview or the distribution's app menu.</description>
+    </key>
   </schema>
 </schemalist>
