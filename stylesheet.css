@@ -641,3 +641,275 @@
 .macr-spotlight.macr-light .macr-spotlight-row:selected .macr-spotlight-description {
   color: #ffffff;
 }
+
+/* ---------- Control Center ---------- */
+/* !important where shell themes (MacTahoe) use it for quick settings. */
+
+.macr-cc .quick-settings {
+  margin: 4px !important;
+  padding: 12px !important;
+  border-radius: 22px !important;
+  border: 1px solid rgba(255, 255, 255, 0.13) !important;
+  background-color: rgba(36, 36, 40, 0.74) !important;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.35) !important;
+  color: #ffffff;
+  font-family: "SF Pro Text", "SF Pro", system-ui, sans-serif;
+  font-size: 13px;
+}
+
+.macr-cc .quick-settings-grid {
+  spacing-rows: 10px;
+  spacing-columns: 10px;
+}
+
+.macr-cc .quick-settings-grid > .quick-toggle,
+.macr-cc .quick-menu-toggle {
+  min-width: 172px !important;
+  max-width: 172px !important;
+  min-height: 52px !important;
+  padding: 0 !important;
+  border: none !important;
+  border-radius: 16px !important;
+  box-shadow: none !important;
+  background-color: rgba(255, 255, 255, 0.09) !important;
+  background-gradient-direction: none !important;
+  color: #ffffff !important;
+}
+
+.macr-cc .quick-settings-grid > .quick-toggle:hover,
+.macr-cc .quick-menu-toggle:hover {
+  background-color: rgba(255, 255, 255, 0.14) !important;
+}
+
+.macr-cc .quick-settings-grid > .quick-toggle:checked,
+.macr-cc .quick-menu-toggle:checked {
+  background-color: rgba(255, 255, 255, 0.09) !important;
+}
+
+.macr-cc .quick-menu-toggle .quick-toggle,
+.macr-cc .quick-menu-toggle .quick-toggle:hover,
+.macr-cc .quick-menu-toggle .quick-toggle:active,
+.macr-cc .quick-menu-toggle .quick-toggle:checked {
+  min-width: 0 !important;
+  max-width: 1000px !important;
+  padding: 0 !important;
+  border: none !important;
+  border-radius: 16px !important;
+  box-shadow: none !important;
+  background: none !important;
+  background-gradient-direction: none !important;
+  color: #ffffff !important;
+}
+
+.macr-cc .quick-toggle > StBoxLayout {
+  spacing: 8px !important;
+  padding: 0 4px 0 11px !important;
+}
+
+.macr-cc .quick-toggle .quick-toggle-icon {
+  icon-size: 16px !important;
+  min-width: 0 !important;
+  min-height: 0 !important;
+  padding: 7px !important;
+  border-radius: 99px !important;
+  background-color: rgba(255, 255, 255, 0.14) !important;
+  color: #ffffff !important;
+}
+
+.macr-cc .quick-toggle:checked .quick-toggle-icon {
+  background-color: #0a84ff !important;
+  color: #ffffff !important;
+}
+
+.macr-cc .quick-toggle .quick-toggle-title {
+  font-size: 13px !important;
+  font-weight: bold !important;
+  color: #ffffff !important;
+}
+
+.macr-cc .quick-toggle .quick-toggle-subtitle {
+  font-size: 11px !important;
+  font-weight: normal !important;
+  color: rgba(255, 255, 255, 0.6) !important;
+}
+
+.macr-cc .quick-menu-toggle .quick-toggle-arrow {
+  min-width: 22px !important;
+  min-height: 22px !important;
+  margin: 15px 6px 15px 0 !important;
+  padding: 0 !important;
+  border: none !important;
+  border-radius: 99px !important;
+  background-color: transparent !important;
+  color: rgba(255, 255, 255, 0.6) !important;
+}
+
+.macr-cc .quick-menu-toggle .quick-toggle-arrow:hover {
+  background-color: rgba(255, 255, 255, 0.14) !important;
+  color: #ffffff !important;
+}
+
+.macr-cc .quick-menu-toggle .quick-toggle-arrow StIcon {
+  icon-size: 12px !important;
+}
+
+.macr-cc .quick-slider {
+  padding: 10px 10px 12px 12px !important;
+  border: none !important;
+  border-radius: 16px !important;
+  box-shadow: none !important;
+  background-color: rgba(255, 255, 255, 0.09) !important;
+  color: #ffffff !important;
+}
+
+.macr-cc-slider-box {
+  spacing: 6px;
+}
+
+.macr-cc-slider-title {
+  padding-left: 2px;
+  font-size: 13px;
+  font-weight: bold;
+}
+
+.macr-cc .quick-slider .icon-button {
+  padding: 4px !important;
+  border: none !important;
+  box-shadow: none !important;
+  background-color: transparent !important;
+  background-gradient-direction: none !important;
+  color: rgba(255, 255, 255, 0.8) !important;
+}
+
+.macr-cc .quick-slider .icon-button StIcon {
+  icon-size: 16px !important;
+}
+
+.macr-cc .quick-slider .slider {
+  height: 22px;
+  -barlevel-height: 22px;
+  -barlevel-border-width: 0;
+  -barlevel-background-color: rgba(255, 255, 255, 0.14);
+  -barlevel-active-background-color: #ffffff;
+  -barlevel-overdrive-color: #ff9f0a;
+  -slider-handle-radius: 11px;
+  -slider-handle-border-width: 1px;
+  -slider-handle-border-color: rgba(0, 0, 0, 0.12);
+  color: #ffffff;
+}
+
+.macr-cc .quick-settings-system-item .icon-button {
+  padding: 8px !important;
+  border: none !important;
+  border-radius: 99px !important;
+  box-shadow: none !important;
+  background-color: rgba(255, 255, 255, 0.09) !important;
+  color: #ffffff !important;
+}
+
+.macr-cc .quick-settings-system-item .icon-button:hover {
+  background-color: rgba(255, 255, 255, 0.16) !important;
+}
+
+.macr-cc .quick-toggle-menu {
+  margin: 8px 0 0 !important;
+  padding: 10px !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  border-radius: 16px !important;
+  background-color: rgba(52, 52, 58, 0.97) !important;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3) !important;
+  color: #ffffff !important;
+}
+
+.macr-cc .quick-toggle-menu .header .icon.active {
+  background-color: #0a84ff !important;
+  color: #ffffff !important;
+}
+
+.macr-cc .quick-toggle-menu .popup-menu-item {
+  border-radius: 8px !important;
+}
+
+.macr-cc .quick-toggle-menu .popup-menu-item:hover,
+.macr-cc .quick-toggle-menu .popup-menu-item:focus {
+  background-color: rgba(255, 255, 255, 0.1) !important;
+  color: #ffffff !important;
+}
+
+/* Light */
+
+.macr-cc.macr-light .quick-settings {
+  border-color: rgba(0, 0, 0, 0.08) !important;
+  background-color: rgba(246, 246, 248, 0.8) !important;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.18) !important;
+  color: #1d1d1f;
+}
+
+.macr-cc.macr-light .quick-settings-grid > .quick-toggle,
+.macr-cc.macr-light .quick-menu-toggle,
+.macr-cc.macr-light .quick-settings-grid > .quick-toggle:checked,
+.macr-cc.macr-light .quick-menu-toggle:checked,
+.macr-cc.macr-light .quick-slider,
+.macr-cc.macr-light .quick-settings-system-item .icon-button {
+  background-color: rgba(0, 0, 0, 0.05) !important;
+  color: #1d1d1f !important;
+}
+
+.macr-cc.macr-light .quick-settings-grid > .quick-toggle:hover,
+.macr-cc.macr-light .quick-menu-toggle:hover,
+.macr-cc.macr-light .quick-settings-system-item .icon-button:hover {
+  background-color: rgba(0, 0, 0, 0.09) !important;
+}
+
+.macr-cc.macr-light .quick-menu-toggle .quick-toggle,
+.macr-cc.macr-light .quick-toggle .quick-toggle-title {
+  color: #1d1d1f !important;
+}
+
+.macr-cc.macr-light .quick-toggle .quick-toggle-icon {
+  background-color: rgba(0, 0, 0, 0.08) !important;
+  color: #1d1d1f !important;
+}
+
+.macr-cc.macr-light .quick-toggle:checked .quick-toggle-icon {
+  background-color: #0a84ff !important;
+  color: #ffffff !important;
+}
+
+.macr-cc.macr-light .quick-toggle .quick-toggle-subtitle,
+.macr-cc.macr-light .quick-menu-toggle .quick-toggle-arrow {
+  color: rgba(0, 0, 0, 0.5) !important;
+}
+
+.macr-cc.macr-light .quick-menu-toggle .quick-toggle-arrow:hover {
+  background-color: rgba(0, 0, 0, 0.08) !important;
+  color: #1d1d1f !important;
+}
+
+.macr-cc.macr-light .quick-slider .icon-button {
+  color: rgba(0, 0, 0, 0.7) !important;
+}
+
+.macr-cc.macr-light .quick-slider .slider {
+  -barlevel-border-width: 1px;
+  -barlevel-border-color: rgba(0, 0, 0, 0.06);
+  -barlevel-background-color: rgba(0, 0, 0, 0.08);
+  -slider-handle-border-color: rgba(0, 0, 0, 0.18);
+}
+
+.macr-cc.macr-light .quick-toggle-menu {
+  border-color: rgba(0, 0, 0, 0.08) !important;
+  background-color: rgba(250, 250, 252, 0.98) !important;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15) !important;
+  color: #1d1d1f !important;
+}
+
+.macr-cc.macr-light .quick-toggle-menu .popup-menu-item {
+  color: #1d1d1f !important;
+}
+
+.macr-cc.macr-light .quick-toggle-menu .popup-menu-item:hover,
+.macr-cc.macr-light .quick-toggle-menu .popup-menu-item:focus {
+  background-color: rgba(0, 0, 0, 0.06) !important;
+  color: #1d1d1f !important;
+}

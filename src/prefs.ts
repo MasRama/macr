@@ -42,6 +42,10 @@ export default class MacrPreferences extends ExtensionPreferences {
         apps.add(superKey);
         apps.add(switchRow(settings, 'spotlight-enabled', _('Spotlight'), _('Search apps, files and settings with Ctrl+Space')));
         page.add(apps);
+
+        const center = new Adw.PreferencesGroup({ title: _('Control Center') });
+        center.add(switchRow(settings, 'control-center-enabled', _('macOS Control Center'), _('Quick settings with Focus, titled sliders and macOS tiles')));
+        page.add(center);
         window.add(page);
     }
 }

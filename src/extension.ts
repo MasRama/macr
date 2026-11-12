@@ -1,6 +1,7 @@
 import type Gio from 'gi://Gio';
 import { Extension } from 'resource:///org/gnome/shell/extensions/extension.js';
 
+import { ControlCenterModule } from './features/controlcenter/index.js';
 import { DockModule } from './features/dock/index.js';
 import { LaunchpadModule } from './features/launchpad/index.js';
 import { MenuBar } from './features/menubar/index.js';
@@ -12,6 +13,7 @@ const MODULES: ModuleEntry[] = [
     { key: 'dock-enabled', create: (context) => new DockModule(context) },
     { key: 'launchpad-enabled', create: (context) => new LaunchpadModule(context) },
     { key: 'spotlight-enabled', create: (context) => new SpotlightModule(context) },
+    { key: 'control-center-enabled', create: () => new ControlCenterModule() },
 ];
 
 export default class Macr extends Extension {

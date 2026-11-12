@@ -62,5 +62,10 @@
       <default><![CDATA[['<Control>space']]]></default>
       <summary>Keyboard shortcut that opens Spotlight</summary>
     </key>
+    <key name="control-center-enabled" type="b">
+      <default>true</default>
+      <summary>Show quick settings as the macOS Control Center</summary>
+      <description>Toggles first, then titled sliders, a Focus toggle and Macr's look.</description>
+    </key>
   </schema>
 </schemalist>
