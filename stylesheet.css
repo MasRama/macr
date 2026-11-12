@@ -1,1 +1,326 @@
-/* Macr styles: added by each module. */
+/* Macr. Colours follow macOS Golden Gate: a translucent bar, glass menus. */
+
+/* ---------- Menu bar ---------- */
+
+#panel.macr-bar {
+  height: 28px;
+  background-color: rgba(0, 0, 0, 0.28);
+  font-family: "SF Pro Text", "SF Pro", system-ui, sans-serif;
+  font-size: 13px;
+  font-weight: normal;
+  transition-duration: 200ms;
+}
+
+#panel.macr-bar.macr-light {
+  background-color: rgba(255, 255, 255, 0.38);
+}
+
+#panel.macr-bar .panel-button {
+  color: #ffffff;
+  font-weight: normal;
+  border-radius: 6px;
+  border-width: 3px 0;
+  -natural-hpadding: 9px;
+  -minimum-hpadding: 5px;
+  box-shadow: none;
+  background-color: transparent;
+}
+
+#panel.macr-bar.macr-light .panel-button {
+  color: #1d1d1f;
+}
+
+#panel.macr-bar .panel-button:hover {
+  box-shadow: none;
+  background-color: rgba(255, 255, 255, 0.12);
+}
+
+#panel.macr-bar .panel-button:active,
+#panel.macr-bar .panel-button:checked,
+#panel.macr-bar .panel-button:focus {
+  box-shadow: none;
+  background-color: rgba(255, 255, 255, 0.22);
+}
+
+#panel.macr-bar.macr-light .panel-button:hover {
+  background-color: rgba(0, 0, 0, 0.07);
+}
+
+#panel.macr-bar.macr-light .panel-button:active,
+#panel.macr-bar.macr-light .panel-button:checked,
+#panel.macr-bar.macr-light .panel-button:focus {
+  background-color: rgba(0, 0, 0, 0.13);
+}
+
+#panel.macr-bar .macr-logo {
+  font-size: 16px;
+  padding: 0 4px;
+}
+
+#panel.macr-bar .macr-logo-icon {
+  icon-size: 16px;
+  padding: 0 3px;
+}
+
+#panel.macr-bar .macr-app-name {
+  font-weight: bold;
+}
+
+#panel.macr-bar .system-status-icon {
+  icon-size: 16px;
+  padding: 0 4px;
+}
+
+#panel.macr-bar .panel-status-indicators-box {
+  spacing: 2px;
+}
+
+/* ---------- Menus ---------- */
+
+.macr-menu.popup-menu-boxpointer {
+  -arrow-rise: 0;
+  -boxpointer-gap: 3px;
+}
+
+.macr-menu .popup-menu-content {
+  min-width: 230px;
+  padding: 5px;
+  border-radius: 11px;
+  border: 1px solid rgba(255, 255, 255, 0.13);
+  background-color: rgba(36, 36, 40, 0.74);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.35);
+  color: #ffffff;
+  font-family: "SF Pro Text", "SF Pro", system-ui, sans-serif;
+  font-size: 13px;
+}
+
+.macr-menu .popup-menu-item {
+  min-height: 0;
+  padding: 3px 10px 3px 6px;
+  border-radius: 6px;
+  spacing: 4px;
+  font-weight: normal;
+  color: #ffffff;
+}
+
+.macr-menu .popup-menu-item:hover,
+.macr-menu .popup-menu-item:focus,
+.macr-menu .popup-menu-item:active,
+.macr-menu .popup-menu-item:checked {
+  background-color: #0a84ff;
+  color: #ffffff;
+}
+
+.macr-menu .popup-menu-item:insensitive {
+  color: rgba(255, 255, 255, 0.32);
+}
+
+.macr-menu .popup-menu-ornament {
+  width: 14px;
+  icon-size: 12px;
+}
+
+.macr-menu .popup-separator-menu-item {
+  padding: 4px 9px;
+}
+
+.macr-menu .popup-separator-menu-item .popup-separator-menu-item-separator {
+  height: 1px;
+  background-color: rgba(255, 255, 255, 0.13);
+}
+
+.macr-menu .popup-sub-menu {
+  background-color: rgba(255, 255, 255, 0.05);
+  border-radius: 6px;
+  box-shadow: none;
+  margin: 1px 0;
+}
+
+.macr-menu .popup-submenu-menu-item:open {
+  background-color: rgba(255, 255, 255, 0.08);
+}
+
+/* Light */
+.macr-menu.macr-light .popup-menu-content {
+  border-color: rgba(0, 0, 0, 0.1);
+  background-color: rgba(246, 246, 248, 0.78);
+  color: #1d1d1f;
+}
+
+.macr-menu.macr-light .popup-menu-item {
+  color: #1d1d1f;
+}
+
+.macr-menu.macr-light .popup-menu-item:hover,
+.macr-menu.macr-light .popup-menu-item:focus,
+.macr-menu.macr-light .popup-menu-item:active {
+  color: #ffffff;
+}
+
+.macr-menu.macr-light .popup-menu-item:insensitive {
+  color: rgba(0, 0, 0, 0.3);
+}
+
+.macr-menu.macr-light .popup-separator-menu-item .popup-separator-menu-item-separator {
+  background-color: rgba(0, 0, 0, 0.1);
+}
+
+.macr-menu.macr-light .popup-sub-menu {
+  background-color: rgba(0, 0, 0, 0.04);
+}
+
+/* ---------- Dialogs ---------- */
+
+.modal-dialog.macr-dialog {
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background-color: rgba(38, 38, 42, 0.97);
+  color: #f5f5f7;
+  font-family: "SF Pro Text", "SF Pro", system-ui, sans-serif;
+}
+
+.modal-dialog.macr-dialog.macr-light {
+  border-color: rgba(0, 0, 0, 0.08);
+  background-color: rgba(246, 246, 248, 0.98);
+  color: #1d1d1f;
+}
+
+.macr-dialog .modal-dialog-linked-button {
+  margin: 0 6px 14px;
+  padding: 7px 16px;
+  border: none;
+  border-radius: 8px;
+  box-shadow: none;
+  background-color: rgba(255, 255, 255, 0.12);
+  color: #f5f5f7;
+  font-weight: normal;
+}
+
+.macr-dialog .modal-dialog-linked-button:hover {
+  background-color: rgba(255, 255, 255, 0.18);
+}
+
+.macr-dialog .modal-dialog-linked-button:default {
+  background-color: #0a84ff;
+  color: #ffffff;
+}
+
+.macr-dialog .modal-dialog-linked-button:default:hover {
+  background-color: #2b94ff;
+}
+
+.macr-dialog.macr-light .modal-dialog-linked-button {
+  background-color: rgba(0, 0, 0, 0.07);
+  color: #1d1d1f;
+}
+
+.macr-dialog.macr-light .modal-dialog-linked-button:default {
+  background-color: #0a84ff;
+  color: #ffffff;
+}
+
+.macr-dialog .modal-dialog-linked-button:first-child {
+  margin-left: 16px;
+}
+
+.macr-dialog .modal-dialog-linked-button:last-child {
+  margin-right: 16px;
+}
+
+.macr-about-box {
+  spacing: 4px;
+  padding: 22px 28px 10px;
+  min-width: 380px;
+}
+
+.macr-about-icon {
+  margin-bottom: 10px;
+}
+
+.macr-about-title {
+  font-size: 21px;
+  font-weight: bold;
+}
+
+.macr-about-subtitle {
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.6);
+  text-align: center;
+}
+
+.macr-light .macr-about-subtitle {
+  color: rgba(0, 0, 0, 0.55);
+}
+
+.macr-about-table {
+  spacing: 5px;
+  padding-top: 18px;
+  font-size: 12px;
+}
+
+.macr-about-row {
+  spacing: 12px;
+}
+
+.macr-about-key {
+  width: 120px;
+  text-align: right;
+  font-weight: bold;
+}
+
+.macr-about-value {
+  color: rgba(255, 255, 255, 0.72);
+}
+
+.macr-light .macr-about-value {
+  color: rgba(0, 0, 0, 0.62);
+}
+
+.macr-dialog-title {
+  font-size: 15px;
+  font-weight: bold;
+  padding: 16px 4px 2px;
+}
+
+.macr-dialog-text {
+  max-width: 400px;
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.65);
+  padding: 0 4px 10px;
+}
+
+.macr-light .macr-dialog-text {
+  color: rgba(0, 0, 0, 0.6);
+}
+
+.macr-force-quit-scroll {
+  min-width: 400px;
+  max-height: 280px;
+  margin-bottom: 8px;
+  padding: 4px;
+  border-radius: 8px;
+  background-color: rgba(0, 0, 0, 0.22);
+}
+
+.macr-light .macr-force-quit-scroll {
+  background-color: rgba(0, 0, 0, 0.05);
+}
+
+.macr-force-quit-row {
+  padding: 4px 8px;
+  border-radius: 6px;
+  color: inherit;
+}
+
+.macr-force-quit-row:hover {
+  background-color: rgba(127, 127, 127, 0.15);
+}
+
+.macr-force-quit-row:checked {
+  background-color: #0a84ff;
+  color: #ffffff;
+}
+
+.macr-force-quit-row-box {
+  spacing: 10px;
+}
