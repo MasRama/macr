@@ -18,11 +18,15 @@ class MirroredButton {
     constructor(readonly owner: PanelMenu.Button) {
         const source = owner.get_first_child();
         if (source) {
-            const clone = new Clutter.Clone({ source });
+            // A clone stretches the source to its own size. Left to the layout
+            // it takes the source's preferred width and the button's height,
+            // which can differ from the source's real size (an app tray icon
+            // came out squashed), so it is held at the source's size, centred.
+            const clone = new Clutter.Clone({ source, x_align: Clutter.ActorAlign.CENTER, y_align: Clutter.ActorAlign.CENTER });
             this.button.add_child(clone);
-            // A clone scales the source to its own size, measured when it is
-            // laid out: lay it out again when the source's size changes.
-            this.ids.push([source, source.connect('notify::allocation', () => clone.queue_relayout())]);
+            const fit = () => clone.set_size(source.width, source.height);
+            fit();
+            this.ids.push([source, source.connect('notify::allocation', fit)]);
             // Gone with its owner, and its handlers with it.
             this.ids.push([source, source.connect('destroy', () => (this.ids.length = 0))]);
         }
