@@ -22,6 +22,7 @@ stack of tweak extensions that each fix one corner. It ships module by module.
 | **Hot corners**: each screen corner can open Mission Control, Launchpad, the desktop or the Notification Center, or lock the screen | GNOME's top-left hot corner | done |
 | **Window corners**: rounded macOS corners on windows that do not round their own, such as frameless (Electron) and older X11 apps, with a soft shadow on frameless ones; square when maximized | Rounded Window Corners | done |
 | **Traffic lights**: red, yellow and green window buttons first on the left of app windows, grey in windows in the background, with their symbols on hover; in GTK and libadwaita apps, Chrome and X11 apps (Qt 6 apps on Wayland and Electron apps with their own title bar draw their own buttons) | a macOS GTK theme's window buttons | done |
+| **Lock screen**: the date and a big time at the top over the unblurred wallpaper, your picture and name low in the middle, and the password field fading in under them on a key press or click | GNOME's centred clock and blurred lock screen | done |
 
 Macr leaves your GTK theme alone, apart from the window buttons it draws as
 traffic lights (a stylesheet it adds to `~/.config/gtk-3.0` and `gtk-4.0` and

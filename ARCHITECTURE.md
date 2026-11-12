@@ -29,6 +29,10 @@ schemas/                GSettings schema
 - Only `logic/` folders are unit tested; they must not import `gi://` or
   `resource://` modules.
 - Supported: GNOME Shell 46 on Wayland.
+- The extension also runs in the `unlock-dialog` session mode, but there
+  `extension.ts` keeps only the modules marked `lockScreen` on (the lock
+  screen) and turns the rest off, in reverse order, until the session is
+  unlocked again.
 
 ## Menu bar
 
@@ -273,3 +277,29 @@ schemas/                GSettings schema
   are reopened. Qt 6 apps on Wayland (the bradient decoration) and Electron
   apps with a custom title bar draw their own buttons and are left as they
   are.
+
+## Lock screen
+
+- GNOME builds a new `UnlockDialog` every time the screen locks, so the
+  module wraps three methods of its prototype while on: `_init` hands every
+  new dialog to a `MacLock`, `_setTransitionProgress` runs MacLock's own
+  transition, and `_updateBackgroundEffects` turns the blur off and only
+  darkens the wallpaper a little. A dialog already showing when the module
+  turns on is taken over at once; disable puts the methods back and undoes
+  every MacLock.
+- MacLock moves GNOME's clock out of the stack it shares with the prompt,
+  puts the date above the time and hides the "click or press a key" hint.
+  The stack now shows a `UserWidget` (avatar and name) while the password
+  field is hidden, and GNOME's prompt over it while it shows, so the avatar
+  never moves; the clock never fades or shrinks.
+- `MacLockLayout` replaces the dialog's layout manager (`logic/layout.ts`):
+  the time near the top, the user at about 70% of the screen height (moved
+  up when a tall prompt would not fit), notifications only in the room
+  between them, and the login options button at the bottom right.
+- The time has no AM/PM and follows the 12h/24h clock setting
+  (`logic/clock.ts`); names follow `LC_TIME`. Styles are scoped to
+  `.unlock-dialog.macr-lock` so they beat the shell theme's
+  `.unlock-dialog` rules without `!important`.
+- The devshell has no screen shield (`Main.screenShield` needs logind), so
+  there a dialog is built by hand from `ui/unlockDialog.js`; the real lock,
+  its blur and the session mode switch are checked in a real session.
