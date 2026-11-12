@@ -25,10 +25,19 @@ GNOME Shell 46 on Wayland. Macr is built and tested on Zorin OS 18; other
 GNOME 46 systems should work but are not tested yet. The menu bar uses the
 SF Pro font when it is installed and the system font otherwise.
 
-## Build and install
+## Install
+
+Download `macr@masrama.github.io.shell-extension.zip` from the
+[latest release](https://github.com/MasRama/macr/releases/latest), then:
 
 ```sh
-npm install
+gnome-extensions install --force macr@masrama.github.io.shell-extension.zip
+```
+
+Or build it from source:
+
+```sh
+npm ci
 npm run pack
 gnome-extensions install --force build/macr@masrama.github.io.shell-extension.zip
 ```
@@ -40,12 +49,13 @@ on, you can turn off Just Perfection and Blur my Shell's top bar blur.
 
 ```sh
 npm run check   # type-check
+npm run lint
 npm test        # unit tests for the pure logic
 ```
 
 `tools/devshell/` runs Macr in an isolated, headless GNOME Shell and takes
 screenshots of it, without touching your session. See
-[ARCHITECTURE.md](ARCHITECTURE.md).
+[CONTRIBUTING.md](CONTRIBUTING.md) and [ARCHITECTURE.md](ARCHITECTURE.md).
 
 ## License
 

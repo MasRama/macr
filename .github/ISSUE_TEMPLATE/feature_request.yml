@@ -1,0 +1,20 @@
+name: Feature request
+description: Suggest a piece of macOS that Macr could bring
+labels: [enhancement]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: What do you miss from macOS
+      description: Describe what macOS does and where you miss it on GNOME.
+    validations:
+      required: true
+  - type: textarea
+    id: idea
+    attributes:
+      label: How it could work
+      description: What you would see and do. Screenshots from macOS help.
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: What you do today instead
