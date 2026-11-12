@@ -40,8 +40,25 @@ schemas/                GSettings schema
   distribution's menu button (`zorin-menu`).
 - The logo is the Apple glyph from an installed SF Pro font (Macr ships no
   Apple artwork); without that font it falls back to a generic symbol.
-- Menus only offer items that work for every app. Real per-app menus are a
-  later tier.
+- Logo, app and Window menus only offer items that work for every app.
+- App menus (`menubar-app-menus`): an app that shares its menu bar over
+  D-Bus gets its own menus between the app name and Window, with its Help
+  after Window. That covers GtkApplication apps with a menu bar (GTK 3 and
+  4) and LibreOffice. Mutter gives each window's bus name and object paths
+  (`get_gtk_menubar_object_path` and friends). The menus are read as a
+  `Gio.DBusMenuModel` and run through `Gio.DBusActionGroup`s for the `app`
+  and `win` prefixes.
+  - `logic/app-menus.ts` turns the model into a tree and drops the app's own
+    Window menu (Macr's lists the app's windows). It also flattens nested
+    sections into separator groups and writes accelerators in macOS symbols.
+  - The buttons are rebuilt only when the list of menus changes. A menu's
+    items are read when it opens and again while it is open when the app
+    changes them.
+  - `submenu-action` is set while a menu or submenu is shown, as GTK does,
+    because LibreOffice fills its submenus only then. Before a refill, the
+    open submenu is closed and reopened.
+  - Qt, Electron and other apps that do not share their menus keep only
+    Macr's menus.
 - Other monitors (`menubar-all-monitors`, on by default) get a
   `SecondaryBar`: a chrome actor named `panel` (so the bar style applies)
   that reserves its height and hides over full-screen windows. It has its own

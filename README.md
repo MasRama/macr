@@ -9,7 +9,7 @@ stack of tweak extensions that each fix one corner. It ships module by module.
 
 | Module | Replaces | Status |
 |---|---|---|
-| **Menu bar**: logo menu, the focused app's name and menu, a Window menu, a macOS clock, a translucent bar, on every monitor | Just Perfection, Blur my Shell (top bar) | done |
+| **Menu bar**: logo menu, the focused app's name and menu, the app's own File, Edit and View menus when it shares them (GTK apps with a menu bar, LibreOffice), a Window menu, a macOS clock, a translucent bar, on every monitor | Just Perfection, Blur my Shell (top bar) | done |
 | **Dock**: frosted glass, magnification, running dots, Trash, hides when a window covers it, genie minimize, on every monitor | Dash to Dock, Magic Lamp | done |
 | **Launchpad**: every app in a full-screen grid with pages and search, on Super and the dock's Apps icon | the distribution's app menu | done |
 | **Spotlight**: Ctrl+Space search over apps, files, settings and the calculator, using GNOME's search providers | Ulauncher | done |
