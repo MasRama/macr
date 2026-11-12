@@ -1482,3 +1482,38 @@
   background-color: #ff3b30 !important;
   color: #ffffff !important;
 }
+
+/* ---------- Mission Control ---------- */
+/* `macr-mission-control` on the overview group. */
+
+.macr-mission-control-dim {
+  background-color: rgba(0, 0, 0, 0.22);
+}
+
+.macr-mission-control .workspace-thumbnails {
+  spacing: 18px !important;
+  padding: 10px 0 14px !important;
+}
+
+.macr-mission-control .workspace-thumbnails .workspace-thumbnail {
+  border: none !important;
+  border-radius: 10px !important;
+  background-color: rgba(255, 255, 255, 0.1) !important;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35);
+}
+
+.macr-mission-control .workspace-thumbnail-indicator {
+  border: 3px solid rgba(255, 255, 255, 0.92) !important;
+  border-radius: 12px !important;
+  padding: 0 !important;
+}
+
+.macr-mission-control .window-caption {
+  padding: 4px 12px !important;
+  border-radius: 99px !important;
+  background-color: rgba(36, 36, 40, 0.82) !important;
+  color: #ffffff !important;
+  font-family: "SF Pro Text", "SF Pro", system-ui, sans-serif;
+  font-size: 13px;
+  font-weight: bold;
+}

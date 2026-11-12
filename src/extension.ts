@@ -6,6 +6,7 @@ import { ControlCenterModule } from './features/controlcenter/index.js';
 import { DockModule } from './features/dock/index.js';
 import { LaunchpadModule } from './features/launchpad/index.js';
 import { MenuBar } from './features/menubar/index.js';
+import { MissionControlModule } from './features/missioncontrol/index.js';
 import { NotificationsModule } from './features/notifications/index.js';
 import { OsdModule } from './features/osd/index.js';
 import { SpotlightModule } from './features/spotlight/index.js';
@@ -22,6 +23,7 @@ const MODULES: ModuleEntry[] = [
     { key: 'osd-enabled', create: () => new OsdModule() },
     { key: 'switcher-enabled', create: () => new SwitcherModule() },
     { key: 'notifications-enabled', create: () => new NotificationsModule() },
+    { key: 'mission-control-enabled', create: () => new MissionControlModule() },
 ];
 
 export default class Macr extends Extension {

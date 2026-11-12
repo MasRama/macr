@@ -62,6 +62,10 @@ export default class MacrPreferences extends ExtensionPreferences {
         const notifications = new Adw.PreferencesGroup({ title: _('Notifications') });
         notifications.add(switchRow(settings, 'notifications-enabled', _('macOS notifications'), _('Banners at the top right and a macOS Notification Center on the clock')));
         page.add(notifications);
+
+        const spaces = new Adw.PreferencesGroup({ title: _('Mission Control') });
+        spaces.add(switchRow(settings, 'mission-control-enabled', _('macOS Mission Control'), _('Windows over the dimmed wallpaper, Spaces always at the top')));
+        page.add(spaces);
         window.add(page);
     }
 }
