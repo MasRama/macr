@@ -180,3 +180,31 @@ schemas/                GSettings schema
   (today in red), world clocks and weather as widget cards on the right.
 - GNOME's message list, Do Not Disturb and the Focus toggle keep working
   unchanged; only classes and effects are added and taken off on disable.
+
+## Mission Control
+
+- GNOME's overview, restyled: `macr-mission-control` on
+  `Main.layoutManager.overviewGroup`, a dimmed, blurred copy of the wallpaper
+  per monitor (`BackgroundManager` in a widget at the bottom of the group),
+  and every `workspace-background` card at opacity 0 (looked up again on each
+  `showing`, since GNOME builds workspaces lazily), so windows spread
+  straight over the wallpaper.
+- The Spaces bar always shows: `ThumbnailsBox.prototype._updateShouldShow` is
+  swapped while the module runs (taken from the live instance, as 46 ships
+  no typings for it) and its thumbnails are bigger (`_maxThumbnailScale`).
+- The search box is hidden (opacity 0, height 0); typing still searches.
+
+## Hot corners
+
+- One 1 px reactive chrome actor per configured corner, on the corners the
+  pointer can be pushed into (`logic/corners.ts`: a corner where another
+  monitor continues is skipped). `trackFullscreen` hides them over
+  full-screen windows. Each corner fires at most once per 600 ms.
+- Actions: Mission Control, Launchpad (through `launchpad-link`, else GNOME's
+  app grid), Desktop (minimizes the workspace's windows and brings the same
+  ones back next time, `logic/desktop.ts`), Notification Center (the
+  dateMenu, anchored on Macr's clock) and Lock Screen.
+- GNOME's own hot corner is destroyed while this runs: the layout manager's
+  `_updateHotCorners` is wrapped on the instance, and a handler on
+  `enable-hot-corners` destroys the one GNOME rebuilds from its own bound
+  handler. Disable deletes the wrapper and lets GNOME rebuild.

@@ -18,6 +18,8 @@ stack of tweak extensions that each fix one corner. It ships module by module.
 | **Volume and brightness**: a small frosted pill under the menu bar at the top right, like macOS, on every monitor | GNOME's on-screen display at the bottom | done |
 | **App switcher**: Alt+Tab as a frosted macOS panel with big icons, a soft highlight and only the chosen app's name; Alt+\` and the other switchers match | GNOME's switcher styling | done |
 | **Notifications**: banners as frosted cards at the top right, and the clock opens a macOS Notification Center with notification cards and calendar, world clock and weather widgets | GNOME's centred banners and calendar popover | done |
+| **Mission Control**: the overview's windows spread over the dimmed wallpaper with the Spaces bar always at the top | GNOME's overview look | done |
+| **Hot corners**: each screen corner can open Mission Control, Launchpad, the desktop or the Notification Center, or lock the screen | GNOME's top-left hot corner | done |
 
 Macr leaves your GTK theme alone. It pairs well with a macOS-style theme such
 as [MacTahoe](https://github.com/vinceliuice/MacTahoe-gtk-theme), and with
