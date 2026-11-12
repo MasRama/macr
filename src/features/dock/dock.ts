@@ -75,12 +75,13 @@ export class Dock {
         this.trash.show(false);
         this.dash._hookUpLabel(this.trash);
         this.dash.extraItems.push(this.trash);
-        this.dash._adjustIconSize();
 
         this.edge = new St.Widget({ name: 'macrDockEdge', reactive: true, track_hover: true, height: 1 });
 
         Main.layoutManager.addChrome(this.actor, { affectsInputRegion: true, trackFullscreen: true });
         Main.layoutManager.addChrome(this.edge, { affectsInputRegion: true, trackFullscreen: true });
+        // Sizing reads theme nodes, so the dock has to be on the stage first.
+        this.dash._adjustIconSize();
         this.edge.hide();
 
         this.listen(this.dash, 'notify::allocation', () => this.queuePlace());
