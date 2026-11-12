@@ -45,12 +45,16 @@ schemas/                GSettings schema
 - Other monitors (`menubar-all-monitors`, on by default) get a
   `SecondaryBar`: a chrome actor named `panel` (so the bar style applies)
   that reserves its height and hides over full-screen windows. It has its own
-  logo, app and Window menus and clock, and a `Clutter.Clone` of the quick
-  settings indicators. App tray icons are not copied. The bars are rebuilt on
-  `monitors-changed`.
-- GNOME has one calendar and one quick settings menu. `BorrowedMenu` points
-  such a menu at the button that opens it, and back at its owner when the
-  button goes.
+  logo, app and Window menus and clock. `StatusMirror` copies the main bar's
+  right-side buttons (status icons, app tray icons, quick settings) as
+  `Clutter.Clone`s and follows them as they come, go, show or hide. The bars
+  are rebuilt on `monitors-changed`.
+- `BorrowedMenu` makes a button act as another one: clicks, touches and
+  scrolls are emitted on the real button, so AppIndicator double-click,
+  quick settings and the hidden dateMenu behave as usual. The menu is
+  anchored on the clicked button and handed back to its owner on close.
+- A clone scales its source to its own size, measured only when the clone is
+  laid out, so each clone is laid out again when its source resizes.
 
 ## Dock
 
