@@ -1,5 +1,29 @@
 # Changelog
 
+## [0.2.0](https://github.com/MasRama/macr/compare/v0.1.0...v0.2.0) (2026-11-12)
+
+
+### Features
+
+* **devshell:** start as the login screen with --gdm ([6c05aa5](https://github.com/MasRama/macr/commit/6c05aa582d399847302524303921f16fedccf209))
+* **hot-corners:** open Mission Control, Launchpad and more from screen corners ([6479173](https://github.com/MasRama/macr/commit/6479173beec764875c1a842c95943a9117b79e79))
+* **lockscreen:** show a macOS lock screen ([3ff2fd5](https://github.com/MasRama/macr/commit/3ff2fd5640ab75a934aa7e24b2ddb9ba27a4f037))
+* **loginscreen:** give GDM's login screen the macOS look ([0cacea4](https://github.com/MasRama/macr/commit/0cacea46edd18a52ca65bf6e974c608b1336ceba))
+* **menubar:** show the focused app's own menus in the menu bar ([431aaf6](https://github.com/MasRama/macr/commit/431aaf60a240308802c395de225c063a48073b84))
+* **mission-control:** show the overview as macOS Mission Control ([91bcd27](https://github.com/MasRama/macr/commit/91bcd27c71cabd68e86887bdbe58f3d1b319f411))
+* **notifications:** show banners at the top right and a macOS Notification Center ([6ab945e](https://github.com/MasRama/macr/commit/6ab945efefa124d964f9d9dd8464dcac19458a4b))
+* **osd:** show volume and brightness as a macOS pill at the top right ([fc7e4ca](https://github.com/MasRama/macr/commit/fc7e4ca0497488bf431bca9a6c1570c2047c19f5))
+* **switcher:** show Alt+Tab as the macOS app switcher ([1ce29fc](https://github.com/MasRama/macr/commit/1ce29fcdca777c6eb680ef745bd038eddd66b7cf))
+* **traffic-lights:** draw macOS traffic lights on app windows ([11ec65e](https://github.com/MasRama/macr/commit/11ec65ef124d4e6b14f5f245a13211f014164c10))
+* **window-corners:** round the corners of windows that do not round their own ([80c0d71](https://github.com/MasRama/macr/commit/80c0d7192401fabb18aa3fb5d997d1fa3363b44b))
+
+
+### Bug Fixes
+
+* **devshell:** keep Eval working while the screen is locked ([a4e0179](https://github.com/MasRama/macr/commit/a4e0179ca13a2d181346643fea8a3af1c84d42df))
+* **dock:** size the dock icons once the dock is on the stage ([a447309](https://github.com/MasRama/macr/commit/a4473093d13256ce76f041244e7dfa6bc68ef30a))
+* **menubar:** keep mirrored tray icons at their real size on other bars ([1d8dbec](https://github.com/MasRama/macr/commit/1d8dbec45b999cf5e406177624d9c576ef93a882))
+
 ## 0.1.0 (2026-11-12)
 
 
