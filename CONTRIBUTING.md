@@ -31,6 +31,7 @@ on its own D-Bus and config directories, so it cannot touch your session.
 `tools/devshell/shot.sh NAME` saves a screenshot to `build/shots/NAME.png`,
 `tools/devshell/eval.sh "<js>"` runs JavaScript inside that shell and
 `tools/devshell/stop.sh` ends it.
+`run.sh --gdm` starts it as the login screen instead (GDM's greeter mode).
 
 ## Making a change
 

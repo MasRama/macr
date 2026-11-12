@@ -29,10 +29,10 @@ schemas/                GSettings schema
 - Only `logic/` folders are unit tested; they must not import `gi://` or
   `resource://` modules.
 - Supported: GNOME Shell 46 on Wayland.
-- The extension also runs in the `unlock-dialog` session mode, but there
-  `extension.ts` keeps only the modules marked `lockScreen` on (the lock
-  screen) and turns the rest off, in reverse order, until the session is
-  unlocked again.
+- The extension also runs in the `unlock-dialog` and `gdm` session modes.
+  Each module lists the screens it runs on (`screens`, the desktop when left
+  out; `shared/logic/screen.ts`), and `extension.ts` turns the others off, in
+  reverse order, while the lock or login screen shows.
 
 ## Menu bar
 
@@ -303,3 +303,33 @@ schemas/                GSettings schema
 - The devshell has no screen shield (`Main.screenShield` needs logind), so
   there a dialog is built by hand from `ui/unlockDialog.js`; the real lock,
   its blur and the session mode switch are checked in a real session.
+
+## Login screen
+
+- GDM runs a GNOME Shell of its own as the `gdm` user, in the `gdm` session
+  mode, which loads only that user's extensions and settings.
+  `scripts/login-screen.sh` copies Macr into the `gdm` user's extension
+  folder and writes `95-macr-settings` next to GDM's own dconf defaults
+  (`/usr/share/gdm/dconf` on Debian and Ubuntu, then `generate-config`):
+  Macr in `enabled-extensions`, the user's clock format, and the wallpaper in
+  Ubuntu's `com.ubuntu.login-screen` keys. A wallpaper or SF Pro fonts in the
+  user's home folder are copied where the `gdm` user can read them.
+  `uninstall` removes every one of these.
+- In that shell only `LoginScreenModule` runs. GDM builds its LoginDialog at
+  startup, maybe before the extension is on, so the module wraps the
+  prototype's `_init` and also takes the dialog `Main.screenShield` already
+  shows.
+- MacLogin keeps GNOME's layout and only overrides the dialog's
+  `_getCenterActorAllocation` on the instance: the user list and the auth
+  prompt, the two boxes GNOME centres, are placed low as on the lock screen
+  (`logic/layout.ts`, built on the lock screen's layout), both from the same
+  top edge, so the avatar does not move when a user is picked. GNOME then
+  grows the list's box evenly, but the list is centre-aligned in it and stays
+  put.
+- A big date and time sit on a monitor-sized actor below the dialog, using
+  the lock screen's style classes; the bar's date is hidden. The user list
+  runs left to right with each avatar over its name, as wide as its users
+  (the theme fixes its width), and the distribution logo is hidden.
+- The devshell starts as the login screen with `run.sh --gdm`; without
+  AccountsService or GDM there, a dialog and stand-in users are built by
+  hand from `gdm/loginDialog.js`.

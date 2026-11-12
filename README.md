@@ -23,6 +23,7 @@ stack of tweak extensions that each fix one corner. It ships module by module.
 | **Window corners**: rounded macOS corners on windows that do not round their own, such as frameless (Electron) and older X11 apps, with a soft shadow on frameless ones; square when maximized | Rounded Window Corners | done |
 | **Traffic lights**: red, yellow and green window buttons first on the left of app windows, grey in windows in the background, with their symbols on hover; in GTK and libadwaita apps, Chrome and X11 apps (Qt 6 apps on Wayland and Electron apps with their own title bar draw their own buttons) | a macOS GTK theme's window buttons | done |
 | **Lock screen**: the date and a big time at the top over the unblurred wallpaper, your picture and name low in the middle, and the password field fading in under them on a key press or click | GNOME's centred clock and blurred lock screen | done |
+| **Login screen** (opt in): the lock screen's look on GDM's login screen, with your users side by side low in the middle, installed with `scripts/login-screen.sh` | GDM's centred user list | done |
 
 Macr leaves your GTK theme alone, apart from the window buttons it draws as
 traffic lights (a stylesheet it adds to `~/.config/gtk-3.0` and `gtk-4.0` and
@@ -60,6 +61,25 @@ Perfection and Blur my Shell's top bar blur for the menu bar, Dash to Dock and
 Magic Lamp for the dock, and any launcher bound to Ctrl+Space (Ulauncher) for
 Spotlight. Launchpad takes the Super key from Zorin Menu while it runs and
 gives it back when turned off. Each module can be turned off in Macr's settings.
+
+### Login screen
+
+GDM's login screen runs its own GNOME Shell as the `gdm` user, which never
+loads your extensions, so it needs Macr installed for it. From a clone of this
+repository, with Macr installed for you first:
+
+```sh
+sudo scripts/login-screen.sh install     # or: install path/to/macr.zip
+sudo scripts/login-screen.sh uninstall
+```
+
+`install` copies Macr into the `gdm` user's extension folder, turns it on in a
+settings file of its own next to GDM's defaults, and passes on your clock
+format, your wallpaper and the SF Pro fonts from your home folder. Run it again
+after updating Macr or changing the wallpaper. The login screen changes the
+next time it shows, after you log out. If it ever breaks, switch to a text
+console (Ctrl+Alt+F3), log in and run `sudo scripts/login-screen.sh uninstall`.
+It is tested on Ubuntu 24.04 based systems.
 
 ## Development
 
