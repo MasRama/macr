@@ -81,6 +81,12 @@ export function pages(): PageInfo[] {
                     switchRow(settings, 'dock-magnification', _('Magnification'), _('Icons grow under the pointer')),
                     switchRow(settings, 'dock-autohide', _('Hide when a window covers it'), _('Push the pointer to the bottom edge to show it again')),
                     switchRow(settings, 'dock-genie', _('Genie minimize'), _('Windows pour into their dock icon')),
+                    switchRow(settings, 'dock-downloads', _('Downloads stack'), _('Your newest downloads, a click away next to the Trash')),
+                    comboRow(settings, 'dock-downloads-view', _('Show the stack as'), [
+                        ['automatic', _('Automatic')],
+                        ['fan', _('Fan')],
+                        ['grid', _('Grid')],
+                    ]),
                 ];
                 dependsOn(settings, 'dock-enabled', ...rows);
                 return [
