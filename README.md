@@ -23,6 +23,7 @@ stack of tweak extensions that each fix one corner. It ships module by module.
 | **Window corners**: rounded macOS corners on windows that do not round their own, such as frameless (Electron) and older X11 apps, with a soft shadow on frameless ones; square when maximized | Rounded Window Corners | done |
 | **Traffic lights**: red, yellow and green window buttons first on the left of app windows, grey in windows in the background, with their symbols on hover; in GTK and libadwaita apps, Chrome and X11 apps (Qt 6 apps on Wayland and Electron apps with their own title bar draw their own buttons) | a macOS GTK theme's window buttons | done |
 | **Window tiling**: drag a window to the left or right edge of the screen for a half, to a corner for a quarter or to the top to fill it, with a frosted preview of where it goes; drag it away to get its size back. Super+Ctrl with the arrow keys, F, C and R, Super+Ctrl+Shift with the arrows to arrange two windows, and Move & Resize in the Window menu, with margins between tiles | Tiling Shell / Zorin Tiling Shell, Tiling Assistant | done |
+| **Screenshots**: Super+Shift+3 takes the whole screen, Super+Shift+4 a dragged area with a crosshair (Space for a window), and Super+Shift+5 or Print shows the macOS toolbar; a floating thumbnail at the bottom right opens, copies, shows or deletes the picture, or swipes away | GNOME's screenshot panel and banner | done |
 | **Lock screen**: the date and a big time at the top over the unblurred wallpaper, your picture and name low in the middle, and the password field fading in under them on a key press or click | GNOME's centred clock and blurred lock screen | done |
 | **Login screen** (opt in): the lock screen's look on GDM's login screen, with your users side by side low in the middle, installed with `scripts/login-screen.sh` | GDM's centred user list | done |
 
@@ -56,15 +57,18 @@ npm run pack
 gnome-extensions install --force build/macr@masrama.github.io.shell-extension.zip
 ```
 
-Log out and back in, then turn Macr on in Extensions. Turn off the
-extensions Macr replaces, or the two will fight over the same UI: Just
-Perfection and Blur my Shell's top bar blur for the menu bar, Dash to Dock and
-Magic Lamp for the dock, any launcher bound to Ctrl+Space (Ulauncher) for
-Spotlight, and Tiling Shell (Zorin Tiling Shell) or Tiling Assistant for
-window tiling. Launchpad takes the Super key from Zorin Menu while it runs and
-gives it back when turned off. Each module can be turned off in Macr's settings,
-laid out like macOS System Settings, and its About Macr page lists the
-enabled extensions that clash with Macr, with a button to turn them off.
+Log out and back in, then turn Macr on in Extensions. Turn off the extensions
+Macr replaces, or the two will fight over the same UI: Just Perfection and
+Blur my Shell's top bar blur for the menu bar, Dash to Dock and Magic Lamp for
+the dock, any launcher bound to Ctrl+Space (Ulauncher) for Spotlight, and
+Tiling Shell (Zorin Tiling Shell) or Tiling Assistant for window tiling. Dash
+to Dock and Zorin Taskbar can bind Super+Shift with the number keys to open
+dock apps, which takes Super+Shift+3, 4 and 5 from screenshots: turn those app
+hotkeys off in their settings. Launchpad takes the Super key from Zorin Menu
+while it runs and gives it back when turned off. Each module can be turned off
+in Macr's settings, laid out like macOS System Settings, and its About Macr
+page lists the enabled extensions that clash with Macr, with a button to turn
+them off.
 
 ### Login screen
 

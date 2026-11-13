@@ -332,6 +332,61 @@ schemas/                GSettings schema
   so the shell never sees the hover), size animations, and tile targets in
   the middle of the screen.
 
+## Screenshots
+
+- Built on GNOME's own screenshot UI (`Main.screenshotUI`, built once and
+  never destroyed) and its exported `captureScreenshot`, which saves, copies
+  and notifies. `ui/screenshot.js` has no typings, so
+  `src/features/screenshot/screenshot-typings.d.ts` declares the parts the
+  module uses; `capture.ts` checks every private part is there before the
+  module touches the UI (GNOME 46 only), else only Super+Shift+3 is bound.
+- Super+Shift+3 (`screenshot-screen-shortcut`) is GNOME's Shift+Print path:
+  `screenshot_stage_to_content`, then `captureScreenshot`. Not while the UI
+  is open, which would be in the picture.
+- Super+Shift+4 (`quick.ts`) opens GNOME's UI with the panel and close
+  button hidden and `macr-screenshot-quick`, which drops the shade and the
+  handles. The selection is parked off the stage, so any press draws a new
+  one; `drag-ended` captures (`_onCaptureButtonClicked`) when the drag is at
+  least 4 logical pixels each way (`logic/quick.ts`), else parks it again.
+  Space (from `captured-event`) checks GNOME's Window button, and a click on
+  a window in its picker captures it. The picker is GNOME's spread of
+  windows, not macOS's camera over the window in place. GNOME's last capture
+  type and selection come back on `closed`.
+- Super+Shift+5 and Print (`toolbar.ts`): one frosted row inserted into
+  GNOME's panel, its two rows and close button hidden. Each button sets
+  GNOME's toggles (`logic/toolbar.ts`), screenshot or screencast first,
+  since screencast unpicks Window, and follows them on `notify::checked`.
+  The record buttons follow `_castButton` and hide when recording is not
+  available. Options is a popup menu inside the UI, over the frozen screen.
+  `open` is wrapped on the instance to match the light or dark style as it
+  opens; `delete` puts the prototype's back.
+- The floating thumbnail (`thumbnail.ts`, `screenshot-thumbnail`): every
+  capture goes through `_storeScreenshot`, which writes the file and then
+  adds a notification to a new `screenshot-recorded-symbolic` source. Macr
+  watches `source-added` (the source's `iconName` getter is null in 46, its
+  `icon` names it) and, in `notification-added`, which runs before the
+  banner request, sets `acknowledged` so no banner shows, and shows the
+  notification's `St.ImageContent` at the bottom right of the primary work
+  area (`logic/thumbnail.ts`), its corners cut by the shared
+  `CornerEffect`. The file is the UI's `screenshot-taken` file,
+  Super+Shift+3's result, or else the newest PNG GNOME just wrote
+  (`logic/files.ts`; Shift+Print and Alt+Print hand nothing over). A click
+  activates the notification, as GNOME's banner would; the menu copies the
+  file (`St.Clipboard`), shows it in the folder app or trashes it. It goes
+  after 5 s, not while hovered or its menu is open, and takes the
+  notification with it: a transient notification without a banner is
+  otherwise never removed.
+- The thumbnail must not be in a screenshot, so `screenshot`,
+  `screenshot_area` and `screenshot_stage_to_content` are wrapped on
+  `Shell.Screenshot.prototype` (where ui/screenshot.js promisified them) to
+  take it away first: Print, Shift+Print, Macr's keys and the D-Bus
+  screenshot service (portal and `gnome-screenshot`) all shoot through them.
+  Alt+Print paints only the window. `disable()` puts the methods back, or
+  leaves a wrapper that does nothing if someone wrapped it again.
+- Not done: dragging the thumbnail into an app (a shell actor cannot start
+  a Wayland drag on 46), the timer and save-location options, and macOS's
+  in-place window highlight.
+
 ## Lock screen
 
 - GNOME builds a new `UnlockDialog` every time the screen locks, so the
