@@ -144,7 +144,7 @@ export function pages(): PageInfo[] {
                 dependsOn(settings, 'window-corners-enabled', radius);
                 const tiling = [
                     switchRow(settings, 'tiling-margins', _('Tiled windows have margins'), _('A small gap around tiled windows and between them')),
-                    shortcutsRow(settings),
+                    tilingShortcutsRow(settings),
                 ];
                 dependsOn(settings, 'tiling-enabled', ...tiling);
                 return [
@@ -158,6 +158,24 @@ export function pages(): PageInfo[] {
                     group(_('Corners'), [
                         switchRow(settings, 'window-corners-enabled', _('Rounded corners'), _('For apps that do not round their own, such as Qt and Electron apps')),
                         radius,
+                    ]),
+                ];
+            },
+        },
+        {
+            id: 'screenshot', section: 1, icon: 'camera-photo-symbolic', color: 'graphite',
+            title: _('Screenshots'),
+            description: _('Super+Shift+3, 4 and 5, and a floating thumbnail after each screenshot.'),
+            build: ({ settings }) => {
+                const rows = [
+                    switchRow(settings, 'screenshot-thumbnail', _('Show floating thumbnail'), _('A small copy at the bottom right for a few seconds, instead of the notification')),
+                    screenshotShortcutsRow(settings),
+                ];
+                dependsOn(settings, 'screenshot-enabled', ...rows);
+                return [
+                    group('', [
+                        switchRow(settings, 'screenshot-enabled', _('macOS screenshots'), _('The whole screen, a dragged area or a window, and the screenshot toolbar')),
+                        ...rows,
                     ]),
                 ];
             },
@@ -217,8 +235,8 @@ export function pageHeader(page: PageInfo): Gtk.Widget {
 }
 
 /** The tiling shortcuts that are set, read-only. */
-function shortcutsRow(settings: Gio.Settings): Gtk.Widget {
-    const shortcuts: [string, string][] = [
+function tilingShortcutsRow(settings: Gio.Settings): Gtk.Widget {
+    return shortcutsRow(settings, _('Super+Ctrl stands in for the Fn and Control keys of a Mac'), [
         ['tiling-left', _('Left half')],
         ['tiling-right', _('Right half')],
         ['tiling-top', _('Top half')],
@@ -234,11 +252,21 @@ function shortcutsRow(settings: Gio.Settings): Gtk.Widget {
         ['tiling-arrange-right-left', _('Arrange right and left')],
         ['tiling-arrange-top-bottom', _('Arrange top and bottom')],
         ['tiling-arrange-bottom-top', _('Arrange bottom and top')],
-    ];
-    const expander = new Adw.ExpanderRow({
-        title: _('Keyboard shortcuts'),
-        subtitle: _('Super+Ctrl stands in for the Fn and Control keys of a Mac'),
-    });
+    ]);
+}
+
+/** The screenshot shortcuts that are set, read-only. */
+function screenshotShortcutsRow(settings: Gio.Settings): Gtk.Widget {
+    return shortcutsRow(settings, _('Super stands in for the Command key of a Mac; Print still opens the toolbar'), [
+        ['screenshot-screen-shortcut', _('Entire screen')],
+        ['screenshot-area-shortcut', _('Selected area or window')],
+        ['screenshot-toolbar-shortcut', _('Screenshot toolbar')],
+    ]);
+}
+
+/** Keyboard shortcuts that are set, read-only, each as a key name and a title. */
+function shortcutsRow(settings: Gio.Settings, subtitle: string, shortcuts: [string, string][]): Gtk.Widget {
+    const expander = new Adw.ExpanderRow({ title: _('Keyboard shortcuts'), subtitle });
     for (const [key, title] of shortcuts) {
         const accelerator = settings.get_strv(key)[0];
         if (!accelerator) continue;
