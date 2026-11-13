@@ -997,6 +997,9 @@ schemas/                GSettings schema
   since screencast unpicks Window, and follows them on `notify::checked`.
   The record buttons follow `_castButton` and hide when recording is not
   available. Options is a popup menu inside the UI, over the frozen screen.
+  GNOME pins the panel to the primary monitor (`_primaryMonitorBin`'s
+  `Layout.MonitorConstraint`); as the UI shows, its `index` is set to the
+  pointer's monitor, and `primary` goes back to true when Macr turns off.
   `open` is wrapped on the instance to match the light or dark style as it
   opens; `delete` puts the prototype's back.
 - The floating thumbnail (`thumbnail.ts`, `screenshot-thumbnail`): every

@@ -2,6 +2,7 @@ import Clutter from 'gi://Clutter';
 import Shell from 'gi://Shell';
 import St from 'gi://St';
 import { gettext as _ } from 'resource:///org/gnome/shell/extensions/extension.js';
+import * as Layout from 'resource:///org/gnome/shell/ui/layout.js';
 import * as Main from 'resource:///org/gnome/shell/ui/main.js';
 import * as PopupMenu from 'resource:///org/gnome/shell/ui/popupMenu.js';
 import { Tooltip, type ScreenshotUI } from 'resource:///org/gnome/shell/ui/screenshot.js';
@@ -17,6 +18,8 @@ const BLUR = 'macr-screenshot-blur';
 type Hidden = { actor: Clutter.Actor; visible: boolean };
 /** Something the toolbar connected to on one of GNOME's objects. */
 type Connection = { object: Clutter.Actor; id: number };
+/** GNOME's `Layout.MonitorConstraint`, which keeps the toolbar on one monitor. */
+type MonitorPin = Clutter.Constraint & { primary: boolean; index: number };
 
 /**
  * GNOME's screenshot UI (Print and Super+Shift+5) with the macOS toolbar:
@@ -95,6 +98,7 @@ export class Toolbar {
         this.listen(ui._castButton, 'notify::reactive', sync);
         // GNOME lists the windows to pick as it opens.
         this.listen(ui, 'notify::visible', sync);
+        this.listen(ui, 'notify::visible', () => this.followPointer());
         this.syncScheme();
         this.sync();
     }
@@ -112,9 +116,24 @@ export class Toolbar {
         this.bar.destroy();
         for (const { actor, visible } of this.hidden) actor.visible = visible;
         this.hidden.length = 0;
+        const pin = this.monitorPin();
+        if (pin) pin.primary = true;
         this.ui._panel.remove_effect_by_name(BLUR);
         this.ui.remove_style_class_name(ROOT);
         this.ui.remove_style_class_name('macr-light');
+    }
+
+    /** GNOME's pin of the toolbar (and its close button) to the primary monitor. */
+    private monitorPin(): MonitorPin | null {
+        const bin = (this.ui as unknown as { _primaryMonitorBin?: Clutter.Actor })._primaryMonitorBin;
+        const pin = bin?.get_constraints().find((constraint) => constraint instanceof Layout.MonitorConstraint);
+        return (pin as MonitorPin | undefined) ?? null;
+    }
+
+    /** GNOME keeps the toolbar on the primary monitor; it opens on the pointer's, the one in use. */
+    private followPointer(): void {
+        const pin = this.monitorPin();
+        if (pin && this.ui.visible) pin.index = global.display.get_current_monitor();
     }
 
     /** Matches GNOME's light or dark style; call it as the UI opens. */
