@@ -283,5 +283,10 @@
       <default><![CDATA[['<Super><Shift>5']]]></default>
       <summary>Keyboard shortcut that shows the screenshot toolbar</summary>
     </key>
+    <key name="screenshot-thumbnail" type="b">
+      <default>true</default>
+      <summary>Show a floating thumbnail after each screenshot</summary>
+      <description>A small copy of the screenshot at the bottom right for a few seconds, instead of GNOME's notification banner. Click it to open the picture, swipe it right to put it away, or right-click it to copy, show or delete the file.</description>
+    </key>
   </schema>
 </schemalist>

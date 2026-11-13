@@ -1931,3 +1931,17 @@
   background-color: rgba(246, 246, 248, 0.96) !important;
   color: #1d1d1f !important;
 }
+
+/* The floating thumbnail at the bottom right after each screenshot. */
+.macr-screenshot-thumb {
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  border-radius: 8px;
+  background-color: rgba(36, 36, 40, 0.9);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+}
+
+.macr-screenshot-thumb.macr-light {
+  border-color: rgba(0, 0, 0, 0.16);
+  background-color: rgba(255, 255, 255, 0.9);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.22);
+}
