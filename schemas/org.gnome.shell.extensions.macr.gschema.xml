@@ -185,5 +185,20 @@
       <summary>Window corner radius</summary>
       <description>In pixels.</description>
     </key>
+    <key name="tiling-enabled" type="b">
+      <default>true</default>
+      <summary>Tile windows the macOS way</summary>
+      <description>Drag a window to the left or right edge of the screen for a half, to a corner for a quarter or to the top to fill the screen. Turns off GNOME's own edge tiling while it is on. Turn off Tiling Shell and Tiling Assistant while it is on.</description>
+    </key>
+    <key name="tiling-margins" type="b">
+      <default>true</default>
+      <summary>Tiled windows have margins</summary>
+      <description>A small gap around tiled windows and between them.</description>
+    </key>
+    <key name="tiling-saved-edge-tiling" type="b">
+      <default>false</default>
+      <summary>GNOME's edge tiling was on before Macr's tiling</summary>
+      <description>Turned back on when Macr's tiling is turned off.</description>
+    </key>
   </schema>
 </schemalist>

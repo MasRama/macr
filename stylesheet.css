@@ -1705,3 +1705,17 @@
   padding: 0 !important;
   color: rgba(255, 255, 255, 0.75);
 }
+
+/* Window tiling: where a dragged window goes, frosted as on macOS */
+.macr-tile-preview {
+  background-color: rgba(255, 255, 255, 0.16);
+  border: 1px solid rgba(255, 255, 255, 0.42);
+  border-radius: 10px;
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.22);
+}
+
+.macr-tile-preview.macr-light {
+  background-color: rgba(255, 255, 255, 0.38);
+  border-color: rgba(255, 255, 255, 0.85);
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.16);
+}
