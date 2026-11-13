@@ -14,6 +14,7 @@ import { resetClipboardHistory } from './features/clipboard/history.js';
 import { ClipboardModule } from './features/clipboard/index.js';
 import { EmojiModule } from './features/emoji/index.js';
 import { DesktopWidgetsModule } from './features/widgets/index.js';
+import { GesturesModule } from './features/gestures/index.js';
 import { HotCornersModule } from './features/hotcorners/index.js';
 import { KeyboardModule } from './features/keyboard/index.js';
 import { LaunchpadModule } from './features/launchpad/index.js';
@@ -49,6 +50,7 @@ const MODULES: ModuleEntry[] = [
     { key: 'notifications-enabled', create: () => new NotificationsModule() },
     { key: 'mission-control-enabled', create: () => new MissionControlModule() },
     { key: 'hot-corners-enabled', create: (context) => new HotCornersModule(context.settings) },
+    { key: 'gestures-enabled', create: () => new GesturesModule() },
     { key: 'window-corners-enabled', create: (context) => new WindowCornersModule(context.settings) },
     { key: 'traffic-lights-enabled', create: (context) => new TrafficLightsModule(context.settings) },
     { key: 'tiling-enabled', create: (context) => new TilingModule(context.settings) },

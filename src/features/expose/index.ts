@@ -30,7 +30,14 @@ export class AppExposeModule implements Module {
     enable(): void {
         const overlay = new ExposeOverlay();
         this.overlay = overlay;
-        setExpose({ show: (app) => overlay.open(app) });
+        setExpose({
+            get isOpen() {
+                return overlay.isOpen;
+            },
+            show: (app) => overlay.open(app),
+            track: (app, openness) => overlay.track(app, openness),
+            settle: (open) => overlay.settle(open),
+        });
         this.unmaximize.take(this.settings.get_strv(SHORTCUT));
         Main.wm.addKeybinding(SHORTCUT, this.settings, Meta.KeyBindingFlags.NONE, Shell.ActionMode.NORMAL | Shell.ActionMode.POPUP, () => {
             if (overlay.isOpen) {

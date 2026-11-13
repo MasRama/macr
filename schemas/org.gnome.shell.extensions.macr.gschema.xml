@@ -112,6 +112,11 @@
       <summary>Use macOS Stage Manager</summary>
       <description>The focused app stays in the middle of the primary monitor and the other apps' windows wait as stages in a strip on the left; clicking a stage swaps it in.</description>
     </key>
+    <key name="gestures-enabled" type="b">
+      <default>true</default>
+      <summary>Four-finger touchpad gestures</summary>
+      <description>Pinch with four fingers for Launchpad, spread them to show the desktop, swipe down for App Exposé.</description>
+    </key>
     <key name="hot-corners-enabled" type="b">
       <default>true</default>
       <summary>Use macOS hot corners</summary>

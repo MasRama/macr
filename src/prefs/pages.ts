@@ -154,6 +154,9 @@ export function pages(): PageInfo[] {
                     group(_('Stage Manager'), [
                         switchRow(settings, 'stage-manager-enabled', _('Stage Manager'), _('The app you use stays in the middle; your other apps wait on the left, a click away')),
                     ]),
+                    group(_('Trackpad'), [
+                        switchRow(settings, 'gestures-enabled', _('Four-finger gestures'), _('Pinch for Launchpad, spread to show the desktop, swipe down for App Exposé. Three-finger gestures stay as they are.')),
+                    ]),
                     group(_('Hot corners'), [
                         switchRow(settings, 'hot-corners-enabled', _('Hot corners'), _('Push the pointer into a screen corner')),
                         ...cornerRows,

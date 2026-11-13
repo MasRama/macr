@@ -65,7 +65,8 @@ export class ExposeOverlay {
         else this.open(app);
     }
 
-    open(app: Shell.App): void {
+    /** Opens for `app`; `tracked` leaves the cards on the windows for track() to move. */
+    open(app: Shell.App, tracked = false): void {
         if (this.root) this.finish();
         const windows = exposedWindows(app);
         const monitor = Main.layoutManager.currentMonitor ?? Main.layoutManager.primaryMonitor;
@@ -132,7 +133,45 @@ export class ExposeOverlay {
         this.grab = grab;
 
         backdrop.opacity = 0;
+        if (tracked) return;
         (backdrop as unknown as Easeable).ease({ opacity: 255, duration: OPEN_MS, mode: Clutter.AnimationMode.EASE_OUT_QUAD });
+        for (const card of this.cards) this.rest(card);
+    }
+
+    /** Shows `openness` (0 closed, 1 open) of the way from the windows to the cards, following a gesture. */
+    track(app: Shell.App | null, openness: number): void {
+        if ((!this.root || this.closing) && app) this.open(app, true);
+        const root = this.root;
+        if (!root || this.closing) return;
+        const backdrop = root.get_first_child();
+        if (backdrop) {
+            backdrop.remove_all_transitions();
+            backdrop.opacity = Math.round(255 * openness);
+        }
+        const mix = (a: number, b: number) => a + (b - a) * openness;
+        for (const card of this.cards) {
+            const button = card.button;
+            button.remove_all_transitions();
+            const scale = card.slot.width / card.frameWidth;
+            if (card.from) {
+                button.set_position(mix(card.from.x, card.slot.x), mix(card.from.y, card.slot.y));
+                button.set_scale(mix(1, scale), mix(1, scale));
+            } else {
+                button.opacity = Math.round(255 * openness);
+            }
+        }
+    }
+
+    /** Finishes what track() started: all the way open, or closed. */
+    settle(open: boolean): void {
+        const root = this.root;
+        if (!root || this.closing) return;
+        if (!open) {
+            this.close(null);
+            return;
+        }
+        const backdrop = root.get_first_child();
+        if (backdrop) (backdrop as unknown as Easeable).ease({ opacity: 255, duration: OPEN_MS, mode: Clutter.AnimationMode.EASE_OUT_QUAD });
         for (const card of this.cards) this.rest(card);
     }
 

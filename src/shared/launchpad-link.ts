@@ -5,6 +5,10 @@
 export interface LaunchpadLink {
     readonly isOpen: boolean;
     toggle(): void;
+    /** Shows it `openness` (0 closed, 1 open) of the way, following a gesture. */
+    track(openness: number): void;
+    /** Finishes what track() started: open, or closed. */
+    settle(open: boolean): void;
 }
 
 let current: LaunchpadLink | null = null;

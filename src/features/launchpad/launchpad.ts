@@ -81,7 +81,8 @@ export class Launchpad {
         else this.open();
     }
 
-    open(): void {
+    /** Opens Launchpad; `tracked` leaves it unshown for track() to bring in. */
+    open(tracked = false): void {
         if (this.root) this.finishClose();
         const monitor = Main.layoutManager.currentMonitor ?? Main.layoutManager.primaryMonitor;
         if (!monitor) return;
@@ -140,8 +141,27 @@ export class Launchpad {
         root.set_pivot_point(0.5, 0.5);
         root.opacity = 0;
         root.set_scale(1.06, 1.06);
-        (root as unknown as Easeable).ease({ opacity: 255, scale_x: 1, scale_y: 1, duration: OPEN_MS, mode: Clutter.AnimationMode.EASE_OUT_QUAD });
+        if (!tracked) (root as unknown as Easeable).ease({ opacity: 255, scale_x: 1, scale_y: 1, duration: OPEN_MS, mode: Clutter.AnimationMode.EASE_OUT_QUAD });
         notifyLaunchpad();
+    }
+
+    /** Shows Launchpad `openness` (0 closed, 1 open) of the way, following a gesture. */
+    track(openness: number): void {
+        if (!this.root || this.closing) this.open(true);
+        const root = this.root;
+        if (!root) return;
+        root.remove_all_transitions();
+        root.opacity = Math.round(255 * openness);
+        const scale = 1.06 - 0.06 * openness;
+        root.set_scale(scale, scale);
+    }
+
+    /** Finishes what track() started: all the way open, or closed. */
+    settle(open: boolean): void {
+        const root = this.root;
+        if (!root || this.closing) return;
+        if (!open) this.close();
+        else (root as unknown as Easeable).ease({ opacity: 255, scale_x: 1, scale_y: 1, duration: OPEN_MS, mode: Clutter.AnimationMode.EASE_OUT_QUAD });
     }
 
     close(): void {
