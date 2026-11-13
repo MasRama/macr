@@ -45,7 +45,7 @@ class MirroredButton {
  * Live copies of the main bar's right-side buttons (status icons, app tray
  * icons, quick settings), in the same order, for another monitor's bar. They
  * follow buttons that come, go, show or hide; clicking one acts on the real
- * button. Macr's own items and the hidden dateMenu are left out.
+ * button. Macr's own items (but its status icons) and the hidden dateMenu are left out.
  */
 export class StatusMirror {
     readonly actor = new St.BoxLayout();
@@ -86,7 +86,8 @@ export class StatusMirror {
     private owners(): PanelMenu.Button[] {
         const skipped = new Set<unknown>();
         for (const [role, button] of Object.entries(Main.panel.statusArea as Record<string, unknown>)) {
-            if (role.startsWith('macr-') || role === 'dateMenu') skipped.add(button);
+            // Macr's status icons stand in for GNOME's, so they are copied too.
+            if ((role.startsWith('macr-') && !role.startsWith('macr-status-')) || role === 'dateMenu') skipped.add(button);
         }
         const owners: PanelMenu.Button[] = [];
         for (const container of (Main.panel as unknown as Boxes)._rightBox.get_children()) {

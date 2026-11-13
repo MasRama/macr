@@ -15,6 +15,11 @@
       <summary>Show the focused app's own menus in the menu bar</summary>
       <description>File, Edit, View and the rest, for apps that share their menus (GTK apps with a menu bar, LibreOffice).</description>
     </key>
+    <key name="menubar-status-menus" type="b">
+      <default>true</default>
+      <summary>Show Wi-Fi, Bluetooth and battery as menu bar icons of their own</summary>
+      <description>Each opens its own menu, as on macOS, instead of sitting in quick settings.</description>
+    </key>
     <key name="menubar-all-monitors" type="b">
       <default>true</default>
       <summary>Show the menu bar on every monitor</summary>

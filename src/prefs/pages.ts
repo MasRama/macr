@@ -43,6 +43,7 @@ export function pages(): PageInfo[] {
             build: ({ settings }) => {
                 const rows = [
                     switchRow(settings, 'menubar-app-menus', _('App menus'), _('The focused app’s own File, Edit and View menus, when the app shares them')),
+                    switchRow(settings, 'menubar-status-menus', _('Wi-Fi, Bluetooth and battery menus'), _('Their own menu bar icons, each with its menu')),
                     switchRow(settings, 'menubar-all-monitors', _('On every monitor'), _('Off shows it on the primary monitor only')),
                     switchRow(settings, 'hide-distro-menu-button', _('Hide the distribution menu button'), _('Such as Zorin Menu')),
                 ];

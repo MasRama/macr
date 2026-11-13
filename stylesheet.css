@@ -128,6 +128,26 @@
   color: rgba(255, 255, 255, 0.32);
 }
 
+.macr-menu .popup-menu-item.macr-battery-heading:insensitive {
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.macr-menu.macr-light .popup-menu-item.macr-battery-heading:insensitive {
+  color: rgba(0, 0, 0, 0.85);
+}
+
+.macr-menu .macr-battery-title {
+  font-weight: bold;
+}
+
+.macr-menu .macr-battery-percent {
+  color: rgba(255, 255, 255, 0.55);
+}
+
+.macr-menu.macr-light .macr-battery-percent {
+  color: rgba(0, 0, 0, 0.5);
+}
+
 .macr-menu .popup-menu-ornament {
   width: 14px;
   icon-size: 12px;

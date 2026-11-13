@@ -10,6 +10,7 @@ import { FocusTracker } from './focus.js';
 import { logoMenu } from './logo-menu.js';
 import { PanelTweaks } from './panel-tweaks.js';
 import { SecondaryBar } from './secondary-bar.js';
+import { StatusMenus } from './status-menus.js';
 import { windowMenu } from './window-menu.js';
 
 type Boxes = { _leftBox: St.BoxLayout; _rightBox: St.BoxLayout };
@@ -30,6 +31,7 @@ export class MenuBar implements Module {
     private appMenus: AppMenus | null = null;
     private appMenuCount = 0;
     private bars: SecondaryBar[] = [];
+    private statusMenus: StatusMenus | null = null;
     private ids: [Disconnectable, number][] = [];
 
     constructor(private readonly context: ModuleContext) {}
@@ -63,6 +65,8 @@ export class MenuBar implements Module {
             this.buildBars();
         })]);
         this.buildAppMenus();
+        this.ids.push([settings, settings.connect('changed::menubar-status-menus', () => this.buildStatusMenus())]);
+        this.buildStatusMenus();
         const layout = Main.layoutManager as unknown as { connect(signal: string, callback: () => void): number } & Disconnectable;
         this.ids.push([layout, layout.connect('monitors-changed', () => this.buildBars())]);
         this.buildBars();
@@ -72,6 +76,8 @@ export class MenuBar implements Module {
         for (const [target, id] of this.ids) target.disconnect(id);
         this.ids = [];
         this.destroyBars();
+        this.statusMenus?.destroy();
+        this.statusMenus = null;
         this.appMenus?.destroy();
         this.appMenus = null;
         this.appMenu = null;
@@ -122,6 +128,12 @@ export class MenuBar implements Module {
             const index = at < 0 ? left.get_n_children() : at + (afterWindow ? 1 : 0);
             Main.panel.addToStatusArea(`macr-app-menu-${this.appMenuCount++}`, button, index, 'left');
         });
+    }
+
+    /** Wi-Fi, Bluetooth and battery as icons of their own while the setting is on. */
+    private buildStatusMenus(): void {
+        this.statusMenus?.destroy();
+        this.statusMenus = this.context.settings.get_boolean('menubar-status-menus') ? new StatusMenus() : null;
     }
 
     private keepClockLast(): void {
