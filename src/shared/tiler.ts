@@ -96,6 +96,11 @@ export class Tiler {
         window.raise();
     }
 
+    canReturn(window: Meta.Window | null): window is Meta.Window {
+        const restore = window && tileState(window)?.restore;
+        return !!restore && !sameRect(rectOf(window.get_frame_rect()), restore);
+    }
+
     /** Return to Previous Size: the frame the window had before it was tiled. */
     returnToPrevious(window: Meta.Window): void {
         const restore = tileState(window)?.restore;

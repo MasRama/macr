@@ -6,10 +6,12 @@ import * as Main from 'resource:///org/gnome/shell/ui/main.js';
 import type * as PanelMenu from 'resource:///org/gnome/shell/ui/panelMenu.js';
 import * as PopupMenu from 'resource:///org/gnome/shell/ui/popupMenu.js';
 
-import { placeWindow, type Placement } from '../../shared/logic/geometry.js';
+import type { Arrangement } from '../../shared/logic/arrange.js';
+import type { Placement } from '../../shared/logic/geometry.js';
+import { tiler } from '../../shared/tiling-link.js';
 import { appWindows, type FocusTracker } from './focus.js';
 import { shortTitle } from './logic/labels.js';
-import { item, menuButton, separator, submenu } from './menu-kit.js';
+import { item, menuButton, separator, submenu, type MenuLike } from './menu-kit.js';
 
 /** The Window menu: size and place the focused window, and list the app's windows. */
 export function windowMenu(focus: FocusTracker): PanelMenu.Button {
@@ -21,10 +23,7 @@ export function windowMenu(focus: FocusTracker): PanelMenu.Button {
         item(menu, _('Zoom'), () => window && toggleZoom(window), !!window && window.can_maximize());
         item(menu, window?.is_fullscreen() ? _('Exit Full Screen') : _('Enter Full Screen'), () => window && toggleFullscreen(window), has);
         separator(menu);
-        item(menu, _('Fill'), () => window && place(window, 'fill'), !!window && window.allows_resize());
-        item(menu, _('Center'), () => window && place(window, 'center'), !!window && window.allows_move());
-        item(menu, _('Move to Left Half'), () => window && place(window, 'left'), !!window && window.allows_resize());
-        item(menu, _('Move to Right Half'), () => window && place(window, 'right'), !!window && window.allows_resize());
+        moveAndResize(menu, window);
         separator(menu);
         const workspaces = submenu(menu, _('Move to Workspace'));
         const manager = global.workspace_manager;
@@ -55,13 +54,38 @@ function toggleFullscreen(window: Meta.Window): void {
     else window.make_fullscreen();
 }
 
-function place(window: Meta.Window, placement: Placement): void {
-    if (window.is_fullscreen()) window.unmake_fullscreen();
-    if (window.get_maximized()) window.unmaximize(Meta.MaximizeFlags.BOTH);
-    const area = window.get_work_area_current_monitor();
-    const frame = window.get_frame_rect();
-    const target = placeWindow(placement, area, frame);
-    window.move_resize_frame(true, target.x, target.y, target.width, target.height);
+/** Fill, Center, the Move & Resize submenu and Return to Previous Size, as on macOS. */
+function moveAndResize(menu: PopupMenu.PopupMenu, window: Meta.Window | null): void {
+    const tiling = tiler();
+    const place = (label: string, placement: Placement, into: MenuLike = menu) =>
+        item(into, label, () => window && tiling.place(window, placement), tiling.canPlace(window, placement));
+    place(_('Fill'), 'fill');
+    place(_('Center'), 'center');
+
+    const move = submenu(menu, _('Move & Resize'));
+    const halves: [string, Placement][] = [
+        [_('Left'), 'left'],
+        [_('Right'), 'right'],
+        [_('Top'), 'top'],
+        [_('Bottom'), 'bottom'],
+        [_('Top Left'), 'top-left'],
+        [_('Top Right'), 'top-right'],
+        [_('Bottom Left'), 'bottom-left'],
+        [_('Bottom Right'), 'bottom-right'],
+    ];
+    for (const [label, placement] of halves) place(label, placement, move.menu);
+    separator(move.menu);
+    const pairs: [string, Arrangement][] = [
+        [_('Arrange Left & Right'), 'left-right'],
+        [_('Arrange Right & Left'), 'right-left'],
+        [_('Arrange Top & Bottom'), 'top-bottom'],
+        [_('Arrange Bottom & Top'), 'bottom-top'],
+    ];
+    const canArrange = tiling.canPlace(window) && !!tiling.partner(window);
+    for (const [label, kind] of pairs) item(move.menu, label, () => window && tiling.arrange(window, kind), canArrange);
+    move.setSensitive(tiling.canPlace(window));
+
+    item(menu, _('Return to Previous Size'), () => window && tiling.returnToPrevious(window), tiling.canReturn(window));
 }
 
 function bringAllToFront(focus: FocusTracker): void {
