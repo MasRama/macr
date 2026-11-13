@@ -1,7 +1,8 @@
 import GObject from 'gi://GObject';
 import Shell from 'gi://Shell';
 
-// `bounds` is the visible window inside the painted texture, in pixels;
+// `bounds` is the visible part (a window without its invisible borders)
+// inside the painted texture, in pixels;
 // pixels outside it (invisible borders) are left as they are.
 const DECLARATIONS = `
 uniform vec4 bounds;
@@ -18,7 +19,7 @@ float macr_corner_coverage(vec2 p) {
 
 const CODE = 'cogl_color_out *= macr_corner_coverage(cogl_tex_coord0_in.xy * size);';
 
-/** Cuts a window's contents to a rounded rectangle, antialiased. */
+/** Cuts an actor's contents (a window, a screenshot thumbnail) to a rounded rectangle, antialiased. */
 export const CornerEffect = GObject.registerClass(
     class CornerEffect extends Shell.GLSLEffect {
         override vfunc_build_pipeline(): void {
