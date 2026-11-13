@@ -221,6 +221,14 @@ export function pages(): PageInfo[] {
                     group(_('Emoji & Symbols'), [
                         switchRow(settings, 'emoji-picker-enabled', _('Emoji picker'), _('Ctrl+Super+Space opens it; the emoji you pick goes into the app you are typing in')),
                     ]),
+                    group(_('Clipboard'), [
+                        switchRow(
+                            settings,
+                            'clipboard-history-enabled',
+                            _('Clipboard history'),
+                            _('Ctrl+Super+V shows what you copied in the last 8 hours and pastes it again. Kept in memory only; password managers’ copies are skipped.'),
+                        ),
+                    ]),
                 ];
             },
         },

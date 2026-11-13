@@ -316,6 +316,15 @@
       <default>[]</default>
       <summary>The emoji picked last, newest first, for Frequently Used</summary>
     </key>
+    <key name="clipboard-history-enabled" type="b">
+      <default>true</default>
+      <summary>Clipboard history</summary>
+      <description>What you copy (text and images) is kept in memory for eight hours and never written to disk; its shortcut opens it to paste something again. Copies a password manager marks as secret are not kept.</description>
+    </key>
+    <key name="clipboard-history-shortcut" type="as">
+      <default><![CDATA[['<Control><Super>v']]]></default>
+      <summary>Keyboard shortcut that opens the clipboard history</summary>
+    </key>
     <key name="keyboard-enabled" type="b">
       <default>true</default>
       <summary>Mac keyboard shortcuts</summary>

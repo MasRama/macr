@@ -939,6 +939,67 @@
   color: #ffffff;
 }
 
+/* ---------- Clipboard history (clipboard/panel.ts), on Spotlight's look ---------- */
+
+.macr-clipboard .macr-spotlight-row {
+  min-height: 34px;
+}
+
+.macr-clipboard-thumb {
+  border-radius: 4px;
+}
+
+.macr-clipboard-age {
+  padding-left: 12px;
+}
+
+.macr-clipboard-empty {
+  padding: 18px 0 16px;
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 13px;
+}
+
+.macr-clipboard-footer {
+  margin-top: 4px;
+  padding: 6px 4px 2px 10px;
+  border-top: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.macr-clipboard-note {
+  color: rgba(255, 255, 255, 0.45);
+  font-size: 11px;
+}
+
+.macr-clipboard-clear {
+  padding: 3px 10px;
+  border-radius: 6px;
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 12px;
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+.macr-clipboard-clear:hover {
+  background-color: rgba(255, 255, 255, 0.18);
+}
+
+.macr-clipboard.macr-light .macr-clipboard-empty,
+.macr-clipboard.macr-light .macr-clipboard-note {
+  color: rgba(0, 0, 0, 0.45);
+}
+
+.macr-clipboard.macr-light .macr-clipboard-footer {
+  border-top-color: rgba(0, 0, 0, 0.1);
+}
+
+.macr-clipboard.macr-light .macr-clipboard-clear {
+  color: rgba(0, 0, 0, 0.75);
+  background-color: rgba(0, 0, 0, 0.06);
+}
+
+.macr-clipboard.macr-light .macr-clipboard-clear:hover {
+  background-color: rgba(0, 0, 0, 0.11);
+}
+
 /* ---------- Control Center ---------- */
 /* !important where shell themes (MacTahoe) use it for quick settings. */
 
