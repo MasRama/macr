@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 
-import { clashes } from '../../src/prefs/logic/conflicts.js';
+import { clashes, toTell } from '../../src/shared/logic/clashes.js';
 
 const allOn = (key: string) => key !== 'none';
 
@@ -37,4 +37,22 @@ test('keeps the order of the enabled list', () => {
 
 test('settings that do not exist yet count as off', () => {
     assert.deepEqual(clashes(['tilingshell@ferrarodomenico.com'], (key) => key !== 'tiling-enabled'), []);
+});
+
+test('each clash is told once while it lasts, and again if it comes back', () => {
+    const dock = clashes(['dash-to-dock@micxgx.gmail.com'], allOn);
+    const both = clashes(['dash-to-dock@micxgx.gmail.com', 'tilingshell@ferrarodomenico.com'], allOn);
+    // At login nothing has been told yet.
+    let step = toTell(dock, new Set());
+    assert.deepEqual(step.tell.map((clash) => clash.name), ['Dash to Dock']);
+    // Turning on another clashing extension tells only that one.
+    step = toTell(both, step.told);
+    assert.deepEqual(step.tell.map((clash) => clash.name), ['Tiling Shell']);
+    step = toTell(both, step.told);
+    assert.deepEqual(step.tell, []);
+    // Turned off, then on again: told again.
+    step = toTell(clashes(['tilingshell@ferrarodomenico.com'], allOn), step.told);
+    assert.deepEqual(step.tell, []);
+    step = toTell(both, step.told);
+    assert.deepEqual(step.tell.map((clash) => clash.name), ['Dash to Dock']);
 });

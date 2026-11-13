@@ -33,6 +33,7 @@ import { StageManagerModule } from './features/stagemanager/index.js';
 import { SwitcherModule } from './features/switcher/index.js';
 import { TilingModule } from './features/tiling/index.js';
 import { TrafficLightsModule } from './features/trafficlights/index.js';
+import { ClashNotice } from './shared/clash-notice.js';
 import { runsOn, screenOf } from './shared/logic/screen.js';
 import type { Module, ModuleEntry } from './shared/module.js';
 import { resetHider } from './shared/hider.js';
@@ -88,6 +89,7 @@ export default class Macr extends Extension {
     private running = new Map<string, Module>();
     private changedIds: number[] = [];
     private sessionId = 0;
+    private clashNotice: ClashNotice | null = null;
 
     override enable(): void {
         const settings = this.getSettings();
@@ -96,9 +98,12 @@ export default class Macr extends Extension {
             this.changedIds.push(settings.connect(`changed::${entry.key}`, () => this.sync(entry)));
         this.sessionId = Main.sessionMode.connect('updated', () => this.syncAll());
         this.syncAll();
+        this.clashNotice = new ClashNotice(settings, () => this.openPreferences());
     }
 
     override disable(): void {
+        this.clashNotice?.destroy();
+        this.clashNotice = null;
         Main.sessionMode.disconnect(this.sessionId);
         this.sessionId = 0;
         for (const id of this.changedIds) this.settings?.disconnect(id);

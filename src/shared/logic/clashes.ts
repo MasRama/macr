@@ -50,3 +50,15 @@ export function clashes(enabled: readonly string[], isOn: (setting: string) => b
     }
     return found;
 }
+
+/**
+ * The clashes to tell the user about now: those not told since they began.
+ * `told` holds the uuids already told; one that stops clashing is forgotten,
+ * so it is told again if it comes back.
+ */
+export function toTell(found: readonly Clash[], told: ReadonlySet<string>): { tell: Clash[]; told: Set<string> } {
+    return {
+        tell: found.filter((clash) => !told.has(clash.uuid)),
+        told: new Set(found.map((clash) => clash.uuid)),
+    };
+}

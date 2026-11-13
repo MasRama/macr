@@ -10,7 +10,7 @@ There is no daemon: everything a module needs is reachable from the shell.
 src/
   extension.ts          turns modules on and off from GSettings
   prefs.ts              settings window (separate GTK 4 process)
-  prefs/                its pages, rows and styles; prefs/logic is tested
+  prefs/                its pages, rows and styles
   shared/               code used by more than one module
   features/<module>/    one folder per module (menubar, dock, ...)
     index.ts            the Module: enable() / disable()
@@ -957,8 +957,17 @@ schemas/                GSettings schema
   builder) and built the first time they are shown. Tile styles come from a
   CSS provider on the display, removed when the window closes along with
   every signal the pages connect.
-- About Macr lists clashing extensions: `prefs/logic/conflicts.ts` maps
+- About Macr lists clashing extensions: `shared/logic/clashes.ts` maps
   known extension UUIDs to the Macr settings they fight, and a clash shows
   only while that extension is in `org.gnome.shell enabled-extensions` and
   the Macr setting is on. Turn Off calls the shell's `DisableExtension`
   over D-Bus. Settings keys Macr does not have count as off.
+- The shell tells about clashes too (`shared/clash-notice.ts`, run by
+  `extension.ts` for every module, on the desktop only): a notification per
+  running extension (ExtensionState ACTIVE, which also covers ones a session
+  mode enables) that wholly clashes with a module that is on, with Turn Off
+  (`extensionManager.disableExtension`) and Macr Settings. It checks after
+  startup and on `extension-state-changed`, Macr's settings and session mode
+  changes. `toTell` tells each clash once while it lasts; its notification
+  goes when it ends. Partial clashes are left to the settings window: Macr
+  cannot see when the user settles them inside the other extension.

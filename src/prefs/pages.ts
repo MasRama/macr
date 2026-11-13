@@ -6,7 +6,7 @@ import { gettext as _ } from 'resource:///org/gnome/Shell/Extensions/js/extensio
 
 import { withStack } from '../features/dock/logic/stack.js';
 import { setAppearance } from '../shared/appearance.js';
-import { clashes, type Clash } from './logic/conflicts.js';
+import { clashes, type Clash } from '../shared/logic/clashes.js';
 import { comboRow, dependsOn, group, spinRow, switchRow } from './rows.js';
 import { tile, type TileColor } from './style.js';
 

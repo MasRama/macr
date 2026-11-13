@@ -219,9 +219,9 @@ Log out and back in, then turn Macr on in Extensions.
 
 ### Turn off what Macr replaces
 
-Two extensions changing the same part of GNOME fight over it. Macr's About
-page lists the enabled extensions that clash with it, with a button to turn
-them off.
+Two extensions changing the same part of GNOME fight over it. When one that
+clashes with Macr is running, a notification says so, with a button to turn
+it off; Macr's About page lists them all too.
 
 | Macr module | Turn off |
 |---|---|
