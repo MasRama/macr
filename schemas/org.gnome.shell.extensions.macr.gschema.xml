@@ -358,5 +358,26 @@
       <summary>How the Downloads stack opens</summary>
       <description>Automatic fans out a few items and shows more as a grid.</description>
     </key>
+    <key name="accent-enabled" type="b">
+      <default>true</default>
+      <summary>Accent colour</summary>
+      <description>Lets Macr re-colour its menus, dialogs and Control Center with the chosen accent. No switch in the settings window: the accent is blue when off.</description>
+    </key>
+    <key name="accent-color" type="s">
+      <choices>
+        <choice value="wallpaper"/>
+        <choice value="blue"/>
+        <choice value="purple"/>
+        <choice value="pink"/>
+        <choice value="red"/>
+        <choice value="orange"/>
+        <choice value="yellow"/>
+        <choice value="green"/>
+        <choice value="graphite"/>
+      </choices>
+      <default>'blue'</default>
+      <summary>Accent colour</summary>
+      <description>The colour of highlighted menu items, default buttons and active toggles in Macr; wallpaper picks the macOS accent nearest the desktop picture's colours.</description>
+    </key>
   </schema>
 </schemalist>

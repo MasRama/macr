@@ -2,6 +2,7 @@ import type Gio from 'gi://Gio';
 import { Extension } from 'resource:///org/gnome/shell/extensions/extension.js';
 import * as Main from 'resource:///org/gnome/shell/ui/main.js';
 
+import { AccentModule } from './features/accent/index.js';
 import { AppIconsModule } from './features/appicons/index.js';
 import { AppExposeModule } from './features/expose/index.js';
 import { ControlCenterModule } from './features/controlcenter/index.js';
@@ -36,6 +37,7 @@ const MODULES: ModuleEntry[] = [
     { key: 'spotlight-enabled', create: (context) => new SpotlightModule(context) },
     { key: 'control-center-enabled', create: (context) => new ControlCenterModule(context) },
     { key: 'app-icon-tiles', create: () => new AppIconsModule() },
+    { key: 'accent-enabled', create: (context) => new AccentModule(context.settings) },
     { key: 'osd-enabled', create: () => new OsdModule() },
     { key: 'switcher-enabled', create: () => new SwitcherModule() },
     { key: 'notifications-enabled', create: () => new NotificationsModule() },
