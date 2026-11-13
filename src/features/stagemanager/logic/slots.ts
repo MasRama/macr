@@ -38,3 +38,16 @@ export function fitPreview(size: { width: number; height: number }, slot: Rect):
     const height = Math.round(size.height * scale);
     return { x: slot.x, y: slot.y + Math.round((slot.height - height) / 2), width, height };
 }
+
+/**
+ * How far x and y lean per unit of depth (z) so that tilted thumbnails are
+ * seen from `vanish` instead of from the middle of the stage, which spans
+ * every monitor. Without it a strip far from that middle, as on the left of
+ * two monitors, has its tilted thumbnails pulled out flat. `fovy` is the
+ * stage's field of view in degrees.
+ */
+export function perspectiveShear(vanish: { x: number; y: number }, stage: { width: number; height: number }, fovy: number): { x: number; y: number } {
+    const distance = stage.height / (2 * Math.tan((fovy * Math.PI) / 360));
+    const lean = (centre: number, at: number) => (centre === at ? 0 : (centre - at) / distance);
+    return { x: lean(stage.width / 2, vanish.x), y: lean(stage.height / 2, vanish.y) };
+}

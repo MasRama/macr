@@ -9,7 +9,7 @@ import * as Main from 'resource:///org/gnome/shell/ui/main.js';
 import { windowCovers } from '../../shared/covered.js';
 import type { Rect } from '../../shared/logic/geometry.js';
 import { isLight } from '../../shared/scheme.js';
-import { fitPreview, stripLayout } from './logic/slots.js';
+import { fitPreview, perspectiveShear, stripLayout } from './logic/slots.js';
 
 /** How far the thumbnails turn away from the viewer, in degrees. */
 const TILT = 22;
@@ -40,10 +40,15 @@ class StageView {
     constructor(
         stage: StripStage,
         private readonly slot: Rect,
+        shear: { x: number; y: number },
         onSelect: (app: string) => void,
     ) {
         // The slot's size, so St.Button does not centre a narrower thumbnail.
         const content = new St.Widget({ width: slot.width, height: slot.height, x_align: Clutter.ActorAlign.START, y_align: Clutter.ActorAlign.START });
+        // The tilt seen from the strip rather than from the stage's middle.
+        const lean = new Graphene.Matrix();
+        lean.init_from_float([1, 0, 0, 0, 0, 1, 0, 0, shear.x, shear.y, 1, 0, 0, 0, 0, 1]);
+        content.child_transform = lean;
         this.button = new St.Button({
             style_class: 'macr-stage',
             reactive: true,
@@ -213,9 +218,12 @@ export class Strip {
         this.actor.set_size(this.rest.width, this.rest.height);
         this.edge.set_position(area.x, area.y + 1);
         this.edge.height = Math.max(1, area.height - 2);
+        const screen = global.stage as Clutter.Stage;
+        const fovy = screen.get_perspective()?.fovy ?? 60;
+        const shear = perspectiveShear({ x: area.x + layout.width / 2, y: area.y + area.height / 2 }, { width: screen.width, height: screen.height }, fovy);
         this.views = this.stages.slice(0, slots.length).map((stage, i) => {
             const slot = slots[i];
-            const view = new StageView(stage, { ...slot, x: slot.x - this.rest.x, y: slot.y - this.rest.y }, this.onSelect);
+            const view = new StageView(stage, { ...slot, x: slot.x - this.rest.x, y: slot.y - this.rest.y }, shear, this.onSelect);
             this.actor.add_child(view.button);
             return view;
         });

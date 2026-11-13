@@ -737,8 +737,12 @@ schemas/                GSettings schema
   an `St.Button` holding a `Shell.WindowPreviewLayout` of up to three of the
   app's windows (clones, which paint minimized windows), turned 22° on the
   Y axis with its pivot on the left edge, a CSS shadow and the app icon over
-  its bottom left corner; hovering turns it towards the viewer. The strip is
-  rebuilt only when the stages change.
+  its bottom left corner; hovering turns it towards the viewer. Clutter's
+  stage looks at the middle of all monitors together, so a strip far from
+  it (the left of two monitors) would have its tilted thumbnails pulled out
+  flat: each slot's `child_transform` shears x and y by depth
+  (`perspectiveShear()`) so the tilt is seen from the strip's own middle on
+  every monitor. The strip is rebuilt only when the stages change.
 - It floats over windows (no struts) and slides away when a showing window
   overlaps it (`src/shared/covered.ts`, shared with the dock); a 1 px edge
   actor at the left of the work area brings it back. Chrome is not hidden in

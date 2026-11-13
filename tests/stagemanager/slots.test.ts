@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 
-import { fitPreview, stripLayout } from '../../src/features/stagemanager/logic/slots.js';
+import { fitPreview, perspectiveShear, stripLayout } from '../../src/features/stagemanager/logic/slots.js';
 
 const full = { x: 0, y: 32, width: 1920, height: 1048 };
 const small = { x: 0, y: 28, width: 1280, height: 692 };
@@ -40,4 +40,17 @@ test('a preview keeps its aspect ratio inside its slot, aligned left and centred
     assert.deepEqual(fitPreview({ width: 1600, height: 800 }, slot), { x: 18, y: 120, width: 160, height: 80 });
     assert.deepEqual(fitPreview({ width: 600, height: 1200 }, slot), { x: 18, y: 100, width: 60, height: 120 });
     assert.deepEqual(fitPreview({ width: 0, height: 0 }, slot), slot);
+});
+
+test('the tilt is seen from the strip, not from the middle of every monitor together', () => {
+    // Two 1920x1080 monitors side by side: the stage looks at x = 1920.
+    const stage = { width: 3840, height: 1080 };
+    const distance = 1080 / (2 * Math.tan(Math.PI / 6));
+    const left = perspectiveShear({ x: 102, y: 540 }, stage, 60);
+    assert.ok(Math.abs(left.x - (1920 - 102) / distance) < 1e-9);
+    assert.equal(left.y, 0);
+    // A strip right of the stage's middle leans the other way.
+    assert.ok(perspectiveShear({ x: 3000, y: 540 }, stage, 60).x < 0);
+    // Where the stage already looks, nothing changes.
+    assert.deepEqual(perspectiveShear({ x: 1920, y: 540 }, stage, 60), { x: 0, y: 0 });
 });
