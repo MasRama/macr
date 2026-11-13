@@ -1,5 +1,5 @@
 /** The widgets Macr can put on the desktop. */
-export const WIDGET_IDS = ['clock', 'calendar', 'weather'] as const;
+export const WIDGET_IDS = ['clock', 'calendar', 'weather', 'batteries', 'photos'] as const;
 export type WidgetId = (typeof WIDGET_IDS)[number];
 
 export interface Rect {

@@ -7,9 +7,11 @@ import * as Main from 'resource:///org/gnome/shell/ui/main.js';
 
 import type { Module } from '../../shared/module.js';
 import { isLight } from '../../shared/scheme.js';
+import { BatteriesWidget } from './batteries.js';
 import { CalendarWidget } from './calendar.js';
 import { ClockWidget } from './clock.js';
 import { defaultSlots, fromFraction, isDesktopIconsTitle, placeWidget, type Point, type Rect, toFraction, type WidgetId, widgetIds } from './logic/widgets.js';
+import { PhotosWidget } from './photos.js';
 import { WeatherWidget } from './weather.js';
 import type { DesktopWidget, WidgetHost } from './widget.js';
 
@@ -26,11 +28,13 @@ const WIDGETS: Record<WidgetId, new (id: WidgetId, size: number, host: WidgetHos
     clock: ClockWidget,
     calendar: CalendarWidget,
     weather: WeatherWidget,
+    batteries: BatteriesWidget,
+    photos: PhotosWidget,
 };
 
 /**
- * macOS Sonoma's desktop widgets: a clock, a calendar and the weather on the
- * desktop. They sit in a layer of their own above the wallpaper and any
+ * macOS Sonoma's desktop widgets: a clock, a calendar, the weather, the
+ * batteries and a photo on the desktop. They sit in a layer of their own above the wallpaper and any
  * desktop-icons window, under every app window; Mutter lowers actors that
  * are not windows on each restack, so the layer is put back after it.
  */

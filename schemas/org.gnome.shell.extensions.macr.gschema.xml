@@ -412,12 +412,12 @@
     <key name="desktop-widgets-enabled" type="b">
       <default>false</default>
       <summary>Widgets on the desktop</summary>
-      <description>Clock, calendar and weather widgets on the desktop, under your windows.</description>
+      <description>Clock, calendar, weather, batteries and photo widgets on the desktop, under your windows.</description>
     </key>
     <key name="desktop-widgets" type="as">
       <default>['clock', 'calendar', 'weather']</default>
       <summary>The widgets on the desktop</summary>
-      <description>Which widgets show, in order: clock, calendar, weather.</description>
+      <description>Which widgets show, in order: clock, calendar, weather, batteries, photos.</description>
     </key>
     <key name="desktop-widget-positions" type="a{s(dd)}">
       <default>{}</default>

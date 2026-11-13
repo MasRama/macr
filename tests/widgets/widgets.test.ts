@@ -6,7 +6,7 @@ import { cityCode, dayRange, defaultSlots, fromFraction, handAngles, isDesktopIc
 const area = { x: 0, y: 32, width: 1920, height: 1048 };
 
 test('only known widgets show, each once, in order', () => {
-    assert.deepEqual(widgetIds(['weather', 'clock', 'weather', 'photos']), ['weather', 'clock']);
+    assert.deepEqual(widgetIds(['weather', 'clock', 'weather', 'stocks', 'photos']), ['weather', 'clock', 'photos']);
     assert.deepEqual(widgetIds([]), []);
 });
 

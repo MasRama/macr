@@ -320,6 +320,8 @@ function widgetsRow(settings: Gio.Settings): Gtk.Widget {
         ['clock', _('Clock')],
         ['calendar', _('Calendar')],
         ['weather', _('Weather')],
+        ['batteries', _('Batteries')],
+        ['photos', _('Photos')],
     ];
     const rows = choices.map(([id, title]) => {
         const row = new Adw.SwitchRow({ title });
