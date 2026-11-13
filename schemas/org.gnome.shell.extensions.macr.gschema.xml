@@ -49,6 +49,11 @@
       <default>true</default>
       <summary>Magnify dock icons under the pointer</summary>
     </key>
+    <key name="dock-minimize-to-app" type="b">
+      <default>false</default>
+      <summary>Minimize windows into their app's icon</summary>
+      <description>Off shows each minimized window as a thumbnail before the Trash, as macOS does by default.</description>
+    </key>
     <key name="dock-genie" type="b">
       <default>true</default>
       <summary>Minimize windows into the dock with the genie effect</summary>

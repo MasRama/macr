@@ -84,7 +84,8 @@ export function pages(): PageInfo[] {
                     spinRow(settings, 'dock-icon-size', _('Icon size'), _('In pixels, before magnification'), 32, 96, 4),
                     switchRow(settings, 'dock-magnification', _('Magnification'), _('Icons grow under the pointer')),
                     switchRow(settings, 'dock-autohide', _('Hide when a window covers it'), _('Push the pointer to the bottom edge to show it again')),
-                    switchRow(settings, 'dock-genie', _('Genie minimize'), _('Windows pour into their dock icon')),
+                    switchRow(settings, 'dock-genie', _('Genie minimize'), _('Windows pour into the dock as they minimize')),
+                    switchRow(settings, 'dock-minimize-to-app', _('Minimize windows into application icon'), _('Off keeps each minimized window as a thumbnail next to the Trash')),
                     switchRow(settings, 'dock-recent-apps', _('Show recent apps'), _('The last three apps you quit stay in the dock after the running apps')),
                 ];
                 const stacks = stacksGroup(context);

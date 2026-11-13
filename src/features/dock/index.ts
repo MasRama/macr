@@ -9,6 +9,8 @@ import type { Module, ModuleContext } from '../../shared/module.js';
 import { Dock, type DockOptions } from './dock.js';
 import { Genie } from './genie.js';
 import { LauncherEntries, setLauncherEntries } from './launcher.js';
+import { minimizedByDock } from './logic/minimized.js';
+import { MinimizedWindows } from './minimized.js';
 import { RecentApps } from './recent.js';
 
 const OPTION_KEYS = ['dock-icon-size', 'dock-autohide', 'dock-magnification'];
@@ -25,6 +27,7 @@ export class DockModule implements Module {
     private genie: Genie | null = null;
     private recent: RecentApps | null = null;
     private launcher: LauncherEntries | null = null;
+    private minimized: MinimizedWindows | null = null;
     private readonly interface = new Gio.Settings({ schema_id: 'org.gnome.desktop.interface' });
     private ids: [Disconnectable, number][] = [];
 
@@ -46,9 +49,11 @@ export class DockModule implements Module {
         for (const key of OPTION_KEYS) this.ids.push([settings, settings.connect(`changed::${key}`, () => this.applyOptions())]);
         this.ids.push([settings, settings.connect('changed::dock-all-monitors', () => this.build())]);
         this.ids.push([settings, settings.connect('changed::dock-genie', () => this.syncGenie())]);
+        this.ids.push([settings, settings.connect('changed::dock-minimize-to-app', () => this.syncMinimized())]);
         this.ids.push([this.interface, this.interface.connect('changed::color-scheme', () => this.syncScheme())]);
         const layout = Main.layoutManager as unknown as { connect(signal: string, callback: () => void): number } & Disconnectable;
         this.ids.push([layout, layout.connect('monitors-changed', () => this.build())]);
+        this.minimized = new MinimizedWindows(() => this.syncMinimized());
         this.build();
         this.syncGenie();
     }
@@ -58,6 +63,8 @@ export class DockModule implements Module {
         this.ids = [];
         this.genie?.destroy();
         this.genie = null;
+        this.minimized?.destroy();
+        this.minimized = null;
         this.destroyDocks();
         this.recent?.destroy();
         this.recent = null;
@@ -78,6 +85,20 @@ export class DockModule implements Module {
             if (everywhere || index === primaryIndex) this.docks.push(new Dock(this.options(), index));
         });
         this.syncScheme();
+        this.syncMinimized();
+    }
+
+    /** Each dock's minimized windows, unless they go into their app's icon. */
+    private syncMinimized(): void {
+        const toApp = this.context.settings.get_boolean('dock-minimize-to-app');
+        const windows = toApp ? [] : (this.minimized?.windows() ?? []);
+        const byId = new Map(windows.map(({ window }) => [window.get_id(), window]));
+        const byDock = minimizedByDock(
+            windows.map(({ window, order }) => ({ id: window.get_id(), monitor: window.get_monitor(), order })),
+            this.docks.map((dock) => dock.monitorIndex),
+            Main.layoutManager.primaryIndex,
+        );
+        for (const dock of this.docks) dock.setMinimized((byDock.get(dock.monitorIndex) ?? []).map((id) => byId.get(id)!));
     }
 
     private destroyDocks(): void {
@@ -102,8 +123,12 @@ export class DockModule implements Module {
         };
     }
 
-    /** The icon a window pours into: its own monitor's dock, else the primary's. */
+    /** Where a window pours into: its thumbnail, else its app's icon in its own monitor's dock, else the primary's. */
     private iconFor(app: Shell.App, window: Meta.Window): Clutter.Actor | null {
+        for (const dock of this.docks) {
+            const thumbnail = dock.thumbnailOf(window);
+            if (thumbnail) return thumbnail;
+        }
         const dock =
             this.docks.find((d) => d.monitorIndex === window.get_monitor()) ??
             this.docks.find((d) => d.monitorIndex === Main.layoutManager.primaryIndex) ??

@@ -11,6 +11,7 @@ import { launchpad, onLaunchpadChanged } from '../../shared/launchpad-link.js';
 import type { Rect } from '../../shared/logic/geometry.js';
 import { MacrDash } from './dash.js';
 import { magnify } from './logic/magnify.js';
+import { MinimizedItem } from './minimized.js';
 import { StackItem, stackSources } from './stack.js';
 import { TrashItem } from './trash.js';
 
@@ -46,6 +47,9 @@ export class Dock {
     private readonly hitArea: St.Widget;
     private readonly trash: TrashItem;
     private stacks: StackItem[] = [];
+    /** Minimized windows waiting before the Trash, and ones on their way out. */
+    private readonly minimized = new Map<Meta.Window, MinimizedItem>();
+    private readonly leaving = new Map<Meta.Window, MinimizedItem>();
     private readonly divider: St.Widget;
     private readonly edge: St.Widget;
     private readonly ids: [Disconnectable, number][] = [];
@@ -150,6 +154,42 @@ export class Dock {
             this.dash._adjustIconSize();
             this.queuePlace();
         }
+    }
+
+    /** Shows `windows` (oldest first) as thumbnails before the Trash. */
+    setMinimized(windows: Meta.Window[]): void {
+        const keep = new Set(windows);
+        for (const [window, item] of [...this.minimized]) {
+            if (keep.has(window)) continue;
+            this.minimized.delete(window);
+            this.dash.extraItems.splice(this.dash.extraItems.indexOf(item), 1);
+            // Still the genie's target while the window comes back out of it.
+            this.leaving.set(window, item);
+            item.connect('destroy', () => {
+                if (this.leaving.get(window) === item) this.leaving.delete(window);
+            });
+            item.animateOutAndDestroy();
+        }
+        const container = this.dash._dashContainer;
+        for (const window of windows) {
+            let item = this.minimized.get(window);
+            if (!item) {
+                item = new MinimizedItem(window);
+                container.insert_child_below(item, this.trash);
+                item.show(false);
+                (item.icon as unknown as { setIconSize(size: number): void }).setIconSize(this.dash.iconPixels);
+                this.dash._hookUpLabel(item);
+                this.dash.extraItems.push(item);
+                this.minimized.set(window, item);
+            }
+            container.set_child_below_sibling(item, this.trash);
+        }
+        this.queuePlace();
+    }
+
+    /** The thumbnail of a minimized `window`, where the genie pours it. */
+    thumbnailOf(window: Meta.Window): Clutter.Actor | null {
+        return (this.minimized.get(window) ?? this.leaving.get(window))?.target ?? null;
     }
 
     /** The recent apps changed: list the apps again. */
@@ -361,7 +401,9 @@ export class Dock {
     }
 
     private rowItems(): Clutter.Actor[] {
-        return [...this.dash.rowItems(), this.divider, ...this.stacks, this.trash].filter((item) => item.visible);
+        const items = new Set<Clutter.Actor>([...this.minimized.values()]);
+        const minimized = this.dash._dashContainer.get_children().filter((child) => items.has(child));
+        return [...this.dash.rowItems(), this.divider, ...this.stacks, ...minimized, this.trash].filter((item) => item.visible);
     }
 
     /** Centre of `item` without its magnification shift, in stage x. */

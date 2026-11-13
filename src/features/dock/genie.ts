@@ -1,4 +1,5 @@
 import Clutter from 'gi://Clutter';
+import GLib from 'gi://GLib';
 import GObject from 'gi://GObject';
 import Meta from 'gi://Meta';
 import Shell from 'gi://Shell';
@@ -23,7 +24,8 @@ type PrivateWM = {
 const GenieEffect = GObject.registerClass(
     class GenieEffect extends Clutter.DeformEffect {
         progress!: number;
-        private icon!: Rect;
+        /** The icon, in the window's coordinates. */
+        icon!: Rect;
         private size!: { width: number; height: number };
 
         constructor(icon: Rect, size: { width: number; height: number }) {
@@ -53,7 +55,14 @@ interface Running {
     timeline: Clutter.Timeline;
     effect: GenieEffect;
     done: () => void;
+    /** Stops waiting for the icon to get its place, while it does. */
+    unwait: (() => void) | null;
+    /** Stops following the icon. */
+    forget: () => void;
 }
+
+/** How long to wait for an icon the dock just added (a thumbnail) to get its place. */
+const PLACE_WAIT = 200;
 
 /**
  * The genie minimize: replaces GNOME's minimize and unminimize animations
@@ -127,17 +136,28 @@ export class Genie {
         this.play(actor, icon, true, () => this.wm.completed_unminimize(actor));
     }
 
+    /** Where `icon` is now, in the coordinates of a window whose buffer is at `rect`; null while it has no place. */
+    private iconRect(icon: Clutter.Actor, rect: Rect): Rect | null {
+        if (!icon.get_stage() || !icon.has_allocation()) return null;
+        const [x, y] = icon.get_transformed_position();
+        const [width, height] = icon.get_transformed_size();
+        if (!width || !height) return null;
+        return { x: (x ?? 0) - rect.x, y: (y ?? 0) - rect.y, width, height };
+    }
+
     private play(actor: Meta.WindowActor, icon: Clutter.Actor, reverse: boolean, done: () => void): void {
-        const [iconX, iconY] = icon.get_transformed_position();
-        const [iconWidth, iconHeight] = icon.get_transformed_size();
-        const rect = actor.meta_window.get_buffer_rect();
-        const local = { x: (iconX ?? 0) - rect.x, y: (iconY ?? 0) - rect.y, width: iconWidth ?? 0, height: iconHeight ?? 0 };
-        const effect = new GenieEffect(local, { width: actor.width, height: actor.height });
+        const buffer = actor.meta_window.get_buffer_rect();
+        const rect = { x: buffer.x, y: buffer.y, width: buffer.width, height: buffer.height };
+        const effect = new GenieEffect(this.iconRect(icon, rect) ?? { x: 0, y: rect.height, width: 0, height: 0 }, { width: actor.width, height: actor.height });
         actor.add_effect_with_name(EFFECT_NAME, effect);
 
         const timeline = new Clutter.Timeline({ actor, duration: adjustAnimationTime(DURATION) });
         timeline.set_progress_mode(Clutter.AnimationMode.EASE_IN_OUT_SINE);
+        // A thumbnail leaves the dock as its window comes back out of it.
+        let target: Clutter.Actor | null = icon;
         const step = (): void => {
+            // The dock moves while its row changes: follow the icon.
+            if (target) effect.icon = this.iconRect(target, rect) ?? effect.icon;
             const t = timeline.get_progress();
             const progress = reverse ? 1 - t : t;
             effect.progress = progress;
@@ -146,20 +166,59 @@ export class Genie {
         };
         timeline.connect('new-frame', step);
         timeline.connect('completed', () => this.finish(actor));
-        this.running.set(actor, { timeline, effect, done });
+        const goneId = icon.connect('destroy', () => {
+            target = null;
+            if (!running.unwait) return;
+            running.unwait();
+            timeline.start();
+        });
+        const running: Running = {
+            timeline,
+            effect,
+            done,
+            unwait: null,
+            forget: () => {
+                if (target) icon.disconnect(goneId);
+                target = null;
+            },
+        };
+        this.running.set(actor, running);
         if (reverse) {
             actor.set_position(rect.x, rect.y);
             effect.progress = 1;
             actor.opacity = 0;
             actor.show();
         }
-        timeline.start();
+        if (icon.has_allocation()) {
+            timeline.start();
+            return;
+        }
+        // A thumbnail the dock just added has no place yet.
+        const start = () => {
+            running.unwait?.();
+            if (target) effect.icon = this.iconRect(target, rect) ?? effect.icon;
+            timeline.start();
+        };
+        const allocationId = icon.connect('notify::allocation', start);
+        let timeoutId = GLib.timeout_add(GLib.PRIORITY_DEFAULT, PLACE_WAIT, () => {
+            timeoutId = 0;
+            start();
+            return GLib.SOURCE_REMOVE;
+        });
+        running.unwait = () => {
+            running.unwait = null;
+            icon.disconnect(allocationId);
+            if (timeoutId) GLib.source_remove(timeoutId);
+            timeoutId = 0;
+        };
     }
 
     private finish(actor: Meta.WindowActor): void {
         const running = this.running.get(actor);
         if (!running) return;
         this.running.delete(actor);
+        running.unwait?.();
+        running.forget();
         running.timeline.stop();
         actor.remove_effect(running.effect);
         actor.opacity = 255;
