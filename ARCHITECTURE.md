@@ -706,7 +706,13 @@ schemas/                GSettings schema
   full-screen window unless the overview is open.
 - Actions: Mission Control, Launchpad (through `launchpad-link`, else GNOME's
   app grid), Desktop (toggles Show Desktop, below), Notification Center (the
-  dateMenu, anchored on Macr's clock) and Lock Screen.
+  dateMenu, anchored on Macr's clock), Lock Screen, Application Windows
+  (App Exposé for the focused app through `expose-link`, or closes it) and
+  Put Display to Sleep (`display-sleep.ts`: mutter's D-Bus `PowerSaveMode`
+  set to 3 with an asynchronous call, since a blocking one would wait on
+  the shell itself; an idle watch of 1 s, then a user-active watch sets it
+  back to 0, so the push into the corner does not wake the displays at
+  once; destroy wakes them if they still sleep).
 - GNOME's own hot corner is destroyed while this runs: the layout manager's
   `_updateHotCorners` is wrapped on the instance, and a handler on
   `enable-hot-corners` destroys the one GNOME rebuilds from its own bound

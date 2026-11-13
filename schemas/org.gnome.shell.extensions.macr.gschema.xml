@@ -155,7 +155,7 @@
     <key name="hot-corners-enabled" type="b">
       <default>true</default>
       <summary>Use macOS hot corners</summary>
-      <description>Each screen corner can open Mission Control, Launchpad, the desktop or the Notification Center, or lock the screen. Takes over GNOME's own hot corner.</description>
+      <description>Each screen corner can open Mission Control, Launchpad, the desktop, the focused app's windows or the Notification Center, lock the screen or put the displays to sleep. Takes over GNOME's own hot corner.</description>
     </key>
     <key name="hot-corner-top-left" type="s">
       <choices>
@@ -163,12 +163,14 @@
         <choice value="mission-control"/>
         <choice value="launchpad"/>
         <choice value="desktop"/>
+        <choice value="app-windows"/>
         <choice value="notification-center"/>
         <choice value="lock-screen"/>
+        <choice value="display-sleep"/>
       </choices>
       <default>'mission-control'</default>
       <summary>What the top left corner does</summary>
-      <description>none, mission-control, launchpad, desktop, notification-center or lock-screen.</description>
+      <description>none, mission-control, launchpad, desktop, app-windows (App Exposé for the focused app), notification-center, lock-screen or display-sleep.</description>
     </key>
     <key name="hot-corner-top-right" type="s">
       <choices>
@@ -176,12 +178,14 @@
         <choice value="mission-control"/>
         <choice value="launchpad"/>
         <choice value="desktop"/>
+        <choice value="app-windows"/>
         <choice value="notification-center"/>
         <choice value="lock-screen"/>
+        <choice value="display-sleep"/>
       </choices>
       <default>'none'</default>
       <summary>What the top right corner does</summary>
-      <description>none, mission-control, launchpad, desktop, notification-center or lock-screen.</description>
+      <description>none, mission-control, launchpad, desktop, app-windows (App Exposé for the focused app), notification-center, lock-screen or display-sleep.</description>
     </key>
     <key name="hot-corner-bottom-left" type="s">
       <choices>
@@ -189,12 +193,14 @@
         <choice value="mission-control"/>
         <choice value="launchpad"/>
         <choice value="desktop"/>
+        <choice value="app-windows"/>
         <choice value="notification-center"/>
         <choice value="lock-screen"/>
+        <choice value="display-sleep"/>
       </choices>
       <default>'none'</default>
       <summary>What the bottom left corner does</summary>
-      <description>none, mission-control, launchpad, desktop, notification-center or lock-screen.</description>
+      <description>none, mission-control, launchpad, desktop, app-windows (App Exposé for the focused app), notification-center, lock-screen or display-sleep.</description>
     </key>
     <key name="hot-corner-bottom-right" type="s">
       <choices>
@@ -202,12 +208,14 @@
         <choice value="mission-control"/>
         <choice value="launchpad"/>
         <choice value="desktop"/>
+        <choice value="app-windows"/>
         <choice value="notification-center"/>
         <choice value="lock-screen"/>
+        <choice value="display-sleep"/>
       </choices>
       <default>'none'</default>
       <summary>What the bottom right corner does</summary>
-      <description>none, mission-control, launchpad, desktop, notification-center or lock-screen.</description>
+      <description>none, mission-control, launchpad, desktop, app-windows (App Exposé for the focused app), notification-center, lock-screen or display-sleep.</description>
     </key>
     <key name="lock-screen-enabled" type="b">
       <default>true</default>

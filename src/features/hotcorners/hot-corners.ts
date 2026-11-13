@@ -7,7 +7,9 @@ import * as Layout from 'resource:///org/gnome/shell/ui/layout.js';
 import * as Main from 'resource:///org/gnome/shell/ui/main.js';
 
 import { releaseDesktopReveal, useDesktopReveal } from '../../shared/desktop-reveal.js';
+import { expose } from '../../shared/expose-link.js';
 import { launchpad } from '../../shared/launchpad-link.js';
+import { DisplaySleep } from './display-sleep.js';
 import { type Barrier, type CornerName, type Corner, cornerBarriers, hotCorners } from './logic/corners.js';
 
 /** The setting that holds each corner's action. */
@@ -47,8 +49,9 @@ type DateMenu = { menu: { sourceActor: unknown; toggle(): void } };
 
 /**
  * macOS hot corners: pushing the pointer into a screen corner opens Mission
- * Control, Launchpad, the desktop, the Notification Center or locks the
- * screen, as set per corner. GNOME's own hot corner is put aside while this
+ * Control, Launchpad, the desktop, the focused app's windows or the
+ * Notification Center, locks the screen or puts the displays to sleep, as
+ * set per corner. GNOME's own hot corner is put aside while this
  * runs, so the two never fire together, and comes back on destroy.
  */
 export class HotCorners {
@@ -59,6 +62,7 @@ export class HotCorners {
     private barriers: Meta.Barrier[] = [];
     private pressures: PressureBarrier[] = [];
     private readonly reveal = useDesktopReveal();
+    private readonly displaySleep = new DisplaySleep();
     private lastFired = 0;
 
     constructor(private readonly settings: Gio.Settings) {
@@ -80,6 +84,7 @@ export class HotCorners {
         for (const [object, id] of this.ids) object.disconnect(id);
         this.ids.length = 0;
         this.clear();
+        this.displaySleep.destroy();
         releaseDesktopReveal();
         delete (this.layout as Partial<LayoutManager>)._updateHotCorners;
         this.layout._updateHotCorners();
@@ -165,13 +170,31 @@ export class HotCorners {
             if (Main.overview.visible) Main.overview.hide();
             this.reveal.toggle();
             break;
+        case 'app-windows':
+            this.toggleAppWindows();
+            break;
         case 'notification-center':
             this.toggleNotificationCenter();
             break;
         case 'lock-screen':
             Main.screenShield?.lock(true);
             break;
+        case 'display-sleep':
+            this.displaySleep.sleep();
+            break;
         }
+    }
+
+    /** App Exposé for the focused app, from the App Exposé module when it runs. */
+    private toggleAppWindows(): void {
+        const link = expose();
+        if (!link) return;
+        if (link.isOpen) {
+            link.settle(false);
+            return;
+        }
+        const app = Shell.WindowTracker.get_default().focus_app;
+        if (app) link.show(app);
     }
 
     /** Opens the clock's calendar and notifications, on Macr's clock if it is there. */

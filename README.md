@@ -135,7 +135,8 @@ are laid out like macOS System Settings.
 - **App icon tiles**: apps your icon theme does not cover get their icon on a
   macOS squircle tile in the Dock, Launchpad, Spotlight and the app switcher.
 - **Hot corners**: each screen corner can open Mission Control, Launchpad, the
-  desktop or the Notification Center, or lock the screen.
+  desktop, the focused app's windows or the Notification Center, lock the
+  screen or put the displays to sleep.
 - **Click the wallpaper to reveal the desktop**: your windows slide
   aside; click again to bring them back.
 

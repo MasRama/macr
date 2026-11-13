@@ -136,8 +136,10 @@ export function pages(): PageInfo[] {
                     ['mission-control', _('Mission Control')],
                     ['launchpad', _('Launchpad')],
                     ['desktop', _('Desktop')],
+                    ['app-windows', _('Application Windows')],
                     ['notification-center', _('Notification Center')],
                     ['lock-screen', _('Lock Screen')],
+                    ['display-sleep', _('Put Display to Sleep')],
                 ];
                 const corners: [string, string][] = [
                     ['hot-corner-top-left', _('Top left')],
