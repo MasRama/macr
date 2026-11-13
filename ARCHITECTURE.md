@@ -233,7 +233,8 @@ schemas/                GSettings schema
 ## Desktop widgets
 
 - `desktop-widgets-enabled` (off by default): clock, calendar, weather,
-  batteries and photos widgets (`desktop-widgets`, in that order) in one actor in
+  batteries, photos and Now Playing widgets (`desktop-widgets`, in that
+  order) in one actor in
   `global.window_group`, above the wallpaper and the desktop icons' window
   (type DESKTOP on X11; on Wayland DING's window is a normal one kept low
   and found by its title, `logic/widgets.ts`) and under every other window.
@@ -244,19 +245,26 @@ schemas/                GSettings schema
   right of the primary monitor's work area. A drag (a stage grab after 6 px)
   snaps to an 8 px grid inside the work area and is saved in
   `desktop-widget-positions` as fractions, so it survives a new resolution.
-- Sizes (`logic/widgets.ts` `sizesOf()`): every widget but the clock is
-  small (164 logical px square) or medium (two smalls and the gap wide),
-  saved per widget in `desktop-widget-sizes`. The column right-aligns
+- Sizes (`logic/widgets.ts` `sizesOf()`, `WIDGET_UNIT`): small (164
+  logical px square), medium (two smalls and the gap wide) and, for
+  calendar, weather and photos, large (two by two), saved per widget in
+  `desktop-widget-sizes`. The column right-aligns
   mixed sizes; a size change rebuilds the widgets. `registry.ts` maps ids
   to classes.
-- A click opens Clocks, Calendar, Weather, the Power settings or the
-  photo; the right-click menu has Small and Medium, Edit Widgets… and
+- A click opens Clocks, Calendar, Weather, the Power settings, the photo
+  or the playing app; the right-click menu has the sizes, Edit Widgets… and
   Remove Widget. While an app window has the focus they are desaturated
   and faded, full colour on the desktop.
 - Weather reuses the shell's own `WeatherClient` from the date menu (a new
   one never disconnects its signals), so it shows the place picked in GNOME
-  Weather; medium adds the next six forecast hours (`hourlyForecast()`).
-  The clock is drawn with Cairo and ticks only while it shows.
+  Weather; medium adds the next six forecast hours (`hourlyForecast()`),
+  large also the next five days, each day's low to high as a bar on the
+  week's range (`dailyForecast()`, `rangeBar()`).
+- The clock is drawn with Cairo and ticks only while it shows. Medium adds
+  up to three world clocks from GNOME Clocks: the date menu's
+  `_clocksItem._locations` (GWeather locations), followed through
+  `org.gnome.shell.world-clocks` `changed::locations`, each with its day
+  and hours from here (`relativeDay()`, `offsetLabel()`).
 - Batteries reads UPower with `UPowerGlib.Client` (`get_devices()`: in GJS
   `get_devices2()` hands back devices that are already freed).
   `logic/batteries.ts` keeps the computer's battery first and up to three
@@ -272,16 +280,23 @@ schemas/                GSettings schema
   shown as the widget's `background-image` so St rounds its corners. The
   module clears old PNGs once as it starts, not each widget, so gallery
   previews leave the desktop's picture alone.
-- The medium calendar lists the next 7 days' events (`upcomingEvents()`:
-  by day, all-day first) from the date menu's `_eventSource`. The calendar
+- The medium calendar lists the next 7 days' events, large the month,
+  today's date and five events (`upcomingEvents()`: by day, all-day
+  first) from the date menu's `_eventSource`. The calendar
   server keeps one time range for all its clients, and a new range clears
   its events, so the widget asks for one only when the last request does
   not already cover it.
+- Now Playing (`media.ts`) reuses the date menu's media section: its
+  `MprisPlayer`s (`_players`) and the ones it shows (`_messages`, followed
+  through `_list` child-added/removed; the section has no signal of its
+  own). `pickPlayer()` takes the one playing, else the one changed last.
 - Edit Widgets… opens `WidgetGallery` (`gallery.ts`): a modal scrim in
   `Main.uiGroup`, a `Clutter.Clone` of the widgets layer on it, and a panel
   of live previews (real widgets made non-reactive and scaled, at most half
-  size, `fitScale()`). A click adds the widget in its column; a drag
-  dropped outside the panel (`droppedOnDesktop()`) adds it at that point.
+  size, `fitScale()`), wrapped into rows that fit the screen
+  (`wrapRows()`); a reactive overlay keeps clicks off their buttons. A
+  click adds the widget in its column; a drag dropped outside the panel
+  (`droppedOnDesktop()`) adds it at that point.
   Esc, Done or a click on the scrim closes it; `disable()` destroys it.
 
 ## Control Center

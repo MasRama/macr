@@ -18,7 +18,7 @@ stack of tweak extensions that each fix one corner. It ships module by module.
 | **Accent colour**: the macOS accent colours, or one picked from your wallpaper, for Macr's menus, buttons and toggles | GNOME 46's fixed blue | done |
 | **Dynamic desktop** (opt in): your wallpaper follows the time of day, warm at sunrise and golden hour, dimmer and cooler at night | nothing in GNOME | done |
 | **Auto appearance** (opt in): light during the day and dark at night, switching your GTK and shell theme to their light or dark variant too | Zorin's auto theme, Night Theme Switcher | done |
-| **Desktop widgets** (opt in): clock, calendar, weather, batteries and photo widgets on the desktop, under your windows, small or medium (upcoming events, hourly forecast); add them from a macOS widget gallery, drag them anywhere and click one to open its app | nothing in GNOME | done |
+| **Desktop widgets** (opt in): clock, calendar, weather, batteries, photo and Now Playing widgets on the desktop, under your windows, small, medium or large (world clocks, upcoming events, a five-day forecast, play and skip buttons); add them from a macOS widget gallery, drag them anywhere and click one to open its app | nothing in GNOME | done |
 | **App icon tiles**: apps your icon theme does not cover get their icon on a macOS squircle tile, in the dock, Launchpad, Spotlight and the app switcher | mixed icon styles | done |
 | **Volume and brightness**: a small frosted pill under the menu bar at the top right, like macOS, on every monitor | GNOME's on-screen display at the bottom | done |
 | **App switcher**: Alt+Tab as a frosted macOS panel with big icons, a soft highlight and only the chosen app's name; Alt+\` and the other switchers match | GNOME's switcher styling | done |
