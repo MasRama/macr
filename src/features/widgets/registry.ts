@@ -2,6 +2,7 @@ import { BatteriesWidget } from './batteries.js';
 import { CalendarWidget } from './calendar.js';
 import { ClockWidget } from './clock.js';
 import type { Box, WidgetId, WidgetSize } from './logic/widgets.js';
+import { MediaWidget } from './media.js';
 import { PhotosWidget } from './photos.js';
 import { WeatherWidget } from './weather.js';
 import type { DesktopWidget, WidgetHost } from './widget.js';
@@ -15,4 +16,5 @@ export const WIDGETS: Record<WidgetId, WidgetClass> = {
     weather: WeatherWidget,
     batteries: BatteriesWidget,
     photos: PhotosWidget,
+    media: MediaWidget,
 };

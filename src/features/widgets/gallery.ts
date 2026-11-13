@@ -305,6 +305,7 @@ function widgetName(id: WidgetId): string {
         weather: _('Weather'),
         batteries: _('Batteries'),
         photos: _('Photos'),
+        media: _('Now Playing'),
     };
     return names[id];
 }

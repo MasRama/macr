@@ -1,5 +1,5 @@
 /** The widgets Macr can put on the desktop. */
-export const WIDGET_IDS = ['clock', 'calendar', 'weather', 'batteries', 'photos'] as const;
+export const WIDGET_IDS = ['clock', 'calendar', 'weather', 'batteries', 'photos', 'media'] as const;
 export type WidgetId = (typeof WIDGET_IDS)[number];
 
 export interface Rect {
@@ -34,6 +34,7 @@ const SIZES: Record<WidgetId, WidgetSize[]> = {
     weather: ['small', 'medium', 'large'],
     batteries: ['small', 'medium'],
     photos: ['small', 'medium', 'large'],
+    media: ['small', 'medium'],
 };
 
 export function sizesOf(id: WidgetId): WidgetSize[] {

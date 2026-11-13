@@ -322,6 +322,7 @@ function widgetsRow(settings: Gio.Settings): Gtk.Widget {
         ['weather', _('Weather')],
         ['batteries', _('Batteries')],
         ['photos', _('Photos')],
+        ['media', _('Now Playing')],
     ];
     const rows = choices.map(([id, title]) => {
         const row = new Adw.SwitchRow({ title });
