@@ -138,11 +138,20 @@ export function pages(): PageInfo[] {
         {
             id: 'windows', section: 1, icon: 'focus-windows-symbolic', color: 'blue',
             title: _('Windows'),
-            description: _('Traffic lights and rounded corners on app windows.'),
+            description: _('Tiling, traffic lights and rounded corners on app windows.'),
             build: ({ settings }) => {
                 const radius = spinRow(settings, 'window-corner-radius', _('Corner radius'), _('In pixels'), 0, 32, 1);
                 dependsOn(settings, 'window-corners-enabled', radius);
+                const tiling = [
+                    switchRow(settings, 'tiling-margins', _('Tiled windows have margins'), _('A small gap around tiled windows and between them')),
+                    shortcutsRow(settings),
+                ];
+                dependsOn(settings, 'tiling-enabled', ...tiling);
                 return [
+                    group(_('Tiling'), [
+                        switchRow(settings, 'tiling-enabled', _('Window tiling'), _('Drag a window to a screen edge or corner, or use the keyboard shortcuts')),
+                        ...tiling,
+                    ]),
                     group(_('Title bar'), [
                         switchRow(settings, 'traffic-lights-enabled', _('Traffic lights'), _('Red, yellow and green window buttons on the left; apps show them when reopened')),
                     ]),
@@ -205,6 +214,39 @@ export function pageHeader(page: PageInfo): Gtk.Widget {
     const header = new Adw.PreferencesGroup();
     header.add(box);
     return header;
+}
+
+/** The tiling shortcuts that are set, read-only. */
+function shortcutsRow(settings: Gio.Settings): Gtk.Widget {
+    const shortcuts: [string, string][] = [
+        ['tiling-left', _('Left half')],
+        ['tiling-right', _('Right half')],
+        ['tiling-top', _('Top half')],
+        ['tiling-bottom', _('Bottom half')],
+        ['tiling-top-left', _('Top left quarter')],
+        ['tiling-top-right', _('Top right quarter')],
+        ['tiling-bottom-left', _('Bottom left quarter')],
+        ['tiling-bottom-right', _('Bottom right quarter')],
+        ['tiling-fill', _('Fill')],
+        ['tiling-center', _('Center')],
+        ['tiling-return', _('Return to previous size')],
+        ['tiling-arrange-left-right', _('Arrange left and right')],
+        ['tiling-arrange-right-left', _('Arrange right and left')],
+        ['tiling-arrange-top-bottom', _('Arrange top and bottom')],
+        ['tiling-arrange-bottom-top', _('Arrange bottom and top')],
+    ];
+    const expander = new Adw.ExpanderRow({
+        title: _('Keyboard shortcuts'),
+        subtitle: _('Super+Ctrl stands in for the Fn and Control keys of a Mac'),
+    });
+    for (const [key, title] of shortcuts) {
+        const accelerator = settings.get_strv(key)[0];
+        if (!accelerator) continue;
+        const row = new Adw.ActionRow({ title });
+        row.add_suffix(new Gtk.ShortcutLabel({ accelerator, valign: Gtk.Align.CENTER }));
+        expander.add_row(row);
+    }
+    return expander;
 }
 
 /** What each Macr setting a clash is about is called, for the clash's subtitle. */
