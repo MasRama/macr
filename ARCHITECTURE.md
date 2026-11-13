@@ -115,6 +115,12 @@ schemas/                GSettings schema
   them, each with its own icon (`logic/stack.ts` gives the XDG folders
   theirs), and Remove from Dock in the stack's menu takes it out again.
   A folder that no longer exists shows no stack.
+- Recent apps (`recent.ts`, `dock-recent-apps`, on by default as on macOS):
+  an app that quits and is not a favourite goes first in
+  `dock-recent-apps-list` (`logic/recent.ts`, three at most). `MacrDash`
+  overrides `_redisplay` and, for that one pass, hands GNOME's code an app
+  system whose running apps are followed by the recent ones that are not
+  running, so they get the same icons, separator and drag handling.
 - Show All Windows in an app icon's menu (after GNOME's window list) opens
   App Exposé through `src/shared/expose-link.ts`, while that module runs.
 - Genie: GNOME's minimize and unminimize handlers on `global.window_manager`
@@ -226,8 +232,8 @@ schemas/                GSettings schema
 
 ## Desktop widgets
 
-- `desktop-widgets-enabled` (off by default): clock, calendar and weather
-  widgets (`desktop-widgets`, in that order) in one actor in
+- `desktop-widgets-enabled` (off by default): clock, calendar, weather,
+  batteries and photos widgets (`desktop-widgets`, in that order) in one actor in
   `global.window_group`, above the wallpaper and the desktop icons' window
   (type DESKTOP on X11; on Wayland DING's window is a normal one kept low
   and found by its title, `logic/widgets.ts`) and under every other window.
@@ -238,12 +244,25 @@ schemas/                GSettings schema
   right of the primary monitor's work area. A drag (a stage grab after 6 px)
   snaps to an 8 px grid inside the work area and is saved in
   `desktop-widget-positions` as fractions, so it survives a new resolution.
-- A click opens Clocks, Calendar or Weather; the right-click menu has Edit
-  Widgets… (the settings window) and Remove Widget. While an app window has
-  the focus they are desaturated and faded, full colour on the desktop.
+- A click opens Clocks, Calendar, Weather, the Power settings or the
+  photo; the right-click menu has Edit Widgets… (the settings window) and
+  Remove Widget. While an app window has the focus they are desaturated
+  and faded, full colour on the desktop.
 - Weather reuses the shell's own `WeatherClient` from the date menu (a new
   one never disconnects its signals), so it shows the place picked in GNOME
   Weather. The clock is drawn with Cairo and ticks only while it shows.
+- Batteries reads UPower with `UPowerGlib.Client` (`get_devices()`: in GJS
+  `get_devices2()` hands back devices that are already freed).
+  `logic/batteries.ts` keeps the computer's battery first and up to three
+  other devices; one device gets a big ring and its charge, more get a 2x2
+  grid of Cairo rings, red at 20% or less, with a bolt while plugged in.
+  The devshell's system bus has no UPower: check it with a fake service.
+- Photos walks the XDG Pictures folder off the main loop (three folders
+  deep, 2000 photos at most) and shows one per three hours
+  (`logic/photos.ts`). GdkPixbuf loads it at the size that covers the
+  widget, turned upright and cropped square, into a PNG in
+  `~/.cache/macr` with a new name each time (St keeps images by name),
+  shown as the widget's `background-image` so St rounds its corners.
 
 ## Control Center
 
