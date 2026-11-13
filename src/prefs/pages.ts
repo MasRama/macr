@@ -76,14 +76,19 @@ export function pages(): PageInfo[] {
         {
             id: 'dock', section: 1, icon: 'user-desktop-symbolic', color: 'graphite',
             title: _('Dock'),
-            description: _('Your favourite and running apps at the bottom of the screen.'),
+            description: _('Your favourite and running apps along the edge of the screen.'),
             build: (context) => {
                 const { settings } = context;
                 const rows = [
+                    comboRow(settings, 'dock-position', _('Position on screen'), [
+                        ['left', _('Left')],
+                        ['bottom', _('Bottom')],
+                        ['right', _('Right')],
+                    ]),
                     switchRow(settings, 'dock-all-monitors', _('On every monitor'), _('Off shows it on the primary monitor only')),
                     spinRow(settings, 'dock-icon-size', _('Icon size'), _('In pixels, before magnification'), 32, 96, 4),
                     switchRow(settings, 'dock-magnification', _('Magnification'), _('Icons grow under the pointer')),
-                    switchRow(settings, 'dock-autohide', _('Hide when a window covers it'), _('Push the pointer to the bottom edge to show it again')),
+                    switchRow(settings, 'dock-autohide', _('Hide when a window covers it'), _('Push the pointer to the screen edge to show it again')),
                     switchRow(settings, 'dock-genie', _('Genie minimize'), _('Windows pour into the dock as they minimize')),
                     switchRow(settings, 'dock-minimize-to-app', _('Minimize windows into application icon'), _('Off keeps each minimized window as a thumbnail next to the Trash')),
                     switchRow(settings, 'dock-recent-apps', _('Show recent apps'), _('The last three apps you quit stay in the dock after the running apps')),

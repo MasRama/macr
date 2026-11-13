@@ -715,6 +715,30 @@
     background-color: rgba(0, 0, 0, 0.16);
 }
 
+/* A dock down the left or right side: a column, the running dot towards the edge. */
+#macrDock.macr-dock-side #macrDash {
+    padding: 4px 0;
+}
+
+#macrDock.macr-dock-left #macrDash .dash-item-container .show-apps,
+#macrDock.macr-dock-left #macrDash .dash-item-container .overview-tile {
+    padding: 3px 5px 3px 9px;
+}
+
+#macrDock.macr-dock-right #macrDash .dash-item-container .show-apps,
+#macrDock.macr-dock-right #macrDash .dash-item-container .overview-tile {
+    padding: 3px 9px 3px 5px;
+}
+
+#macrDock.macr-dock-side #macrDash .app-grid-running-dot {
+    margin-bottom: 0;
+}
+
+#macrDock.macr-dock-side #macrDash .dash-separator,
+#macrDock.macr-dock-side .macr-dock-divider {
+    margin: 5px 0;
+}
+
 .dash-label.macr-dock-label {
     -y-offset: 10px;
     font-family: "SF Pro Text", "SF Pro", system-ui, sans-serif;

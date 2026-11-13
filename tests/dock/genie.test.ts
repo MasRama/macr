@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 
-import { genieVertex } from '../../src/features/dock/logic/genie.js';
+import { genieVertex, genieVertexToward } from '../../src/features/dock/logic/genie.js';
 
 const win = { width: 800, height: 600 };
 const icon = { x: 300, y: 900, width: 48, height: 48 };
@@ -34,4 +34,27 @@ test('rows keep their order at every step', () => {
             last = ny;
         }
     }
+});
+
+test('a bottom dock pours the window as before', () => {
+    assert.deepEqual(genieVertexToward('bottom', 200, 300, win, icon, 0.4), genieVertex(200, 300, win, icon, 0.4));
+});
+
+test('a side dock squeezes the window into its icon at the end', () => {
+    const right = { x: 1200, y: 250, width: 48, height: 48 };
+    assert.deepEqual(genieVertexToward('right', 0, 0, win, right, 1), [1200, 250]);
+    assert.deepEqual(genieVertexToward('right', 800, 600, win, right, 1), [1248, 298]);
+    const left = { x: -500, y: 250, width: 48, height: 48 };
+    assert.deepEqual(genieVertexToward('left', 0, 0, win, left, 1), [-500, 250]);
+    assert.deepEqual(genieVertexToward('left', 800, 600, win, left, 1), [-452, 298]);
+    assert.deepEqual(genieVertexToward('left', 300, 200, win, left, 0), [300, 200]);
+});
+
+test('halfway, the side nearest the dock is the narrowest', () => {
+    const right = { x: 1200, y: 250, width: 48, height: 48 };
+    const span = (x: number) => genieVertexToward('right', x, 600, win, right, 0.5)[1] - genieVertexToward('right', x, 0, win, right, 0.5)[1];
+    assert.ok(span(800) < span(0));
+    const left = { x: -500, y: 250, width: 48, height: 48 };
+    const leftSpan = (x: number) => genieVertexToward('left', x, 600, win, left, 0.5)[1] - genieVertexToward('left', x, 0, win, left, 0.5)[1];
+    assert.ok(leftSpan(0) < leftSpan(800));
 });

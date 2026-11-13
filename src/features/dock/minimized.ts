@@ -38,7 +38,6 @@ export const MinimizedItem = GObject.registerClass(
             this.icon.y_align = Clutter.ActorAlign.CENTER;
             this.button.set_child(this.icon);
             (this.button as unknown as { _delegate: unknown })._delegate = this;
-            this.button.set_pivot_point(0.5, 1);
             this.setChild(this.button);
             this.setLabelText(window.get_title() ?? '');
             this.button.connect('clicked', () => Main.activateWindow(window));

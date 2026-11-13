@@ -5,6 +5,7 @@ import type Meta from 'gi://Meta';
 import Shell from 'gi://Shell';
 import St from 'gi://St';
 import { gettext as _ } from 'resource:///org/gnome/shell/extensions/extension.js';
+import * as AppDisplay from 'resource:///org/gnome/shell/ui/appDisplay.js';
 import * as AppFavorites from 'resource:///org/gnome/shell/ui/appFavorites.js';
 import * as Dash from 'resource:///org/gnome/shell/ui/dash.js';
 import * as Main from 'resource:///org/gnome/shell/ui/main.js';
@@ -13,6 +14,7 @@ import * as PopupMenu from 'resource:///org/gnome/shell/ui/popupMenu.js';
 import { expose } from '../../shared/expose-link.js';
 import { styleMenu, syncMenuScheme } from '../../shared/menu-style.js';
 import { launcherEntries } from './launcher.js';
+import { type DockEdge, growPivot, isSide, labelPlace } from './logic/edge.js';
 import { badgeText, progressOf } from './logic/launcher.js';
 import { clickAction, nextWindow } from './logic/rules.js';
 
@@ -61,15 +63,41 @@ function recordConnections(targets: Connectable[]): { stop(): [Disconnectable, n
 
 /** Icon size of the running dock, for drag actors. */
 let currentIconSize = 48;
+/** The screen edge the docks sit on; they are built again when it changes. */
+let currentEdge: DockEdge = 'bottom';
 
-/** Moves the label above the item's magnified icon, not its resting size. */
+export function dockEdge(): DockEdge {
+    return currentEdge;
+}
+
+/** The side of a dock item its menus open from, away from the screen edge. */
+export function menuSide(): St.Side {
+    if (currentEdge === 'left') return St.Side.LEFT;
+    if (currentEdge === 'right') return St.Side.RIGHT;
+    return St.Side.BOTTOM;
+}
+
+/** Makes `actor` grow away from the screen edge when magnified. */
+export function growAway(actor: Clutter.Actor): void {
+    const [x, y] = growPivot(currentEdge);
+    actor.set_pivot_point(x, y);
+}
+
+/** Puts the label past the item's magnified icon, over it or beside it, not at its resting size. */
 export function liftLabel(item: Dash.DashItemContainer): void {
     item.label?.add_style_class_name('macr-dock-label');
     const show = item.showLabel.bind(item);
     item.showLabel = () => {
         show();
-        const child = item.child;
-        if (item.label && child) item.label.y -= (child.scale_y - 1) * child.height;
+        const { label, child } = item;
+        if (!label || !child) return;
+        const [x, y] = item.get_transformed_position();
+        const grown = isSide(currentEdge) ? (child.scale_x - 1) * child.width : (child.scale_y - 1) * child.height;
+        const gap = label.get_theme_node().get_length('-y-offset');
+        const rect = { x: x ?? 0, y: y ?? 0, width: item.width, height: item.height };
+        const stage = { width: global.stage.width, height: global.stage.height };
+        const place = labelPlace(currentEdge, rect, grown, { width: label.width, height: label.height }, gap, stage);
+        label.set_position(place.x, place.y);
     };
 }
 
@@ -120,6 +148,14 @@ export const MacrDashIcon = GObject.registerClass(
             this.progress.add_child(this.progressFill);
             container.add_child(this.progress);
             container.add_child(this.badge);
+            // The running dot sits between the icon and the screen edge.
+            const dot = (this as unknown as { _dot?: St.Widget })._dot;
+            if (dot && isSide(currentEdge)) {
+                dot.x_align = currentEdge === 'left' ? Clutter.ActorAlign.START : Clutter.ActorAlign.END;
+                dot.y_align = Clutter.ActorAlign.CENTER;
+                dot.translation_y = 0;
+                dot.translation_x = currentEdge === 'left' ? -6 : 6;
+            }
             const entries = launcherEntries();
             if (entries) {
                 this.launcherId = entries.connect((appId) => {
@@ -168,9 +204,10 @@ export const MacrDashIcon = GObject.registerClass(
             return (this as unknown as { _menu?: PopupMenu.PopupMenu | null })._menu ?? null;
         }
 
-        // GNOME builds the app menu on the first right click: dress it like Macr's menus.
-        override popupMenu(side?: St.Side): void {
-            super.popupMenu(side);
+        // GNOME builds the app menu on the first right click: dress it like Macr's
+        // menus, and open it away from the screen edge (DashIcon always opens it up).
+        override popupMenu(): void {
+            AppDisplay.AppIcon.prototype.popupMenu.call(this, menuSide());
             const menu = this.menu;
             if (!menu) return;
             styleMenu(menu);
@@ -223,7 +260,8 @@ export const MacrDash = GObject.registerClass(
         /** Recent apps shown after the running ones (see RecentApps). */
         recentApps!: () => Shell.App[];
 
-        constructor(iconSize: number, extensionPath: string) {
+        constructor(iconSize: number, extensionPath: string, edge: DockEdge) {
+            currentEdge = edge;
             const targets = [
                 Shell.AppSystem.get_default() as unknown as Connectable,
                 AppFavorites.getAppFavorites() as unknown as Connectable,
@@ -246,8 +284,13 @@ export const MacrDash = GObject.registerClass(
             this.useAppsIcon(extensionPath);
             // Magnified icons grow out of the dock.
             this._box.clip_to_allocation = false;
+            if (isSide(edge)) {
+                // A column down the side of the screen.
+                (this._dashContainer as unknown as { vertical: boolean }).vertical = true;
+                (this._box.layout_manager as Clutter.BoxLayout).orientation = Clutter.Orientation.VERTICAL;
+            }
             liftLabel(this._showAppsIcon);
-            this._showAppsIcon.child?.set_pivot_point(0.5, 1);
+            if (this._showAppsIcon.child) growAway(this._showAppsIcon.child);
             this.connect('destroy', () => {
                 for (const [target, id] of this.leaked) target.disconnect(id);
                 this.leaked = [];
@@ -284,7 +327,7 @@ export const MacrDash = GObject.registerClass(
             appIcon.label_actor = null as unknown as Clutter.Actor;
             item.setLabelText(app.get_name());
             (appIcon.icon as unknown as SizedIcon).setIconSize(this.pixels);
-            appIcon.set_pivot_point(0.5, 1);
+            growAway(appIcon);
             this._hookUpLabel(item, appIcon);
             liftLabel(item);
             return item;
@@ -298,6 +341,7 @@ export const MacrDash = GObject.registerClass(
             const recent = this.recentApps?.() ?? [];
             if (recent.length === 0) {
                 super._redisplay();
+                this.sizeSeparator();
                 return;
             }
             const system = this._appSystem;
@@ -307,6 +351,21 @@ export const MacrDash = GObject.registerClass(
             } finally {
                 this._appSystem = system;
             }
+            this.sizeSeparator();
+        }
+
+        /** The line between the kept and the other apps: across the row or the column. */
+        private sizeSeparator(): void {
+            const separator = this._separator;
+            // Dash._init may redisplay before the constructor sets the size.
+            if (!separator || !this.pixels) return;
+            if (!isSide(currentEdge)) {
+                separator.height = this.pixels;
+                return;
+            }
+            const scale = St.ThemeContext.get_for_stage(global.stage as Clutter.Stage).scale_factor;
+            separator.set_size(this.pixels, scale);
+            separator.x_align = Clutter.ActorAlign.CENTER;
         }
 
         override _adjustIconSize(): void {
@@ -322,10 +381,10 @@ export const MacrDash = GObject.registerClass(
             for (const item of items) {
                 (item.child as Delegated | null)?._delegate?.icon?.setIconSize(this.pixels);
             }
-            if (this._separator) this._separator.height = this.pixels;
+            this.sizeSeparator();
         }
 
-        /** Items in the order they are drawn, left to right. */
+        /** Items in the order they are drawn, left to right or top to bottom. */
         rowItems(): Clutter.Actor[] {
             const box = this._box.get_children();
             return [this._showAppsIcon, ...box];

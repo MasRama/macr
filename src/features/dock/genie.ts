@@ -7,7 +7,8 @@ import { adjustAnimationTime } from 'resource:///org/gnome/shell/misc/animationU
 import * as Main from 'resource:///org/gnome/shell/ui/main.js';
 
 import type { Rect } from '../../shared/logic/geometry.js';
-import { genieVertex } from './logic/genie.js';
+import type { DockEdge } from './logic/edge.js';
+import { genieVertexToward } from './logic/genie.js';
 
 const DURATION = 480;
 const EFFECT_NAME = 'macr-genie';
@@ -27,17 +28,19 @@ const GenieEffect = GObject.registerClass(
         /** The icon, in the window's coordinates. */
         icon!: Rect;
         private size!: { width: number; height: number };
+        private edge!: DockEdge;
 
-        constructor(icon: Rect, size: { width: number; height: number }) {
+        constructor(icon: Rect, size: { width: number; height: number }, edge: DockEdge) {
             super();
             this.icon = icon;
             this.size = size;
+            this.edge = edge;
             this.progress = 0;
             this.set_n_tiles(12, 32);
         }
 
         override vfunc_deform_vertex(width: number, height: number, vertex: { x: number; y: number; tx: number; ty: number }): void {
-            const [x, y] = genieVertex(vertex.tx * this.size.width, vertex.ty * this.size.height, this.size, this.icon, this.progress);
+            const [x, y] = genieVertexToward(this.edge, vertex.tx * this.size.width, vertex.ty * this.size.height, this.size, this.icon, this.progress);
             vertex.x = (x * width) / this.size.width;
             vertex.y = (y * height) / this.size.height;
         }
@@ -76,7 +79,10 @@ export class Genie {
     private readonly ids: number[] = [];
     private readonly running = new Map<Meta.WindowActor, Running>();
 
-    constructor(private readonly iconOf: (app: Shell.App, window: Meta.Window) => Clutter.Actor | null) {
+    constructor(
+        private readonly iconOf: (app: Shell.App, window: Meta.Window) => Clutter.Actor | null,
+        private readonly edge: () => DockEdge,
+    ) {
         const found = ['minimize', 'unminimize'].map((signalId) =>
             (GObject.signal_handler_find as unknown as (instance: object, match: { signalId: string }) => unknown)(this.wm, { signalId }),
         );
@@ -148,7 +154,14 @@ export class Genie {
     private play(actor: Meta.WindowActor, icon: Clutter.Actor, reverse: boolean, done: () => void): void {
         const buffer = actor.meta_window.get_buffer_rect();
         const rect = { x: buffer.x, y: buffer.y, width: buffer.width, height: buffer.height };
-        const effect = new GenieEffect(this.iconRect(icon, rect) ?? { x: 0, y: rect.height, width: 0, height: 0 }, { width: actor.width, height: actor.height });
+        const edge = this.edge();
+        // Until the icon has its place: the middle of the window's dock side.
+        const fallback = {
+            bottom: { x: rect.width / 2, y: rect.height, width: 0, height: 0 },
+            left: { x: 0, y: rect.height / 2, width: 0, height: 0 },
+            right: { x: rect.width, y: rect.height / 2, width: 0, height: 0 },
+        }[edge];
+        const effect = new GenieEffect(this.iconRect(icon, rect) ?? fallback, { width: actor.width, height: actor.height }, edge);
         actor.add_effect_with_name(EFFECT_NAME, effect);
 
         const timeline = new Clutter.Timeline({ actor, duration: adjustAnimationTime(DURATION) });

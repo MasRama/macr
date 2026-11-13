@@ -20,3 +20,20 @@ export function genieVertex(x: number, y: number, win: { width: number; height: 
     const slide = smooth(clamp01(progress * 1.8 - (1 - v) * 0.8));
     return [lerp(x, icon.x + u * icon.width, squeeze), lerp(y, icon.y + v * icon.height, slide)];
 }
+
+/**
+ * genieVertex for a dock on any edge: a side dock's window pours sideways,
+ * the columns nearest the dock first. Worked out as the bottom case on the
+ * window turned (and, for the left, mirrored) so the dock is below it.
+ */
+export function genieVertexToward(edge: 'bottom' | 'left' | 'right', x: number, y: number, win: { width: number; height: number }, icon: Rect, progress: number): [number, number] {
+    if (edge === 'bottom') return genieVertex(x, y, win, icon, progress);
+    const turned = { width: win.height, height: win.width };
+    if (edge === 'right') {
+        const [ty, tx] = genieVertex(y, x, turned, { x: icon.y, y: icon.x, width: icon.height, height: icon.width }, progress);
+        return [tx, ty];
+    }
+    const mirrored = { x: icon.y, y: win.width - icon.x - icon.width, width: icon.height, height: icon.width };
+    const [ty, tx] = genieVertex(y, win.width - x, turned, mirrored, progress);
+    return [win.width - tx, ty];
+}

@@ -13,7 +13,10 @@ import * as PopupMenu from 'resource:///org/gnome/shell/ui/popupMenu.js';
 
 import { styleMenu, syncMenuScheme } from '../../shared/menu-style.js';
 import { quickLook } from '../../shared/quick-look.js';
+import type { Rect } from '../../shared/logic/geometry.js';
 import { isLight } from '../../shared/scheme.js';
+import { dockEdge, menuSide } from './dash.js';
+import { isSide, panelPlace } from './logic/edge.js';
 import { chooseView, FAN_MAX, fanSlot, folderIcon, gridShape, type SpecialFolder, type StackEntry, type StackMode, visibleEntries } from './logic/stack.js';
 
 const ATTRIBUTES = 'standard::name,standard::display-name,standard::is-hidden,standard::icon,standard::type,time::created,time::modified,thumbnail::path';
@@ -190,11 +193,10 @@ export const StackItem = GObject.registerClass(
             this.icon.y_align = Clutter.ActorAlign.CENTER;
             this.button.set_child(this.icon);
             (this.button as unknown as { _delegate: unknown })._delegate = this;
-            this.button.set_pivot_point(0.5, 1);
             this.setChild(this.button);
             this.setLabelText(source.name);
 
-            this.menu = new PopupMenu.PopupMenu(this.button, 0.5, St.Side.BOTTOM);
+            this.menu = new PopupMenu.PopupMenu(this.button, 0.5, menuSide());
             styleMenu(this.menu);
             Main.uiGroup.add_child(this.menu.actor);
             this.menu.actor.hide();
@@ -254,6 +256,8 @@ export const StackItem = GObject.registerClass(
                 item.connect('activate', () => this.settings.set_string('dock-downloads-view', mode));
                 this.menu.addMenuItem(item);
                 item.setOrnament(this.mode() === mode ? PopupMenu.Ornament.CHECK : PopupMenu.Ornament.NONE);
+                // The fan only rises from a dock along the bottom, as on macOS.
+                if (mode === 'fan' && isSide(dockEdge())) item.setSensitive(false);
             }
             this.hideLabel();
             this.menu.open(true);
@@ -284,12 +288,14 @@ export const StackItem = GObject.registerClass(
                 by = (by ?? 0) - actor.translation_y;
             }
             const anchor = { x: (bx ?? 0) - monitor.x + this.button.width / 2, y: (by ?? 0) - monitor.y - 6 * scale };
-            const view = chooseView(items.length, this.mode());
+            const icon = { x: (bx ?? 0) - monitor.x, y: (by ?? 0) - monitor.y, width: this.button.width, height: this.button.height };
+            // Down a side the stack always opens as a grid beside it.
+            const view = isSide(dockEdge()) ? 'grid' : chooseView(items.length, this.mode());
             this.shown = items.slice(0, view === 'fan' ? FAN_MAX : GRID_MAX);
             this.pointed = -1;
             this.fanned = view === 'fan';
             if (view === 'fan') this.buildFan(root, folder, this.shown, anchor, scale);
-            else this.buildGrid(root, folder, this.shown, anchor, monitor.width, scale);
+            else this.buildGrid(root, folder, this.shown, icon, { width: monitor.width, height: monitor.height }, scale);
 
             root.connect('button-press-event', () => {
                 this.close();
@@ -438,8 +444,8 @@ export const StackItem = GObject.registerClass(
             return button;
         }
 
-        /** A frosted panel above the dock icon: the folder's name, Open in Files and a scrolling grid. */
-        private buildGrid(root: St.Widget, folder: Gio.File, items: Item[], anchor: { x: number; y: number }, monitorWidth: number, scale: number): void {
+        /** A frosted panel above (or beside) the dock icon: the folder's name, Open in Files and a scrolling grid. */
+        private buildGrid(root: St.Widget, folder: Gio.File, items: Item[], icon: Rect, monitor: { width: number; height: number }, scale: number): void {
             const shape = gridShape(items.length);
             const cell = GRID_CELL * scale;
             const panel = new St.BoxLayout({ style_class: 'macr-stack-grid', vertical: true, reactive: true });
@@ -480,10 +486,9 @@ export const StackItem = GObject.registerClass(
             this.placeLater = () => {
                 const [, width] = panel.get_preferred_width(-1);
                 const [, height] = panel.get_preferred_height(width);
-                const margin = 8 * scale;
-                const x = Math.max(margin, Math.min(monitorWidth - width - margin, anchor.x - width / 2));
-                panel.set_position(Math.round(x), Math.round(anchor.y - height - 4 * scale));
-                panel.set_pivot_point(Math.min(1, Math.max(0, (anchor.x - x) / width)), 1);
+                const place = panelPlace(dockEdge(), icon, { width, height }, monitor, 10 * scale, 8 * scale);
+                panel.set_position(Math.round(place.x), Math.round(place.y));
+                panel.set_pivot_point(...place.pivot);
                 panel.set_scale(0.92, 0.92);
                 (panel as unknown as Easeable).ease({ opacity: 255, scale_x: 1, scale_y: 1, duration: OPEN_MS, mode: Clutter.AnimationMode.EASE_OUT_QUAD });
             };

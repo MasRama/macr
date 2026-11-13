@@ -9,6 +9,7 @@ import type { Module, ModuleContext } from '../../shared/module.js';
 import { Dock, type DockOptions } from './dock.js';
 import { Genie } from './genie.js';
 import { LauncherEntries, setLauncherEntries } from './launcher.js';
+import { parseEdge } from './logic/edge.js';
 import { minimizedByDock } from './logic/minimized.js';
 import { MinimizedWindows } from './minimized.js';
 import { RecentApps } from './recent.js';
@@ -18,7 +19,7 @@ const OPTION_KEYS = ['dock-icon-size', 'dock-autohide', 'dock-magnification'];
 type Disconnectable = { disconnect(id: number): void };
 
 /**
- * The macOS dock at the bottom of every monitor (or only the primary one),
+ * The macOS dock along the bottom (or down a side) of every monitor (or only the primary one),
  * replacing the overview's dash (and Dash to Dock), plus the genie minimize
  * (instead of Magic Lamp).
  */
@@ -48,6 +49,7 @@ export class DockModule implements Module {
 
         for (const key of OPTION_KEYS) this.ids.push([settings, settings.connect(`changed::${key}`, () => this.applyOptions())]);
         this.ids.push([settings, settings.connect('changed::dock-all-monitors', () => this.build())]);
+        this.ids.push([settings, settings.connect('changed::dock-position', () => this.build())]);
         this.ids.push([settings, settings.connect('changed::dock-genie', () => this.syncGenie())]);
         this.ids.push([settings, settings.connect('changed::dock-minimize-to-app', () => this.syncMinimized())]);
         this.ids.push([this.interface, this.interface.connect('changed::color-scheme', () => this.syncScheme())]);
@@ -119,6 +121,7 @@ export class DockModule implements Module {
             iconSize: settings.get_int('dock-icon-size'),
             autohide: settings.get_boolean('dock-autohide'),
             magnification: settings.get_boolean('dock-magnification'),
+            edge: parseEdge(settings.get_string('dock-position')),
             recentApps: () => this.recent?.apps() ?? [],
         };
     }
@@ -139,7 +142,10 @@ export class DockModule implements Module {
     private syncGenie(): void {
         const wanted = this.context.settings.get_boolean('dock-genie');
         if (wanted && !this.genie) {
-            this.genie = new Genie((app, window) => this.iconFor(app, window));
+            this.genie = new Genie(
+                (app, window) => this.iconFor(app, window),
+                () => parseEdge(this.context.settings.get_string('dock-position')),
+            );
         } else if (!wanted && this.genie) {
             this.genie.destroy();
             this.genie = null;

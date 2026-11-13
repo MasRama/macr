@@ -12,6 +12,7 @@ import * as PopupMenu from 'resource:///org/gnome/shell/ui/popupMenu.js';
 
 import { styleMenu, syncMenuScheme } from '../../shared/menu-style.js';
 import { dialogClass } from '../../shared/scheme.js';
+import { menuSide } from './dash.js';
 
 const TRASH_URI = 'trash:///';
 
@@ -82,11 +83,10 @@ export const TrashItem = GObject.registerClass(
             this.icon.y_align = Clutter.ActorAlign.CENTER;
             this.button.set_child(this.icon);
             (this.button as unknown as { _delegate: unknown })._delegate = this;
-            this.button.set_pivot_point(0.5, 1);
             this.setChild(this.button);
             this.setLabelText(_('Trash'));
 
-            this.menu = new PopupMenu.PopupMenu(this.button, 0.5, St.Side.BOTTOM);
+            this.menu = new PopupMenu.PopupMenu(this.button, 0.5, menuSide());
             styleMenu(this.menu);
             Main.uiGroup.add_child(this.menu.actor);
             this.menu.actor.hide();
