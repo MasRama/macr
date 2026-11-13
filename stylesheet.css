@@ -1719,3 +1719,23 @@
   border-color: rgba(255, 255, 255, 0.85);
   box-shadow: 0 6px 24px rgba(0, 0, 0, 0.16);
 }
+
+/* ---------- Screenshots ---------- */
+/* GNOME's screenshot UI (#screenshot-ui). !important where shell themes
+   (MacTahoe) style it. */
+
+/* Super+Shift+4: a bare crosshair over the screen, the selection a light
+   veil with a thin border, no shade and no handles. */
+#screenshot-ui.macr-screenshot-quick .screenshot-ui-area-indicator-shade {
+  background-color: transparent !important;
+}
+
+#screenshot-ui.macr-screenshot-quick .screenshot-ui-area-indicator-selection {
+  border: 1px solid rgba(255, 255, 255, 0.9) !important;
+  background-color: rgba(255, 255, 255, 0.14) !important;
+}
+
+#screenshot-ui.macr-screenshot-quick .screenshot-ui-area-selector-handle {
+  background-color: transparent !important;
+  box-shadow: none !important;
+}
