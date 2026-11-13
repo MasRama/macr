@@ -15,9 +15,11 @@ import * as PopupMenu from 'resource:///org/gnome/shell/ui/popupMenu.js';
 
 import { expose } from '../../shared/expose-link.js';
 import { styleMenu, syncMenuScheme } from '../../shared/menu-style.js';
+import type { AppDesktops } from './desktops.js';
 import { launcherEntries } from './launcher.js';
 import { BOUNCE_HEIGHT, BOUNCE_TIME, type BounceKind, bounceOffset, bounceShift, keepBouncing } from './logic/bounce.js';
 import { type DockEdge, growPivot, isSide, labelPlace } from './logic/edge.js';
+import type { Assignment } from './logic/assign.js';
 import { badgeText, progressOf } from './logic/launcher.js';
 import { clickAction, nextWindow } from './logic/rules.js';
 
@@ -85,6 +87,13 @@ export function setBounce(on: boolean): void {
 
 export function bounceEnabled(): boolean {
     return bounceOn;
+}
+
+/** Assign To in the icons' Options menu, while the dock runs. */
+let appDesktops: AppDesktops | null = null;
+
+export function setAppDesktops(desktops: AppDesktops | null): void {
+    appDesktops = desktops;
 }
 
 export function dockEdge(): DockEdge {
@@ -329,6 +338,49 @@ export const MacrDashIcon = GObject.registerClass(
             syncMenuScheme(menu);
             this.syncShowAll(menu);
             this.syncRecent(menu);
+            this.syncOptions(menu);
+        }
+
+        /**
+         * Options > Assign To: All Desktops, This Desktop or None, as in the
+         * macOS Dock; Desktop N too when the app is assigned to another one.
+         */
+        private syncOptions(menu: PopupMenu.PopupMenu): void {
+            type Choice = 'all' | 'here' | 'other' | 'none';
+            const self = this as unknown as { _macrOptions?: { submenu: PopupMenu.PopupSubMenuMenuItem; items: Map<Choice, PopupMenu.PopupMenuItem> } };
+            const desktops = appDesktops;
+            if (!self._macrOptions) {
+                const submenu = new PopupMenu.PopupSubMenuMenuItem(_('Options'));
+                submenu.menu.addMenuItem(new PopupMenu.PopupSeparatorMenuItem(_('Assign To')));
+                const items = new Map<Choice, PopupMenu.PopupMenuItem>();
+                const add = (choice: Choice, label: string, assignment: () => Assignment | null) => {
+                    const item = new PopupMenu.PopupMenuItem(label);
+                    item.connect('activate', () => appDesktops?.assign(this.app, assignment()));
+                    submenu.menu.addMenuItem(item);
+                    items.set(choice, item);
+                };
+                add('all', _('All Desktops'), () => 'all');
+                add('here', _('This Desktop'), () => global.workspace_manager.get_active_workspace_index());
+                // Shown only while assigned elsewhere: choosing it keeps that desktop.
+                add('other', '', () => appDesktops?.get(this.app.get_id()) ?? null);
+                add('none', _('None'), () => null);
+                const all = (menu as unknown as { _getMenuItems(): unknown[] })._getMenuItems();
+                const details = (menu as unknown as { _detailsItem?: unknown })._detailsItem;
+                const index = details ? all.indexOf(details) : -1;
+                menu.addMenuItem(submenu, index >= 0 ? index + 1 : undefined);
+                self._macrOptions = { submenu, items };
+            }
+            const { submenu, items } = self._macrOptions;
+            submenu.visible = desktops !== null;
+            const current = desktops?.get(this.app.get_id()) ?? null;
+            const checked: Choice = current === null ? 'none' : current === 'all' ? 'all' : current === global.workspace_manager.get_active_workspace_index() ? 'here' : 'other';
+            const other = items.get('other');
+            if (other) {
+                other.visible = checked === 'other';
+                // TRANSLATORS: %d is a desktop (workspace) number, from 1.
+                if (typeof current === 'number') other.label.text = _('Desktop %d').format(current + 1);
+            }
+            for (const [choice, item] of items) item.setOrnament(choice === checked ? PopupMenu.Ornament.CHECK : PopupMenu.Ornament.NONE);
         }
 
         /** Remove from Dock and Clear Recent Apps, on a recent app's menu (macOS's Options > Remove from Dock). */

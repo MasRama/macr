@@ -196,6 +196,15 @@ schemas/                GSettings schema
   right and a progress bar under it.
 - Show All Windows in an app icon's menu (after GNOME's window list) opens
   App Exposé through `src/shared/expose-link.ts`, while that module runs.
+- Options > Assign To in an app icon's menu (after App Details): All
+  Desktops, This Desktop, None, and Desktop N while the app is assigned to
+  another desktop. Saved in `dock-app-desktops` as `app-id=all` or
+  `app-id=N` (`logic/assign.ts`). `AppDesktops` (`desktops.ts`) places a
+  new normal window on `window-created`, or on its first `shown` when a
+  Wayland window has no app yet: `stick()` for every desktop, else
+  `change_workspace_by_index`, adding missing desktops at the end first
+  (through Mission Control's fixed Spaces link while it runs). Choosing
+  moves the app's open windows too; None only unsticks.
 - Minimized windows (`minimized.ts`, unless `dock-minimize-to-app` is on):
   `MinimizedWindows` follows `notify::minimized` on every window, in the
   order they were minimized, and each dock shows its monitor's (the

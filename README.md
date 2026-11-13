@@ -74,6 +74,8 @@ are laid out like macOS System Settings.
   Trash, with the genie effect when you minimize.
 - Hides when a window covers it. Sits along the bottom or down the left or
   right side, on every monitor.
+- **Assign To**: right-click an app, Options, and its windows open on All
+  Desktops, on This Desktop, or wherever you are (None).
 
 ### Launchpad and Spotlight
 

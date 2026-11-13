@@ -478,6 +478,11 @@
       <summary>How stacks show in the dock</summary>
       <description>Stack piles the newest items on the icon; Folder shows the folder's icon.</description>
     </key>
+    <key name="dock-app-desktops" type="as">
+      <default>[]</default>
+      <summary>Apps assigned to desktops</summary>
+      <description>Set from a Dock icon's Options > Assign To. Entries are app-id=all (every desktop) or app-id=N (desktop N, counted from 0).</description>
+    </key>
     <key name="accent-enabled" type="b">
       <default>true</default>
       <summary>Accent colour</summary>

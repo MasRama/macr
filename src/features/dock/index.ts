@@ -7,7 +7,8 @@ import * as Main from 'resource:///org/gnome/shell/ui/main.js';
 import { isLight } from '../../shared/scheme.js';
 import type { Module, ModuleContext } from '../../shared/module.js';
 import { onStagesChanged, stageManager } from '../../shared/stage-link.js';
-import { setBounce } from './dash.js';
+import { setAppDesktops, setBounce } from './dash.js';
+import { AppDesktops } from './desktops.js';
 import { Dock, type DockOptions } from './dock.js';
 import { Genie } from './genie.js';
 import { LauncherEntries, setLauncherEntries } from './launcher.js';
@@ -31,6 +32,7 @@ export class DockModule implements Module {
     private recent: RecentApps | null = null;
     private launcher: LauncherEntries | null = null;
     private minimized: MinimizedWindows | null = null;
+    private desktops: AppDesktops | null = null;
     private stopStages: (() => void) | null = null;
     private readonly interface = new Gio.Settings({ schema_id: 'org.gnome.desktop.interface' });
     private ids: [Disconnectable, number][] = [];
@@ -46,6 +48,8 @@ export class DockModule implements Module {
         // Before the docks: their icons follow the badges from the start.
         this.launcher = new LauncherEntries();
         setLauncherEntries(this.launcher);
+        this.desktops = new AppDesktops(settings);
+        setAppDesktops(this.desktops);
         this.recent = new RecentApps(settings, () => {
             for (const dock of this.docks) dock.refreshApps();
         });
@@ -76,6 +80,9 @@ export class DockModule implements Module {
         this.ids = [];
         this.genie?.destroy();
         this.genie = null;
+        setAppDesktops(null);
+        this.desktops?.destroy();
+        this.desktops = null;
         this.stopStages?.();
         this.stopStages = null;
         this.minimized?.destroy();
