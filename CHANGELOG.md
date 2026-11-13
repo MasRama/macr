@@ -1,5 +1,29 @@
 # Changelog
 
+## [0.3.0](https://github.com/MasRama/macr/compare/v0.2.0...v0.3.0) (2026-11-13)
+
+
+### Features
+
+* **control-center:** add a Stage Manager toggle ([4722f8a](https://github.com/MasRama/macr/commit/4722f8aee43430873ba101f20337f0fe3f4dd2a2))
+* **menubar:** add Move & Resize to the Window menu ([3d75ba3](https://github.com/MasRama/macr/commit/3d75ba3829c109b028da5d432c9f312545886e5d))
+* **prefs:** add a Screenshots page ([fa07722](https://github.com/MasRama/macr/commit/fa077223b2915a961dff357cadaef025bff05def))
+* **prefs:** add a Stage Manager switch to the Mission Control page ([392b560](https://github.com/MasRama/macr/commit/392b560cf6dd50ff59dfe9818889e958084b1799))
+* **prefs:** add tiling settings to the Windows page ([8df2cb8](https://github.com/MasRama/macr/commit/8df2cb8f3513d9ee992887eb33f76650d3c913c1))
+* **prefs:** lay out the settings like macOS System Settings ([b6b0876](https://github.com/MasRama/macr/commit/b6b08768f95b39911e5c74a19a83ae6d652b81da))
+* **screenshot:** show a floating thumbnail after each screenshot ([8373e86](https://github.com/MasRama/macr/commit/8373e86c9e30db8873fc4dcab309a7fd7f76e76c))
+* **screenshot:** show the toolbar as the macOS bar on Super+Shift+5 ([b237ed6](https://github.com/MasRama/macr/commit/b237ed600d1ea83190eae51b4bb156f27e7e3684))
+* **screenshot:** take a dragged area or a window with the crosshair on Super+Shift+4 ([4c9d6af](https://github.com/MasRama/macr/commit/4c9d6afd75a23201f882a16aec1cf2684cf3afb1))
+* **screenshot:** take a screenshot of the whole screen with Super+Shift+3 ([35ccaa2](https://github.com/MasRama/macr/commit/35ccaa2e217c2f950c86a69f22eb452a2e554f32))
+* **stage-manager:** keep the focused app in the middle and the others as stages on the left ([eed80e1](https://github.com/MasRama/macr/commit/eed80e1b9c9361966d0168c05d91be55b1e05eef))
+* **tiling:** add keyboard shortcuts to tile, arrange and restore windows ([85c716f](https://github.com/MasRama/macr/commit/85c716f5609bc4c10929d03bf2f9cdebc7bebdc2))
+* **tiling:** snap windows to halves, quarters and Fill by dragging them to the screen edges ([caf1e6f](https://github.com/MasRama/macr/commit/caf1e6f7f7c364a988feb829f7042f8625c0afd4))
+
+
+### Bug Fixes
+
+* **stage-manager:** keep your next minimize and restore animations after a quick swap or turning it off ([2b3b48c](https://github.com/MasRama/macr/commit/2b3b48c7be4fcd578e114eddf68f934ab49c031f))
+
 ## [0.2.0](https://github.com/MasRama/macr/compare/v0.1.0...v0.2.0) (2026-11-12)
 
 
