@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 
-import { boxOf, cityCode, dailyForecast, dayRange, defaultSlots, droppedOnDesktop, fitScale, fromFraction, galleryTiles, handAngles, hourlyForecast, isDesktopIconsTitle, monthGrid, placeWidget, rangeBar, sizesOf, toFraction, upcomingEvents, widgetIds, widgetSize, wrapRows } from '../../src/features/widgets/logic/widgets.js';
+import { boxOf, cityCode, cityName, dailyForecast, dayRange, defaultSlots, droppedOnDesktop, fitScale, fromFraction, galleryTiles, handAngles, hourlyForecast, isDesktopIconsTitle, monthGrid, offsetLabel, placeWidget, rangeBar, relativeDay, sizesOf, toFraction, upcomingEvents, widgetIds, widgetSize, wrapRows } from '../../src/features/widgets/logic/widgets.js';
 
 const area = { x: 0, y: 32, width: 1920, height: 1048 };
 
@@ -43,12 +43,13 @@ test('a dropped widget snaps to the grid and stays on screen', () => {
 });
 
 test('each widget comes in the sizes macOS has for it', () => {
-    assert.deepEqual(sizesOf('clock'), ['small']);
+    assert.deepEqual(sizesOf('clock'), ['small', 'medium']);
     assert.deepEqual(sizesOf('calendar'), ['small', 'medium', 'large']);
     assert.deepEqual(sizesOf('weather'), ['small', 'medium', 'large']);
     assert.deepEqual(sizesOf('batteries'), ['small', 'medium']);
     assert.deepEqual(sizesOf('photos'), ['small', 'medium', 'large']);
     assert.equal(widgetSize('calendar', 'medium'), 'medium');
+    assert.equal(widgetSize('clock', 'medium'), 'medium');
     assert.equal(widgetSize('clock', 'large'), 'small');
     assert.equal(widgetSize('weather', undefined), 'small');
     assert.equal(widgetSize('weather', 'huge'), 'small');
@@ -149,6 +150,7 @@ test('hourly forecast: the next hours from now, one per hour', () => {
 test('the gallery shows every widget at each of its sizes, in order', () => {
     assert.deepEqual(galleryTiles(), [
         { id: 'clock', size: 'small' },
+        { id: 'clock', size: 'medium' },
         { id: 'calendar', size: 'small' },
         { id: 'calendar', size: 'medium' },
         { id: 'calendar', size: 'large' },
@@ -204,6 +206,18 @@ test('daily forecast: today and the next days, each with its low, high and midda
     assert.deepEqual(dailyForecast([], h(0, 14), 5), []);
 });
 
+test('world clocks show the hours from here and the day there', () => {
+    assert.equal(offsetLabel(5 * 3600), '+5');
+    assert.equal(offsetLabel(-3 * 3600), '\u22123');
+    assert.equal(offsetLabel(5.5 * 3600), '+5:30');
+    assert.equal(offsetLabel(-9.75 * 3600), '\u22129:45');
+    assert.equal(offsetLabel(0), '');
+    assert.equal(relativeDay('2026-11-13', '2026-11-13'), 'today');
+    assert.equal(relativeDay('2026-11-13', '2026-11-14'), 'tomorrow');
+    assert.equal(relativeDay('2026-11-13', '2026-11-12'), 'yesterday');
+    assert.equal(relativeDay('2026-12-31', '2027-01-01'), 'tomorrow');
+});
+
 test('a day\'s range bar sits where its low and high fall in the week', () => {
     assert.deepEqual(rangeBar(20, 30, 20, 30, 100), { x: 0, width: 100 });
     assert.deepEqual(rangeBar(24, 28, 20, 30, 100), { x: 40, width: 40 });
@@ -211,4 +225,12 @@ test('a day\'s range bar sits where its low and high fall in the week', () => {
     assert.deepEqual(rangeBar(25, 25, 20, 30, 100, 6), { x: 47, width: 6 });
     assert.deepEqual(rangeBar(30, 30, 20, 30, 100, 6), { x: 94, width: 6 });
     assert.deepEqual(rangeBar(25, 25, 25, 25, 100, 6), { x: 0, width: 100 });
+});
+
+test('the local clock is named after its time zone\'s city', () => {
+    assert.equal(cityName('Asia/Jakarta'), 'Jakarta');
+    assert.equal(cityName('America/New_York'), 'New York');
+    assert.equal(cityName('America/Argentina/Buenos_Aires'), 'Buenos Aires');
+    assert.equal(cityName('UTC'), 'UTC');
+    assert.equal(cityName(''), '');
 });

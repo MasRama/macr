@@ -29,7 +29,7 @@ export const WIDGET_GAP = 20;
 
 /** The sizes macOS has for each widget; the first is the default. */
 const SIZES: Record<WidgetId, WidgetSize[]> = {
-    clock: ['small'],
+    clock: ['small', 'medium'],
     calendar: ['small', 'medium', 'large'],
     weather: ['small', 'medium', 'large'],
     batteries: ['small', 'medium'],
@@ -126,6 +126,11 @@ export function handAngles(hours: number, minutes: number, seconds: number): { h
 export function cityCode(zone: string): string {
     const city = zone.split('/').pop() ?? '';
     return city.replace(/[^A-Za-z]/g, '').slice(0, 3).toUpperCase();
+}
+
+/** The city of a time zone like "America/New_York": "New York". */
+export function cityName(zone: string): string {
+    return (zone.split('/').pop() ?? '').replace(/_/g, ' ');
 }
 
 /** Today's low and high, rounded, from the temperatures known for it. */
@@ -245,6 +250,21 @@ export function rangeBar(low: number, high: number, min: number, max: number, wi
     }
     x = Math.min(Math.max(x, 0), width - bar);
     return { x: Math.round(x), width: Math.round(bar) };
+}
+
+/** A world clock's hours from here: "+5", "−3", "+5:30"; nothing when the same. */
+export function offsetLabel(seconds: number): string {
+    if (seconds === 0) return '';
+    const minutes = Math.round(Math.abs(seconds) / 60);
+    const sign = seconds > 0 ? '+' : '\u2212';
+    const rest = minutes % 60;
+    return `${sign}${Math.floor(minutes / 60)}${rest ? `:${String(rest).padStart(2, '0')}` : ''}`;
+}
+
+/** Whether a world clock's date (YYYY-MM-DD) is today, tomorrow or yesterday here. */
+export function relativeDay(here: string, there: string): 'today' | 'tomorrow' | 'yesterday' {
+    if (there === here) return 'today';
+    return there > here ? 'tomorrow' : 'yesterday';
 }
 
 /** The Edit Widgets gallery's previews: each widget at each of its sizes. */
