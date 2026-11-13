@@ -2112,3 +2112,103 @@
   padding: 16px;
   color: #f5f5f7;
 }
+
+/* Desktop widgets */
+/* No box-shadow: St draws it square under a gradient, and the tint effect clips it. */
+.macr-widget {
+  border-radius: 22px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background-color: rgba(28, 28, 30, 0.94);
+  font-family: "SF Pro Text", "SF Pro", system-ui, sans-serif;
+  color: #f5f5f7;
+}
+
+.macr-widget.macr-light {
+  border-color: rgba(0, 0, 0, 0.08);
+  background-color: rgba(255, 255, 255, 0.95);
+  color: #1d1d1f;
+}
+
+.macr-widget-calendar-box {
+  padding: 13px 12px 10px 12px;
+}
+
+.macr-widget-month {
+  font-size: 9pt;
+  font-weight: 700;
+  color: #ff453a;
+  padding-left: 5px;
+  margin-bottom: 3px;
+}
+
+.macr-widget.macr-light .macr-widget-month {
+  color: #ff3b30;
+}
+
+.macr-widget-weekday {
+  font-size: 7.5pt;
+  font-weight: 700;
+  color: rgba(245, 245, 247, 0.5);
+}
+
+.macr-widget.macr-light .macr-widget-weekday {
+  color: rgba(29, 29, 31, 0.45);
+}
+
+.macr-widget-day {
+  font-size: 8pt;
+  font-weight: 600;
+  min-width: 17px;
+  min-height: 17px;
+  text-align: center;
+  border-radius: 999px;
+}
+
+.macr-widget-day.today {
+  background-color: #ff453a;
+  color: #ffffff;
+}
+
+.macr-widget.macr-light .macr-widget-day.today {
+  background-color: #ff3b30;
+}
+
+.macr-widget-weather,
+.macr-widget-weather.macr-light {
+  background-gradient-direction: vertical;
+  background-gradient-start: #3f8ee6;
+  background-gradient-end: #2a64c2;
+  color: #ffffff;
+}
+
+.macr-widget-weather.night,
+.macr-widget-weather.night.macr-light {
+  background-gradient-start: #22305a;
+  background-gradient-end: #0e1530;
+}
+
+.macr-widget-weather-box {
+  padding: 13px 14px 12px 14px;
+}
+
+.macr-widget-weather-place {
+  font-size: 10pt;
+  font-weight: 700;
+}
+
+.macr-widget-weather-temp {
+  font-family: "SF Pro Display", "SF Pro", system-ui, sans-serif;
+  font-size: 30pt;
+  font-weight: 300;
+}
+
+.macr-widget-weather-icon {
+  icon-size: 16px;
+  margin-bottom: 2px;
+}
+
+.macr-widget-weather-sky,
+.macr-widget-weather-range {
+  font-size: 8.5pt;
+  font-weight: 600;
+}

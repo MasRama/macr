@@ -220,6 +220,7 @@ export function pages(): PageInfo[] {
                 group('', [appearanceRow(settings), accentRow(settings)]),
                 group(_('Desktop'), [
                     switchRow(settings, 'dynamic-desktop-enabled', _('Dynamic desktop'), _('Your desktop picture follows the time of day: warm at sunrise and sunset, dimmer and cooler at night')),
+                    widgetsRow(settings),
                 ]),
                 group(_('App icons'), [switchRow(settings, 'app-icon-tiles', _('macOS tiles for other icons'), _('Apps your icon theme does not cover get their icon on a macOS tile'))]),
                 group(_('App switcher'), [switchRow(settings, 'switcher-enabled', _('macOS app switcher'), _('Alt+Tab as a frosted panel with big icons'))]),
@@ -301,6 +302,49 @@ function stacksGroup({ settings, window, onClose }: PageContext): Adw.Preference
     const id = settings.connect('changed::dock-stacks', refresh);
     onClose(() => settings.disconnect(id));
     return box;
+}
+
+/**
+ * Widgets on the desktop: the switch, one switch per widget and a button
+ * that puts dragged widgets back in their column.
+ */
+function widgetsRow(settings: Gio.Settings): Gtk.Widget {
+    const expander = new Adw.ExpanderRow({
+        title: _('Widgets on the desktop'),
+        subtitle: _('Drag them anywhere; click one to open its app'),
+        show_enable_switch: true,
+    });
+    settings.bind('desktop-widgets-enabled', expander, 'enable-expansion', Gio.SettingsBindFlags.DEFAULT);
+    const choices: [string, string][] = [
+        ['clock', _('Clock')],
+        ['calendar', _('Calendar')],
+        ['weather', _('Weather')],
+    ];
+    const rows = choices.map(([id, title]) => {
+        const row = new Adw.SwitchRow({ title });
+        row.connect('notify::active', () => {
+            const list = settings.get_strv('desktop-widgets');
+            if (row.active === list.includes(id)) return;
+            // Keep the widgets in the order they are listed here.
+            const wanted = row.active ? [...list, id] : list.filter((name) => name !== id);
+            settings.set_strv('desktop-widgets', choices.map(([name]) => name).filter((name) => wanted.includes(name)));
+        });
+        expander.add_row(row);
+        return [id, row] as const;
+    });
+    const sync = () => {
+        const list = settings.get_strv('desktop-widgets');
+        for (const [id, row] of rows) row.active = list.includes(id);
+    };
+    sync();
+    const reset = new Adw.ActionRow({ title: _('Put widgets back in their column') });
+    const button = new Gtk.Button({ label: _('Reset'), valign: Gtk.Align.CENTER });
+    button.connect('clicked', () => settings.reset('desktop-widget-positions'));
+    reset.add_suffix(button);
+    expander.add_row(reset);
+    const id = settings.connect('changed::desktop-widgets', sync);
+    expander.connect('destroy', () => settings.disconnect(id));
+    return expander;
 }
 
 /** A path for reading: ~ for the home folder. */

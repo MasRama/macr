@@ -399,5 +399,20 @@
       <summary>Folder stacks in the dock</summary>
       <description>Paths of folders shown as stacks before the Downloads stack.</description>
     </key>
+    <key name="desktop-widgets-enabled" type="b">
+      <default>false</default>
+      <summary>Widgets on the desktop</summary>
+      <description>Clock, calendar and weather widgets on the desktop, under your windows.</description>
+    </key>
+    <key name="desktop-widgets" type="as">
+      <default>['clock', 'calendar', 'weather']</default>
+      <summary>The widgets on the desktop</summary>
+      <description>Which widgets show, in order: clock, calendar, weather.</description>
+    </key>
+    <key name="desktop-widget-positions" type="a{s(dd)}">
+      <default>{}</default>
+      <summary>Where each widget was dragged</summary>
+      <description>Each widget's top left corner as fractions of the primary monitor's work area; widgets not listed take their default place.</description>
+    </key>
   </schema>
 </schemalist>
