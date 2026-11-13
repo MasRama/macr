@@ -7,6 +7,7 @@ import { ControlCenterModule } from './features/controlcenter/index.js';
 import { WindowCornersModule } from './features/corners/index.js';
 import { DockModule } from './features/dock/index.js';
 import { HotCornersModule } from './features/hotcorners/index.js';
+import { KeyboardModule } from './features/keyboard/index.js';
 import { LaunchpadModule } from './features/launchpad/index.js';
 import { LockScreenModule } from './features/lockscreen/index.js';
 import { LoginScreenModule } from './features/loginscreen/index.js';
@@ -22,6 +23,7 @@ import { TilingModule } from './features/tiling/index.js';
 import { TrafficLightsModule } from './features/trafficlights/index.js';
 import { runsOn, screenOf } from './shared/logic/screen.js';
 import type { Module, ModuleEntry } from './shared/module.js';
+import { resetHider } from './shared/hider.js';
 import { resetTiling } from './shared/tiling-link.js';
 
 const MODULES: ModuleEntry[] = [
@@ -40,6 +42,7 @@ const MODULES: ModuleEntry[] = [
     { key: 'traffic-lights-enabled', create: (context) => new TrafficLightsModule(context.settings) },
     { key: 'tiling-enabled', create: (context) => new TilingModule(context.settings) },
     { key: 'screenshot-enabled', create: (context) => new ScreenshotModule(context) },
+    { key: 'keyboard-enabled', create: (context) => new KeyboardModule(context.settings) },
     // Paused, not turned off, while locked: turning off would bring every window back.
     { key: 'stage-manager-enabled', screens: ['desktop', 'lock'], create: () => new StageManagerModule() },
     { key: 'lock-screen-enabled', screens: ['desktop', 'lock'], create: () => new LockScreenModule() },
@@ -76,6 +79,7 @@ export default class Macr extends Extension {
         for (const module of [...this.running.values()].reverse()) module.disable();
         this.running.clear();
         resetTiling();
+        resetHider();
         this.settings = null;
     }
 

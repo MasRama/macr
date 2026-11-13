@@ -293,5 +293,36 @@
       <summary>Show a floating thumbnail after each screenshot</summary>
       <description>A small copy of the screenshot at the bottom right for a few seconds, instead of GNOME's notification banner. Click it to open the picture, swipe it right to put it away, or right-click it to copy, show or delete the file.</description>
     </key>
+    <key name="keyboard-enabled" type="b">
+      <default>true</default>
+      <summary>Mac keyboard shortcuts</summary>
+      <description>Super stands in for the Command key: Super+Q quits the app, Super+M minimizes the window, Super+H hides the app and Super+Alt+H hides the others. GNOME's own Super+H and Super+M give way while it is on.</description>
+    </key>
+    <key name="keyboard-quit" type="as">
+      <default><![CDATA[['<Super>q']]]></default>
+      <summary>Keyboard shortcut that quits the focused app</summary>
+    </key>
+    <key name="keyboard-minimize" type="as">
+      <default><![CDATA[['<Super>m']]]></default>
+      <summary>Keyboard shortcut that minimizes the focused window</summary>
+    </key>
+    <key name="keyboard-hide" type="as">
+      <default><![CDATA[['<Super>h']]]></default>
+      <summary>Keyboard shortcut that hides the focused app</summary>
+    </key>
+    <key name="keyboard-hide-others" type="as">
+      <default><![CDATA[['<Super><Alt>h']]]></default>
+      <summary>Keyboard shortcut that hides every app but the focused one</summary>
+    </key>
+    <key name="keyboard-saved-wm" type="a{sas}">
+      <default>{}</default>
+      <summary>GNOME's window shortcuts before Macr's keyboard shortcuts</summary>
+      <description>Macr takes its own shortcuts out of org.gnome.desktop.wm.keybindings minimize while its keyboard shortcuts are on, and puts this list back when they are turned off.</description>
+    </key>
+    <key name="keyboard-saved-shell" type="a{sas}">
+      <default>{}</default>
+      <summary>GNOME's shell shortcuts before Macr's keyboard shortcuts</summary>
+      <description>Macr takes its own shortcuts out of org.gnome.shell.keybindings toggle-message-tray while its keyboard shortcuts are on, and puts this list back when they are turned off.</description>
+    </key>
   </schema>
 </schemalist>
