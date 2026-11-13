@@ -170,7 +170,9 @@ schemas/                GSettings schema
   `MinimizedItem`s before the Trash: a `Shell.WindowPreviewLayout` of the
   window fitted into the icon square, which paints minimized windows, with
   the app's icon in its corner. A click activates the window; its item
-  animates out and stays the genie's target until it is destroyed.
+  animates out and stays the genie's target until it is destroyed. Windows
+  Stage Manager minimized into its strip are left out: the dock asks
+  `src/shared/stage-link.ts` (`holds`) and syncs again on `onStagesChanged`.
 - Genie: GNOME's minimize and unminimize handlers on `global.window_manager`
   are blocked, and a `Clutter.DeformEffect` bends the window into its
   thumbnail, else its app's icon in the dock on its monitor
@@ -612,7 +614,9 @@ schemas/                GSettings schema
   arrives first.
 - Show Desktop (see Show Desktop) pauses Stage Manager while the windows
   are slid aside, through `src/shared/stage-link.ts`, so the sliding does not
-  read as windows leaving the middle.
+  read as windows leaving the middle. Whenever the windows it holds change,
+  it calls `stagesChanged()` there so the dock leaves them out of its
+  minimized thumbnails.
 - Turning off unminimizes every window it minimized, oldest first and on any
   workspace, and activates the focused window: nothing was moved, so every
   window is back where it was.

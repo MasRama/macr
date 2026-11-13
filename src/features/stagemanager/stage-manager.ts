@@ -3,7 +3,7 @@ import Meta from 'gi://Meta';
 import Shell from 'gi://Shell';
 import * as Main from 'resource:///org/gnome/shell/ui/main.js';
 
-import type { StageLink } from '../../shared/stage-link.js';
+import { type StageLink, stagesChanged } from '../../shared/stage-link.js';
 import { eligible, initialState, type Plan, type StageEvent, stages, type StageState, step, type World } from './logic/stages.js';
 import { Strip, type StripStage } from './strip.js';
 
@@ -94,6 +94,10 @@ export class StageManager implements StageLink {
         // What happened before the pause still counts.
         if (this.queue.length > 0 && !Main.overview.visible) this.flush();
         this.runAll({ type: 'pause' });
+    }
+
+    holds(windowId: number): boolean {
+        return [...this.states.values()].some((state) => state.ours.includes(windowId));
     }
 
     resume(): void {
@@ -196,9 +200,12 @@ export class StageManager implements StageLink {
     }
 
     private run(monitor: number, event: StageEvent): void {
-        const plan = step(this.states.get(monitor) ?? initialState(), this.world(monitor), event);
+        const before = this.states.get(monitor) ?? initialState();
+        const plan = step(before, this.world(monitor), event);
         this.states.set(monitor, plan.state);
         this.apply(plan);
+        const held = new Set(before.ours);
+        if (plan.state.ours.length !== held.size || plan.state.ours.some((id) => !held.has(id))) stagesChanged();
     }
 
     private makeStrips(): void {
@@ -227,6 +234,7 @@ export class StageManager implements StageLink {
         this.runAll({ type: 'enable' });
         if (this.pauses > 0) this.runAll({ type: 'pause' });
         this.refresh();
+        stagesChanged();
     }
 
     /** Unminimize, focus, then minimize, without animations. */

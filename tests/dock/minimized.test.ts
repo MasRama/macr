@@ -25,6 +25,15 @@ test('with the primary dock gone the first dock takes them', () => {
     assert.equal(minimizedByDock([{ id: 7, monitor: 0, order: 0 }], [], 0).size, 0);
 });
 
+test('windows waiting in the Stage Manager strip stay out of the dock', () => {
+    const windows = [
+        { id: 1, monitor: 0, order: 1, staged: true },
+        { id: 2, monitor: 0, order: 2, staged: false },
+        { id: 3, monitor: 0, order: 3 },
+    ];
+    assert.deepEqual(minimizedByDock(windows, [0], 0).get(0), [2, 3]);
+});
+
 test('a thumbnail keeps the window’s shape inside the icon square', () => {
     assert.deepEqual(fitInSquare(1600, 900, 48), { width: 48, height: 27 });
     assert.deepEqual(fitInSquare(600, 800, 48), { width: 36, height: 48 });

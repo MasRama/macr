@@ -5,17 +5,21 @@ export interface MinimizedWindow {
     monitor: number;
     /** When it was minimized, as a count: older ones sit further from the Trash. */
     order: number;
+    /** Stage Manager keeps it in its strip, so it is not the user's to bring back from the dock. */
+    staged?: boolean;
 }
 
 /**
  * Which dock shows each minimized window, oldest first: the dock on its
- * monitor, else the primary monitor's, else the first dock.
+ * monitor, else the primary monitor's, else the first dock. Windows waiting
+ * in the Stage Manager strip are left out, as on macOS.
  */
 export function minimizedByDock(windows: readonly MinimizedWindow[], docks: readonly number[], primary: number): Map<number, number[]> {
     const byDock = new Map<number, number[]>(docks.map((monitor) => [monitor, []]));
     if (!docks.length) return byDock;
     const fallback = docks.includes(primary) ? primary : docks[0];
     for (const window of [...windows].sort((a, b) => a.order - b.order)) {
+        if (window.staged) continue;
         byDock.get(docks.includes(window.monitor) ? window.monitor : fallback)!.push(window.id);
     }
     return byDock;

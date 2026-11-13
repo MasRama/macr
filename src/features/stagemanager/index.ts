@@ -12,8 +12,9 @@ export class StageManagerModule implements Module {
     }
 
     disable(): void {
-        setStageManager(null);
+        // Destroyed first: the windows it brings back are still its own until then.
         this.manager?.destroy();
+        setStageManager(null);
         this.manager = null;
     }
 }

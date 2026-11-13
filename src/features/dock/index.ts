@@ -6,6 +6,7 @@ import * as Main from 'resource:///org/gnome/shell/ui/main.js';
 
 import { isLight } from '../../shared/scheme.js';
 import type { Module, ModuleContext } from '../../shared/module.js';
+import { onStagesChanged, stageManager } from '../../shared/stage-link.js';
 import { setBounce } from './dash.js';
 import { Dock, type DockOptions } from './dock.js';
 import { Genie } from './genie.js';
@@ -30,6 +31,7 @@ export class DockModule implements Module {
     private recent: RecentApps | null = null;
     private launcher: LauncherEntries | null = null;
     private minimized: MinimizedWindows | null = null;
+    private stopStages: (() => void) | null = null;
     private readonly interface = new Gio.Settings({ schema_id: 'org.gnome.desktop.interface' });
     private ids: [Disconnectable, number][] = [];
 
@@ -62,6 +64,7 @@ export class DockModule implements Module {
         const layout = Main.layoutManager as unknown as { connect(signal: string, callback: () => void): number } & Disconnectable;
         this.ids.push([layout, layout.connect('monitors-changed', () => this.build())]);
         this.minimized = new MinimizedWindows(() => this.syncMinimized());
+        this.stopStages = onStagesChanged(() => this.syncMinimized());
         this.build();
         this.syncGenie();
     }
@@ -71,6 +74,8 @@ export class DockModule implements Module {
         this.ids = [];
         this.genie?.destroy();
         this.genie = null;
+        this.stopStages?.();
+        this.stopStages = null;
         this.minimized?.destroy();
         this.minimized = null;
         this.destroyDocks();
@@ -110,7 +115,12 @@ export class DockModule implements Module {
         const windows = toApp ? [] : (this.minimized?.windows() ?? []);
         const byId = new Map(windows.map(({ window }) => [window.get_id(), window]));
         const byDock = minimizedByDock(
-            windows.map(({ window, order }) => ({ id: window.get_id(), monitor: window.get_monitor(), order })),
+            windows.map(({ window, order }) => ({
+                id: window.get_id(),
+                monitor: window.get_monitor(),
+                order,
+                staged: stageManager()?.holds(window.get_id()) ?? false,
+            })),
             this.docks.map((dock) => dock.monitorIndex),
             Main.layoutManager.primaryIndex,
         );
