@@ -10,7 +10,7 @@ stack of tweak extensions that each fix one corner. It ships module by module.
 | Module | Replaces | Status |
 |---|---|---|
 | **Menu bar**: logo menu, the focused app's name and menu, the app's own File, Edit and View menus when it shares them (GTK apps with a menu bar, LibreOffice), a Window menu, a macOS clock, a translucent bar, on every monitor | Just Perfection, Blur my Shell (top bar) | done |
-| **Dock**: frosted glass, magnification, running dots, Trash, hides when a window covers it, genie minimize, on every monitor | Dash to Dock, Magic Lamp | done |
+| **Dock**: frosted glass, magnification, running dots, a Downloads stack that fans or shows your newest downloads in a grid, Trash, hides when a window covers it, genie minimize, on every monitor | Dash to Dock, Magic Lamp | done |
 | **Launchpad**: every app in a full-screen grid with pages and search, on Super and the dock's Apps icon | the distribution's app menu | done |
 | **Spotlight**: Ctrl+Space search over apps, files, settings and the calculator, using GNOME's search providers | Ulauncher | done |
 | **Control Center**: GNOME's quick settings as macOS tiles, toggles first, titled Display and Sound sliders, a Focus (Do Not Disturb) toggle with a moon in the bar and a Stage Manager toggle | GNOME quick settings styling | done |
@@ -20,6 +20,9 @@ stack of tweak extensions that each fix one corner. It ships module by module.
 | **Notifications**: banners as frosted cards at the top right, and the clock opens a macOS Notification Center with notification cards and calendar, world clock and weather widgets | GNOME's centred banners and calendar popover | done |
 | **Mission Control**: the overview's windows spread over the dimmed wallpaper with the Spaces bar always at the top | GNOME's overview look | done |
 | **Stage Manager** (opt in): the app you use stays in the middle and your other apps wait as tilted thumbnails on the left; click one to swap it in, or reach it from the dock, Alt+Tab or Mission Control. Turn it on in the Control Center | nothing in GNOME | done |
+| **App Exposé**: all of one app's windows on the current workspace spread over the blurred screen, minimized ones in a row at the bottom; Super+Down or Show All Windows in the dock icon's menu | nothing in GNOME | done |
+| **Full-screen Spaces**: an app that goes full screen gets a workspace of its own next to the one it left, and goes back when it leaves full screen | nothing in GNOME | done |
+| **Keyboard**: Super stands in for Command: Super+Q quits the app, Super+M minimizes, Super+H hides the app and Super+Alt+H the others, as on a Mac (Super+Tab and Super+\` already switch apps and windows) | GNOME's Super+H and Super+M | done |
 | **Hot corners**: each screen corner can open Mission Control, Launchpad, the desktop or the Notification Center, or lock the screen | GNOME's top-left hot corner | done |
 | **Window corners**: rounded macOS corners on windows that do not round their own, such as frameless (Electron) and older X11 apps, with a soft shadow on frameless ones; square when maximized | Rounded Window Corners | done |
 | **Traffic lights**: red, yellow and green window buttons first on the left of app windows, grey in windows in the background, with their symbols on hover; in GTK and libadwaita apps, Chrome and X11 apps (Qt 6 apps on Wayland and Electron apps with their own title bar draw their own buttons) | a macOS GTK theme's window buttons | done |

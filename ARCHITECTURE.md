@@ -97,6 +97,20 @@ schemas/                GSettings schema
   fullscreen, and a 1 px strip at the bottom edge brings it back.
 - Clicking the focused app minimizes its window, or cycles its windows on the
   workspace (`logic/rules.ts`). Everything else is GNOME's default.
+- Downloads stack (`stack.ts`, `dock-downloads`): a `DashItemContainer`
+  between the divider and the Trash for the XDG Downloads folder (none when
+  it is not set up). A click reads the folder (`enumerate_children_async`,
+  with gvfs's `thumbnail::path` for pictures) and `logic/stack.ts` drops
+  hidden files and unfinished downloads (`.part`, `.crdownload`, ...), sorts
+  by `time::created`, else `time::modified`, and picks the view: a fan of at
+  most ten items rising along a curve, or a frosted grid that scrolls. It is
+  a modal popup (`Main.pushModal`) placed from where the icon rests, with
+  the dock's slide and magnification taken off, and the dock stays shown
+  while it is open (`open-changed`). Its menu opens the folder and sets
+  `dock-downloads-view`. Not done: dragging items out (a shell actor cannot
+  start a Wayland drag on 46).
+- Show All Windows in an app icon's menu (after GNOME's window list) opens
+  App Exposé through `src/shared/expose-link.ts`, while that module runs.
 - Genie: GNOME's minimize and unminimize handlers on `global.window_manager`
   are blocked, and a `Clutter.DeformEffect` bends the window into its app's
   icon in the dock on its monitor (`logic/genie.ts`). A window with no icon
@@ -218,6 +232,55 @@ schemas/                GSettings schema
   swapped while the module runs (taken from the live instance, as 46 ships
   no typings for it) and its thumbnails are bigger (`_maxThumbnailScale`).
 - The search box is hidden (opacity 0, height 0); typing still searches.
+
+## App Exposé
+
+- `ExposeOverlay` (`features/expose/overlay.ts`): a modal widget in
+  `uiGroup` over the monitor under the pointer, a blurred and dimmed backdrop,
+  and one `St.Button` per window of the app on the active workspace holding
+  a `Shell.WindowPreviewLayout` (so minimized windows paint too). Cards ease
+  from the window's frame to their slot and back on close; minimized ones
+  fade in a row at the bottom. A ring and the window title follow the
+  pointer. Clicking a card activates the window; Escape, a click on the
+  backdrop, the shortcut again or the overview showing close it.
+- `logic/layout.ts` puts the windows in rows, in order, all at one scale
+  (never above 1), trying every row count and keeping the biggest.
+- `app-expose-shortcut` (Super+Down, for the focused app) borrows stock
+  GNOME's `unmaximize` accelerator (`app-expose-saved-wm`).
+
+## Full-screen Spaces
+
+- `fullscreen-spaces-enabled`: a window's `notify::fullscreen` is handled
+  in a `BEFORE_REDRAW` later. Going full screen, `logic/spaces.ts` lets a
+  NORMAL window that is not on all workspaces and has other windows showing
+  on its workspace move, only with `dynamic-workspaces`: a workspace is
+  appended, reordered to just after the window's own, and activated with the
+  window. Leaving full screen moves it back (to the first workspace left if
+  its own is gone) and switches there; closing it while its Space shows
+  switches back. GNOME's dynamic workspaces remove the empty one.
+- A window moved to another workspace by hand meanwhile stays there. The
+  module runs on the lock screen too, so locking does not move windows;
+  `disable()` moves every window it moved back.
+
+## Keyboard
+
+- Super stands in for Command: `keyboard-quit` (`Shell.App.request_quit`),
+  `keyboard-minimize`, `keyboard-hide` and `keyboard-hide-others`, bound with
+  `Main.wm.addKeybinding` in NORMAL mode on the focused window (not the
+  desktop or a skip-taskbar window). Super+Tab and Super+` are already
+  GNOME's app and window switchers. No Super+W: a Mac's Command+W closes a
+  tab, which apps already do with Ctrl+W, and the shell could only close
+  the whole window.
+- GNOME binds Super+H to `minimize` and Super+M to `toggle-message-tray`;
+  `BorrowedKeys` takes only Macr's accelerators out of those lists
+  (`keyboard-saved-wm`, `keyboard-saved-shell`) and puts them back on
+  disable unless the user changed them since.
+- Hide (`src/shared/hider.ts`, also behind the menu bar's Hide, Hide Others
+  and Show All) minimizes the app's normal windows that can be, skipping
+  the animation with `Main.wm.skipNextEffect` only when one would play. It
+  remembers them per app (`logic/hide.ts`); when that app gets focus again
+  (`notify::focus-app`: dock, Alt+Tab, launching it) the rest come back
+  too. Show All and `Macr.disable()` forget them.
 
 ## Stage Manager
 
@@ -398,7 +461,9 @@ schemas/                GSettings schema
 - GNOME's own edge tiling (`org.gnome.mutter edge-tiling`, on in Zorin) would
   show its preview and tile on drop too, so it is off while the module runs.
   Zorin also binds Super+Ctrl+Left/Right to `toggle-tiled-left/right`: those
-  lists lose only the accelerators Macr's shortcuts use (`logic/keys.ts`), so
+  lists lose only the accelerators Macr's shortcuts use (`src/shared/borrowed-keys.ts`
+  with `src/shared/logic/keys.ts`, also used by the keyboard and App Exposé
+  modules), so
   Super+Left/Right keep GNOME's half tiling. Both are saved in Macr's
   settings (`tiling-saved-edge-tiling`, `tiling-saved-toggle-tiled`) and put
   back on disable unless the user changed them since.
