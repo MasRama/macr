@@ -110,6 +110,11 @@ schemas/                GSettings schema
   `dock-downloads-view`. Space opens Quick Look on the item under the
   pointer (see Quick Look). Not done: dragging items out (a shell actor
   cannot start a Wayland drag on 46).
+- Folder stacks (`dock-stacks`): any folder added in the settings window
+  becomes a stack like Downloads, placed before it. `stackSources()` lists
+  them, each with its own icon (`logic/stack.ts` gives the XDG folders
+  theirs), and Remove from Dock in the stack's menu takes it out again.
+  A folder that no longer exists shows no stack.
 - Show All Windows in an app icon's menu (after GNOME's window list) opens
   App Exposé through `src/shared/expose-link.ts`, while that module runs.
 - Genie: GNOME's minimize and unminimize handlers on `global.window_manager`
@@ -199,6 +204,46 @@ schemas/                GSettings schema
   golden hour, dusk), eased in between and wrapping past midnight. Sunrise
   and sunset come from gsd's Night Light (`org.gnome.SettingsDaemon.Color`),
   -1 without a location, then 6:00 and 18:00. Updated every minute.
+  `shared/sun.ts` (`SunWatcher`) reads them for this module and Auto
+  appearance.
+
+## Auto appearance
+
+- `appearance-auto` (the Auto button next to Light and Dark): light from
+  sunrise to sunset, dark at night, as macOS does. Runs on the lock screen
+  too. Sunrise and sunset come from `SunWatcher` (see Dynamic desktop).
+- `logic/appearance.ts` names the phase (`<day>:light|dark`, the early
+  morning belonging to the evening before) and it is stored in
+  `appearance-auto-phase`. The module switches only when the phase changes,
+  so a Light or Dark picked by hand holds until the next sunrise or sunset.
+- `shared/appearance.ts` (also used by the settings window) sets
+  `color-scheme` and swaps `gtk-theme` and the User Themes shell theme for
+  their other variant when it is installed: `themeCandidates()` turns
+  MacTahoe-Dark into MacTahoe-Light or MacTahoe, Yaru into Yaru-Dark or
+  Yaru-dark. The icon theme is left alone.
+- Zorin's own auto theme (`com.zorin.desktop.auto-theme`) would fight it;
+  the settings window warns while that is on.
+
+## Desktop widgets
+
+- `desktop-widgets-enabled` (off by default): clock, calendar and weather
+  widgets (`desktop-widgets`, in that order) in one actor in
+  `global.window_group`, above the wallpaper and the desktop icons' window
+  (type DESKTOP on X11; on Wayland DING's window is a normal one kept low
+  and found by its title, `logic/widgets.ts`) and under every other window.
+  Mutter restacks window actors on `restacked`, so the layer is put back
+  before the next redraw. The overview hides `window_group`, and the
+  widgets with it.
+- Without a saved place, `defaultSlots()` puts them in a column at the top
+  right of the primary monitor's work area. A drag (a stage grab after 6 px)
+  snaps to an 8 px grid inside the work area and is saved in
+  `desktop-widget-positions` as fractions, so it survives a new resolution.
+- A click opens Clocks, Calendar or Weather; the right-click menu has Edit
+  Widgets… (the settings window) and Remove Widget. While an app window has
+  the focus they are desaturated and faded, full colour on the desktop.
+- Weather reuses the shell's own `WeatherClient` from the date menu (a new
+  one never disconnects its signals), so it shows the place picked in GNOME
+  Weather. The clock is drawn with Cairo and ticks only while it shows.
 
 ## Control Center
 
