@@ -338,5 +338,10 @@
       <summary>GNOME's unmaximize shortcut before App Exposé</summary>
       <description>Macr takes its App Exposé shortcut out of org.gnome.desktop.wm.keybindings unmaximize while App Exposé is on, and puts this list back when it is turned off.</description>
     </key>
+    <key name="fullscreen-spaces-enabled" type="b">
+      <default>true</default>
+      <summary>Full-screen apps get their own Space</summary>
+      <description>A window that goes full screen moves to a new workspace next to its own, and goes back when it leaves full screen. Only with dynamic workspaces.</description>
+    </key>
   </schema>
 </schemalist>

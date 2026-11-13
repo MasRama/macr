@@ -17,6 +17,7 @@ import { MissionControlModule } from './features/missioncontrol/index.js';
 import { NotificationsModule } from './features/notifications/index.js';
 import { OsdModule } from './features/osd/index.js';
 import { ScreenshotModule } from './features/screenshot/index.js';
+import { FullscreenSpacesModule } from './features/spaces/index.js';
 import { SpotlightModule } from './features/spotlight/index.js';
 import { StageManagerModule } from './features/stagemanager/index.js';
 import { SwitcherModule } from './features/switcher/index.js';
@@ -45,6 +46,8 @@ const MODULES: ModuleEntry[] = [
     { key: 'screenshot-enabled', create: (context) => new ScreenshotModule(context) },
     { key: 'keyboard-enabled', create: (context) => new KeyboardModule(context.settings) },
     { key: 'app-expose-enabled', create: (context) => new AppExposeModule(context.settings) },
+    // Kept on while locked: turning off would move full-screen windows back.
+    { key: 'fullscreen-spaces-enabled', screens: ['desktop', 'lock'], create: () => new FullscreenSpacesModule() },
     // Paused, not turned off, while locked: turning off would bring every window back.
     { key: 'stage-manager-enabled', screens: ['desktop', 'lock'], create: () => new StageManagerModule() },
     { key: 'lock-screen-enabled', screens: ['desktop', 'lock'], create: () => new LockScreenModule() },
