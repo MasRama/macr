@@ -326,13 +326,17 @@ function stacksGroup({ settings, window, onClose }: PageContext): Adw.Preference
             }
         });
     });
+    const display = comboRow(settings, 'dock-stacks-display', _('Display stacks as'), [
+        ['stack', _('Stack')],
+        ['folder', _('Folder')],
+    ]);
     const view = comboRow(settings, 'dock-downloads-view', _('Show stacks as'), [
         ['automatic', _('Automatic')],
         ['fan', _('Fan')],
         ['grid', _('Grid')],
     ]);
     const refresh = () => {
-        for (const row of [...folderRows, addRow, view]) if (row.get_parent()) box.remove(row);
+        for (const row of [...folderRows, addRow, display, view]) if (row.get_parent()) box.remove(row);
         folderRows = settings.get_strv('dock-stacks').map((path) => {
             const row = new Adw.ActionRow({ title: GLib.filename_display_basename(path), subtitle: homeRelative(path) });
             row.add_prefix(new Gtk.Image({ icon_name: 'folder-symbolic' }));
@@ -341,7 +345,7 @@ function stacksGroup({ settings, window, onClose }: PageContext): Adw.Preference
             row.add_suffix(remove);
             return row;
         });
-        for (const row of [...folderRows, addRow, view]) box.add(row);
+        for (const row of [...folderRows, addRow, display, view]) box.add(row);
     };
     refresh();
     const id = settings.connect('changed::dock-stacks', refresh);

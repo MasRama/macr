@@ -66,9 +66,9 @@ are laid out like macOS System Settings.
 - Frosted glass, magnification, running dots, and red badges and progress
   bars from apps such as Telegram and Thunderbird.
 - Icons bounce while their app opens and when it needs your attention.
-- A Downloads stack that fans out or shows your newest downloads in a grid,
-  stacks for any folder you add, and the apps you quit last (right-click
-  one to remove it).
+- A Downloads stack that piles your newest downloads on its icon and fans
+  them out or shows them in a grid, stacks for any folder you add, and the
+  apps you quit last (right-click one to remove it).
 - Minimized windows go into their app's icon, or wait as thumbnails before the
   Trash, with the genie effect when you minimize.
 - Hides when a window covers it. Sits along the bottom or down the left or

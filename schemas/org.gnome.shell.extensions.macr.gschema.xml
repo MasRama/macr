@@ -469,6 +469,15 @@
       <summary>How the Downloads stack opens</summary>
       <description>Automatic fans out a few items and shows more as a grid.</description>
     </key>
+    <key name="dock-stacks-display" type="s">
+      <choices>
+        <choice value="stack"/>
+        <choice value="folder"/>
+      </choices>
+      <default>'stack'</default>
+      <summary>How stacks show in the dock</summary>
+      <description>Stack piles the newest items on the icon; Folder shows the folder's icon.</description>
+    </key>
     <key name="accent-enabled" type="b">
       <default>true</default>
       <summary>Accent colour</summary>

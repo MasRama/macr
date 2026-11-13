@@ -1,4 +1,5 @@
 import Clutter from 'gi://Clutter';
+import GdkPixbuf from 'gi://GdkPixbuf';
 import Gio from 'gi://Gio';
 import GLib from 'gi://GLib';
 import GObject from 'gi://GObject';
@@ -17,7 +18,23 @@ import type { Rect } from '../../shared/logic/geometry.js';
 import { isLight } from '../../shared/scheme.js';
 import { dockEdge, menuSide } from './dash.js';
 import { isSide, panelPlace } from './logic/edge.js';
-import { chooseView, FAN_MAX, fanSlot, folderIcon, gridShape, type SpecialFolder, type StackEntry, type StackMode, visibleEntries } from './logic/stack.js';
+import {
+    chooseView,
+    FAN_MAX,
+    fanSlot,
+    fitInside,
+    folderIcon,
+    gridShape,
+    isNewArrival,
+    isShownName,
+    pileEntries,
+    pileLayers,
+    type SpecialFolder,
+    type StackDisplay,
+    type StackEntry,
+    type StackMode,
+    visibleEntries,
+} from './logic/stack.js';
 
 const ATTRIBUTES = 'standard::name,standard::display-name,standard::is-hidden,standard::icon,standard::type,time::created,time::modified,thumbnail::path';
 /** The grid never lists more than this. */
@@ -30,6 +47,8 @@ const GRID_ICON = 56;
 const GRID_CELL = 104;
 const OPEN_MS = 220;
 const CLOSE_MS = 150;
+/** Waits for a folder to settle before reading it again, in ms. */
+const REREAD_MS = 400;
 
 type Easeable = {
     ease(params: Record<string, unknown> & { duration: number; mode: Clutter.AnimationMode; onStopped?: () => void }): void;
@@ -39,6 +58,8 @@ interface Item extends StackEntry {
     file: Gio.File;
     label: string;
     gicon: Gio.Icon | null;
+    /** The picture's thumbnail, when gvfs has one. */
+    thumbnail: string | null;
 }
 
 /** The user's Downloads folder, or null when it is not set up. */
@@ -89,6 +110,16 @@ export function stackSources(settings: Gio.Settings): StackSource[] {
     return sources;
 }
 
+/** A picture's size in pixels, or null when it cannot be read. */
+function pictureSize(path: string): { width: number; height: number } | null {
+    try {
+        const [format, width, height] = GdkPixbuf.Pixbuf.get_file_info(path);
+        return format ? { width, height } : null;
+    } catch {
+        return null;
+    }
+}
+
 function launch(file: Gio.File): void {
     try {
         Gio.AppInfo.launch_default_for_uri(file.get_uri(), global.create_app_launch_context(0, -1));
@@ -127,6 +158,7 @@ function readItems(folder: Gio.File, done: (items: Item[]) => void): void {
                         modified: info.get_attribute_uint64('time::modified'),
                         file: folder.get_child(info.get_name()),
                         gicon: thumbnail ? new Gio.FileIcon({ file: Gio.File.new_for_path(thumbnail) }) : info.get_icon(),
+                        thumbnail,
                     });
                 }
                 if (infos.length > 0) next();
@@ -165,6 +197,16 @@ export const StackItem = GObject.registerClass(
         private shown!: Item[];
         private pointed!: number;
         private fanned!: boolean;
+        /** The folder's items, newest first, as last read; and the newest (undefined before the first read). */
+        private latest!: Item[];
+        private newest!: StackEntry | null | undefined;
+        private readCount!: number;
+        private monitor!: Gio.FileMonitor | null;
+        private rereadId!: number;
+        private alive!: boolean;
+        /** What the dock icon shows: the pile of newest items, or the folder's icon. */
+        private pile!: St.Widget | null;
+        private pileSize!: number;
         icon!: IconGrid.BaseIcon;
 
         constructor(settings: Gio.Settings, source: StackSource) {
@@ -179,6 +221,14 @@ export const StackItem = GObject.registerClass(
             this.shown = [];
             this.pointed = -1;
             this.fanned = false;
+            this.latest = [];
+            this.newest = undefined;
+            this.readCount = 0;
+            this.monitor = null;
+            this.rereadId = 0;
+            this.alive = true;
+            this.pile = null;
+            this.pileSize = 0;
             this.button = new St.Button({
                 style_class: 'show-apps macr-dock-stack',
                 track_hover: true,
@@ -188,7 +238,7 @@ export const StackItem = GObject.registerClass(
             this.icon = new IconGrid.BaseIcon(source.name, {
                 setSizeManually: true,
                 showLabel: false,
-                createIcon: (size: number) => new St.Icon({ icon_name: source.icon, fallback_icon_name: 'folder', icon_size: size }),
+                createIcon: (size: number) => this.makePile(size),
             });
             this.icon.y_align = Clutter.ActorAlign.CENTER;
             this.button.set_child(this.icon);
@@ -207,12 +257,22 @@ export const StackItem = GObject.registerClass(
                 if (mouse === Clutter.BUTTON_SECONDARY) this.openMenu();
                 else this.toggle();
             });
-            this.settingsIds = [settings.connect('changed::dock-downloads', () => this.syncShown())];
+            this.settingsIds = [
+                settings.connect('changed::dock-downloads', () => this.syncShown()),
+                settings.connect('changed::dock-stacks-display', () => this.fillPile()),
+            ];
             this.syncShown();
+            this.watchFolder();
+            this.reread();
 
             this.connect('destroy', () => {
+                this.alive = false;
                 for (const id of this.settingsIds) this.settings.disconnect(id);
                 this.settingsIds = [];
+                this.monitor?.cancel();
+                this.monitor = null;
+                if (this.rereadId) GLib.Source.remove(this.rereadId);
+                this.rereadId = 0;
                 this.finishClose();
                 this.menu.destroy();
             });
@@ -225,6 +285,100 @@ export const StackItem = GObject.registerClass(
         private syncShown(): void {
             this.visible = this.folder !== null && (this.source.path !== null || this.settings.get_boolean('dock-downloads'));
             if (!this.visible) this.close();
+        }
+
+        private display(): StackDisplay {
+            return this.settings.get_string('dock-stacks-display') === 'folder' ? 'folder' : 'stack';
+        }
+
+        /** Reads the folder again a moment after it changes: a new download, a file deleted. */
+        private watchFolder(): void {
+            if (!this.folder) return;
+            try {
+                this.monitor = this.folder.monitor_directory(Gio.FileMonitorFlags.WATCH_MOVES, null);
+            } catch (error) {
+                logError(error as object, 'Macr: could not watch a stack’s folder');
+                return;
+            }
+            this.monitor.connect('changed', (_monitor: Gio.FileMonitor, file: Gio.File, other: Gio.File | null, event: Gio.FileMonitorEvent) => {
+                // A download being written changes all the time; what shows only
+                // changes when a shown file comes, goes, is renamed or finished.
+                if (event === Gio.FileMonitorEvent.CHANGED || event === Gio.FileMonitorEvent.ATTRIBUTE_CHANGED) return;
+                const shown = (f: Gio.File | null) => f !== null && isShownName(f.get_basename() ?? '');
+                if (!shown(file) && !shown(other)) return;
+                if (this.rereadId) return;
+                this.rereadId = GLib.timeout_add(GLib.PRIORITY_DEFAULT, REREAD_MS, () => {
+                    this.rereadId = 0;
+                    this.reread();
+                    return GLib.SOURCE_REMOVE;
+                });
+            });
+        }
+
+        private reread(): void {
+            if (!this.folder) return;
+            const count = ++this.readCount;
+            readItems(this.folder, (items) => {
+                // Destroyed meanwhile, or a later read already landed.
+                if (!this.alive || count !== this.readCount) return;
+                const before = this.newest;
+                this.latest = items;
+                this.newest = items[0] ?? null;
+                this.fillPile();
+                if (this.source.path === null && isNewArrival(before, this.newest)) this.arrived();
+            });
+        }
+
+        /** A new download landed. */
+        private arrived(): void {}
+
+        /** The dock icon's content, `size` logical pixels square. */
+        private makePile(size: number): St.Widget {
+            const scale = St.ThemeContext.get_for_stage(global.stage as Clutter.Stage).scale_factor;
+            const pile = new St.Widget({ style_class: 'macr-stack-pile', width: size * scale, height: size * scale });
+            this.pile = pile;
+            this.pileSize = size;
+            pile.connect('destroy', () => {
+                if (this.pile === pile) this.pile = null;
+            });
+            this.fillPile();
+            return pile;
+        }
+
+        /** The newest items piled up, newest on top, or the folder's icon when there are none or Folder is chosen. */
+        private fillPile(): void {
+            const pile = this.pile;
+            if (!pile) return;
+            pile.destroy_all_children();
+            const scale = St.ThemeContext.get_for_stage(global.stage as Clutter.Stage).scale_factor;
+            const size = this.pileSize;
+            const items = this.display() === 'stack' ? pileEntries(this.latest) : [];
+            if (items.length === 0) {
+                pile.add_child(new St.Icon({ icon_name: this.source.icon, fallback_icon_name: 'folder', icon_size: size }));
+                return;
+            }
+            const layers = pileLayers(items.length);
+            layers.forEach((layer, index) => {
+                // Bottom to top: the oldest of the pile first.
+                const item = items[items.length - 1 - index];
+                const box = size * layer.size;
+                const picture = item.thumbnail ? pictureSize(item.thumbnail) : null;
+                let layerActor: St.Widget;
+                let width = box;
+                let height = box;
+                if (picture && item.thumbnail) {
+                    // A picture keeps its shape, in a thin white frame, as on macOS.
+                    ({ width, height } = fitInside(picture.width, picture.height, box));
+                    layerActor = new St.Widget({ style_class: 'macr-stack-pile-picture', width: Math.round(width * scale), height: Math.round(height * scale) });
+                    layerActor.set_style(`background-image: url("${GLib.filename_to_uri(item.thumbnail, null)}");`);
+                } else {
+                    layerActor = new St.Icon({ gicon: item.gicon ?? undefined, icon_size: Math.round(box), fallback_icon_name: 'text-x-generic' });
+                }
+                layerActor.set_position(Math.round((size / 2 + layer.x * size - width / 2) * scale), Math.round((size / 2 + layer.y * size - height / 2) * scale));
+                layerActor.set_pivot_point(0.5, 0.5);
+                layerActor.rotation_angle_z = layer.rotation;
+                pile.add_child(layerActor);
+            });
         }
 
         private mode(): StackMode {
@@ -244,6 +398,17 @@ export const StackItem = GObject.registerClass(
                 const remove = new PopupMenu.PopupMenuItem(_('Remove from Dock'));
                 remove.connect('activate', () => this.settings.set_strv('dock-stacks', this.settings.get_strv('dock-stacks').filter((p) => p !== path)));
                 this.menu.addMenuItem(remove);
+            }
+            this.menu.addMenuItem(new PopupMenu.PopupSeparatorMenuItem(_('Display as')));
+            const displays: [StackDisplay, string][] = [
+                ['stack', _('Stack')],
+                ['folder', _('Folder')],
+            ];
+            for (const [display, label] of displays) {
+                const item = new PopupMenu.PopupMenuItem(label);
+                item.connect('activate', () => this.settings.set_string('dock-stacks-display', display));
+                this.menu.addMenuItem(item);
+                item.setOrnament(this.display() === display ? PopupMenu.Ornament.CHECK : PopupMenu.Ornament.NONE);
             }
             this.menu.addMenuItem(new PopupMenu.PopupSeparatorMenuItem(_('View as')));
             const views: [StackMode, string][] = [

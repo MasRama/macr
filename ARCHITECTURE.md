@@ -160,6 +160,16 @@ schemas/                GSettings schema
   `dock-downloads-view`. Space opens Quick Look on the item under the
   pointer (see Quick Look). Not done: dragging items out (a shell actor
   cannot start a Wayland drag on 46).
+- Stack icons (`dock-stacks-display`): with Stack (the default) a stack's
+  dock icon piles up its three newest items, newest flat on top and the
+  others turned under it (`pileLayers()` in `logic/stack.ts`); pictures with
+  a thumbnail keep their shape in a white frame (`fitInside()`), other files
+  show their type's icon. An empty folder, or Folder, shows the folder's
+  icon. The pile is the `BaseIcon`'s `createIcon` widget, so magnification
+  rebuilds it at its size. A `Gio.FileMonitor` reads the folder again 400 ms
+  after a shown file (`isShownName()`) comes, goes, is renamed or finishes
+  being written; writes into a download in progress are ignored. The monitor
+  and timeout go when the stack is destroyed.
 - Folder stacks (`dock-stacks`): any folder added in the settings window
   becomes a stack like Downloads, placed before it. `stackSources()` lists
   them, each with its own icon (`logic/stack.ts` gives the XDG folders

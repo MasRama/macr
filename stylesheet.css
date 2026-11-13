@@ -2617,6 +2617,17 @@
   icon-shadow: 0 2px 6px rgba(0, 0, 0, 0.35);
 }
 
+.macr-stack-pile StIcon {
+  icon-shadow: 0 1px 3px rgba(0, 0, 0, 0.35);
+}
+
+.macr-stack-pile-picture {
+  background-size: cover;
+  border: 2px solid #fff;
+  border-radius: 2px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
+}
+
 .macr-stack-open {
   border-radius: 999px;
   color: #fff;

@@ -15,17 +15,75 @@ export const FAN_MAX = 10;
 /** Browsers' names for downloads still in progress. */
 const PARTIAL = ['.part', '.crdownload', '.download', '.tmp', '.partial'];
 
+/** Whether a file of this name can show in a stack: not hidden, not an unfinished download. */
+export function isShownName(name: string): boolean {
+    return !name.startsWith('.') && !PARTIAL.some((suffix) => name.toLowerCase().endsWith(suffix));
+}
+
 /** The items a stack shows: no hidden files or unfinished downloads, newest first. */
 export function visibleEntries<T extends StackEntry>(entries: readonly T[]): T[] {
     const added = (entry: StackEntry) => entry.created ?? entry.modified;
     return entries
-        .filter((entry) => !entry.hidden && !entry.name.startsWith('.') && !PARTIAL.some((suffix) => entry.name.toLowerCase().endsWith(suffix)))
+        .filter((entry) => !entry.hidden && isShownName(entry.name))
         .sort((a, b) => added(b) - added(a) || a.name.localeCompare(b.name));
 }
 
 export function chooseView(count: number, mode: StackMode): StackView {
     if (mode !== 'automatic') return mode;
     return count <= FAN_MAX ? 'fan' : 'grid';
+}
+
+/** How a stack shows in the dock: its newest items piled up, or the folder's icon. */
+export type StackDisplay = 'stack' | 'folder';
+
+/** The dock icon piles up at most this many items. */
+export const PILE_MAX = 3;
+
+/** The items piled on a stack's dock icon, newest first. */
+export function pileEntries<T extends StackEntry>(entries: readonly T[]): T[] {
+    return visibleEntries(entries).slice(0, PILE_MAX);
+}
+
+/**
+ * One item of the pile: its centre's offset from the icon's centre and its
+ * size, as shares of the icon's size, and its turn in degrees.
+ */
+export interface PileLayer {
+    x: number;
+    y: number;
+    rotation: number;
+    size: number;
+}
+
+/** Bottom to top; the top one is the newest item, lying flat. */
+const PILE: readonly PileLayer[] = [
+    { x: -0.05, y: 0.03, rotation: -12, size: 0.74 },
+    { x: 0.05, y: 0.01, rotation: 9, size: 0.74 },
+    { x: 0, y: 0, rotation: 0, size: 0.78 },
+];
+
+/** The layers of a pile of `count` items, bottom to top. */
+export function pileLayers(count: number): PileLayer[] {
+    const n = Math.max(0, Math.min(PILE_MAX, Math.floor(count)));
+    return n === 0 ? [] : PILE.slice(PILE.length - n).map((layer) => ({ ...layer }));
+}
+
+/** A `width` × `height` picture scaled to fit a `box` square, keeping its shape. */
+export function fitInside(width: number, height: number, box: number): { width: number; height: number } {
+    if (!(width > 0 && height > 0)) return { width: box, height: box };
+    const ratio = Math.min(box / width, box / height);
+    return { width: width * ratio, height: height * ratio };
+}
+
+/**
+ * Whether the newest item `after` just arrived, given the newest one before
+ * (`null` for an empty folder, `undefined` before the folder was first read).
+ */
+export function isNewArrival(before: StackEntry | null | undefined, after: StackEntry | null): boolean {
+    if (before === undefined || after === null) return false;
+    if (before === null) return true;
+    const added = (entry: StackEntry) => entry.created ?? entry.modified;
+    return added(after) > added(before);
 }
 
 /**
