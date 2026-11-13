@@ -7,6 +7,7 @@ import Pango from 'gi://Pango';
 import Shell from 'gi://Shell';
 import St from 'gi://St';
 import { gettext as _ } from 'resource:///org/gnome/shell/extensions/extension.js';
+import { adjustAnimationTime } from 'resource:///org/gnome/shell/misc/animationUtils.js';
 import * as Dash from 'resource:///org/gnome/shell/ui/dash.js';
 import * as IconGrid from 'resource:///org/gnome/shell/ui/iconGrid.js';
 import * as Main from 'resource:///org/gnome/shell/ui/main.js';
@@ -16,7 +17,8 @@ import { styleMenu, syncMenuScheme } from '../../shared/menu-style.js';
 import { quickLook } from '../../shared/quick-look.js';
 import type { Rect } from '../../shared/logic/geometry.js';
 import { isLight } from '../../shared/scheme.js';
-import { dockEdge, menuSide } from './dash.js';
+import { bounceEnabled, dockEdge, menuSide } from './dash.js';
+import { BOUNCE_HEIGHT, BOUNCE_TIME, bounceOffset, bounceShift } from './logic/bounce.js';
 import { isSide, panelPlace } from './logic/edge.js';
 import {
     chooseView,
@@ -207,6 +209,7 @@ export const StackItem = GObject.registerClass(
         /** What the dock icon shows: the pile of newest items, or the folder's icon. */
         private pile!: St.Widget | null;
         private pileSize!: number;
+        private bouncing!: Clutter.Timeline | null;
         icon!: IconGrid.BaseIcon;
 
         constructor(settings: Gio.Settings, source: StackSource) {
@@ -229,6 +232,7 @@ export const StackItem = GObject.registerClass(
             this.alive = true;
             this.pile = null;
             this.pileSize = 0;
+            this.bouncing = null;
             this.button = new St.Button({
                 style_class: 'show-apps macr-dock-stack',
                 track_hover: true,
@@ -273,6 +277,8 @@ export const StackItem = GObject.registerClass(
                 this.monitor = null;
                 if (this.rereadId) GLib.Source.remove(this.rereadId);
                 this.rereadId = 0;
+                this.bouncing?.stop();
+                this.bouncing = null;
                 this.finishClose();
                 this.menu.destroy();
             });
@@ -329,8 +335,27 @@ export const StackItem = GObject.registerClass(
             });
         }
 
-        /** A new download landed. */
-        private arrived(): void {}
+        /** A new download landed: the icon bounces once, as on macOS. */
+        private arrived(): void {
+            if (!bounceEnabled() || this.bouncing || !this.visible) return;
+            const icon = this.icon as unknown as Clutter.Actor;
+            const timeline = new Clutter.Timeline({ actor: icon, duration: adjustAnimationTime(BOUNCE_TIME) });
+            const lift = (offset: number) => {
+                const [x, y] = bounceShift(dockEdge(), offset);
+                icon.translation_x = x;
+                icon.translation_y = y;
+            };
+            timeline.connect('new-frame', () => {
+                const scale = St.ThemeContext.get_for_stage(global.stage as Clutter.Stage).scale_factor;
+                lift(bounceOffset(timeline.get_progress(), this.pileSize * BOUNCE_HEIGHT * scale));
+            });
+            timeline.connect('stopped', () => {
+                lift(0);
+                if (this.bouncing === timeline) this.bouncing = null;
+            });
+            this.bouncing = timeline;
+            timeline.start();
+        }
 
         /** The dock icon's content, `size` logical pixels square. */
         private makePile(size: number): St.Widget {

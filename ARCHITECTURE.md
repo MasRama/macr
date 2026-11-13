@@ -170,6 +170,9 @@ schemas/                GSettings schema
   after a shown file (`isShownName()`) comes, goes, is renamed or finishes
   being written; writes into a download in progress are ignored. The monitor
   and timeout go when the stack is destroyed.
+  When the Downloads stack's newest item was added after the one before
+  (`isNewArrival()`; never on the first read), its icon bounces once with
+  the dock's bounce (`logic/bounce.ts`), unless bouncing is turned off.
 - Folder stacks (`dock-stacks`): any folder added in the settings window
   becomes a stack like Downloads, placed before it. `stackSources()` lists
   them, each with its own icon (`logic/stack.ts` gives the XDG folders

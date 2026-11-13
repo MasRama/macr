@@ -83,6 +83,10 @@ export function setBounce(on: boolean): void {
     bounceOn = on;
 }
 
+export function bounceEnabled(): boolean {
+    return bounceOn;
+}
+
 export function dockEdge(): DockEdge {
     return currentEdge;
 }
