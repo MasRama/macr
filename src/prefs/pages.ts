@@ -184,6 +184,21 @@ export function pages(): PageInfo[] {
             },
         },
         {
+            id: 'keyboard', section: 1, icon: 'input-keyboard-symbolic', color: 'gray',
+            title: _('Keyboard'),
+            description: _('The Mac’s Command shortcuts on the Super key.'),
+            build: ({ settings }) => {
+                const shortcuts = keyboardShortcutsRow(settings);
+                dependsOn(settings, 'keyboard-enabled', shortcuts);
+                return [
+                    group('', [
+                        switchRow(settings, 'keyboard-enabled', _('Mac keyboard shortcuts'), _('Quit, minimize and hide apps as on a Mac; GNOME’s own Super+H and Super+M give way')),
+                        shortcuts,
+                    ]),
+                ];
+            },
+        },
+        {
             id: 'appearance', section: 2, icon: 'preferences-desktop-appearance-symbolic', color: 'orange',
             title: _('Appearance'),
             description: _('App icons and the app switcher.'),
@@ -264,6 +279,16 @@ function screenshotShortcutsRow(settings: Gio.Settings): Gtk.Widget {
         ['screenshot-screen-shortcut', _('Entire screen')],
         ['screenshot-area-shortcut', _('Selected area or window')],
         ['screenshot-toolbar-shortcut', _('Screenshot toolbar')],
+    ]);
+}
+
+/** The Command shortcuts that are set, read-only. */
+function keyboardShortcutsRow(settings: Gio.Settings): Gtk.Widget {
+    return shortcutsRow(settings, _('Super stands in for the Command key; Super+Tab and Super+` already switch apps and windows'), [
+        ['keyboard-quit', _('Quit app')],
+        ['keyboard-minimize', _('Minimize window')],
+        ['keyboard-hide', _('Hide app')],
+        ['keyboard-hide-others', _('Hide others')],
     ]);
 }
 
