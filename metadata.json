@@ -13,5 +13,5 @@
   ],
   "settings-schema": "org.gnome.shell.extensions.macr",
   "gettext-domain": "macr@masrama.github.io",
-  "version-name": "0.4.0"
+  "version-name": "0.5.0"
 }
