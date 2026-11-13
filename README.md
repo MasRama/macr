@@ -60,7 +60,9 @@ extensions Macr replaces, or the two will fight over the same UI: Just
 Perfection and Blur my Shell's top bar blur for the menu bar, Dash to Dock and
 Magic Lamp for the dock, and any launcher bound to Ctrl+Space (Ulauncher) for
 Spotlight. Launchpad takes the Super key from Zorin Menu while it runs and
-gives it back when turned off. Each module can be turned off in Macr's settings.
+gives it back when turned off. Each module can be turned off in Macr's settings,
+laid out like macOS System Settings, and its About Macr page lists the
+enabled extensions that clash with Macr, with a button to turn them off.
 
 ### Login screen
 

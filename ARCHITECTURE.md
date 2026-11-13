@@ -10,6 +10,7 @@ There is no daemon: everything a module needs is reachable from the shell.
 src/
   extension.ts          turns modules on and off from GSettings
   prefs.ts              settings window (separate GTK 4 process)
+  prefs/                its pages, rows and styles; prefs/logic is tested
   shared/               code used by more than one module
   features/<module>/    one folder per module (menubar, dock, ...)
     index.ts            the Module: enable() / disable()
@@ -333,3 +334,21 @@ schemas/                GSettings schema
 - The devshell starts as the login screen with `run.sh --gdm`; without
   AccountsService or GDM there, a dialog and stand-in users are built by
   hand from `gdm/loginDialog.js`.
+
+## Settings window
+
+- Laid out like macOS System Settings: `prefs.ts` puts an
+  `Adw.NavigationSplitView` in the `Adw.PreferencesWindow` with
+  `set_content()`, a sidebar of coloured tiles on the left and the chosen
+  page on the right, collapsing to one column under 640sp. GNOME's prefs
+  dialog fails unless a page was `add()`ed, so an empty one is added first
+  and never shown. Adw's built-in search goes with it.
+- Pages are listed in `prefs/pages.ts` (sidebar order, section, tile colour,
+  builder) and built the first time they are shown. Tile styles come from a
+  CSS provider on the display, removed when the window closes along with
+  every signal the pages connect.
+- About Macr lists clashing extensions: `prefs/logic/conflicts.ts` maps
+  known extension UUIDs to the Macr settings they fight, and a clash shows
+  only while that extension is in `org.gnome.shell enabled-extensions` and
+  the Macr setting is on. Turn Off calls the shell's `DisableExtension`
+  over D-Bus. Settings keys Macr does not have count as off.
