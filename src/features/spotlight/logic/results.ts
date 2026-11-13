@@ -22,16 +22,17 @@ const LIMITS = { apps: 6, other: 4 };
 /**
  * Spotlight's result list: a Top Hit (the first app, else the first result
  * of the first provider that found something), then one capped section per
- * provider, in provider order, without the Top Hit.
+ * provider, in provider order, without the Top Hit. A view (Apps, Files…)
+ * turns both off and lists everything.
  */
-export function layoutResults<T>(groups: ProviderResults<T>[]): Layout<T> {
+export function layoutResults<T>(groups: ProviderResults<T>[], options = { topHit: true, capped: true }): Layout<T> {
     const apps = groups.find((group) => group.id === APPS_PROVIDER && group.results.length);
-    const source = apps ?? groups.find((group) => group.results.length);
+    const source = options.topHit ? (apps ?? groups.find((group) => group.results.length)) : undefined;
     const topHit = source ? { providerId: source.id, item: source.results[0] } : null;
     const sections: Section<T>[] = [];
     for (const group of groups) {
         const rest = group === source ? group.results.slice(1) : group.results;
-        const items = rest.slice(0, group.id === APPS_PROVIDER ? LIMITS.apps : LIMITS.other);
+        const items = options.capped ? rest.slice(0, group.id === APPS_PROVIDER ? LIMITS.apps : LIMITS.other) : rest;
         if (items.length) sections.push({ providerId: group.id, title: group.title, items });
     }
     return { topHit, sections };

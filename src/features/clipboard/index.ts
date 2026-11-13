@@ -2,6 +2,7 @@ import Meta from 'gi://Meta';
 import Shell from 'gi://Shell';
 import * as Main from 'resource:///org/gnome/shell/ui/main.js';
 
+import { setClipboardHistory } from '../../shared/clipboard-link.js';
 import type { Module, ModuleContext } from '../../shared/module.js';
 import { ClipboardHistory } from './history.js';
 import { ClipboardPanel } from './panel.js';
@@ -21,12 +22,14 @@ export class ClipboardModule implements Module {
         const panel = new ClipboardPanel(history);
         this.history = history;
         this.panel = panel;
+        setClipboardHistory({ open: (query) => panel.open(query) });
         // POPUP too, so the shortcut also closes it.
         Main.wm.addKeybinding(SHORTCUT, this.context.settings, Meta.KeyBindingFlags.NONE, Shell.ActionMode.NORMAL | Shell.ActionMode.POPUP, () => panel.toggle());
     }
 
     disable(): void {
         Main.wm.removeKeybinding(SHORTCUT);
+        setClipboardHistory(null);
         this.panel?.destroy();
         this.panel = null;
         // Kept while only the lock screen turned the module off.

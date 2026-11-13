@@ -56,7 +56,7 @@ export const ACCENT_RULES: AccentRule[] = [
         value: (color) => `2px solid ${color}`,
         alpha: 0.85,
     },
-    { selectors: ['.macr-spotlight-row:selected'], property: 'background-color', alpha: 0.9, text: true },
+    { selectors: ['.macr-spotlight-row:selected', '.macr-spotlight-view:checked', '.macr-spotlight.macr-light .macr-spotlight-view:checked'], property: 'background-color', alpha: 0.9, text: true },
     {
         selectors: ['.macr-cc .quick-toggle:checked .quick-toggle-icon', '.macr-cc .quick-toggle-menu .header .icon.active', '.macr-cc.macr-light .quick-toggle:checked .quick-toggle-icon'],
         property: 'background-color',

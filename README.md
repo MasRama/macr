@@ -86,7 +86,10 @@ are laid out like macOS System Settings.
 - **Spotlight**: Ctrl+Space searches apps, files, settings and the calculator
   through GNOME's search providers, and answers unit and currency conversions
   ("10 km to mi", "$20 in rupiah"), word definitions and web searches with
-  suggestions. The online lookups can be turned off.
+  suggestions. The online lookups can be turned off. As in macOS Tahoe,
+  Super+1 to Super+4 (or the round buttons by the field) narrow it to Apps
+  (most used, then A to Z), Files (recent files first), Actions (Lock
+  Screen, Dark Mode, Empty Trash, an app's "New Window"…) or the Clipboard.
 - **Quick Look**: Space on a file in the Downloads stack, or Super+Y on a file
   in Spotlight, previews it; the arrow keys go to the next file.
 
@@ -204,6 +207,7 @@ are laid out like macOS System Settings.
 | Super | Launchpad |
 | Ctrl+Space | Spotlight |
 | Super+Y | Quick Look the file selected in Spotlight |
+| Super+1 … Super+4 | Spotlight's Apps, Files, Actions and Clipboard views |
 | Super+Down | App Exposé |
 | Ctrl+Super+V | Clipboard history |
 | Ctrl+Super+Space | Emoji & Symbols |

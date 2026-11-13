@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 
-import { recentFiles } from '../../src/features/menubar/logic/recent.js';
+import { recentFiles } from '../../src/shared/logic/recent-files.js';
 
 const xbel = `<?xml version="1.0" encoding="UTF-8"?>
 <xbel version="1.0">

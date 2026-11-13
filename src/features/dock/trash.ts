@@ -7,11 +7,10 @@ import { gettext as _ } from 'resource:///org/gnome/shell/extensions/extension.j
 import * as Dash from 'resource:///org/gnome/shell/ui/dash.js';
 import * as IconGrid from 'resource:///org/gnome/shell/ui/iconGrid.js';
 import * as Main from 'resource:///org/gnome/shell/ui/main.js';
-import * as ModalDialog from 'resource:///org/gnome/shell/ui/modalDialog.js';
 import * as PopupMenu from 'resource:///org/gnome/shell/ui/popupMenu.js';
 
+import { askToEmptyTrash } from '../../shared/empty-trash.js';
 import { styleMenu, syncMenuScheme } from '../../shared/menu-style.js';
-import { dialogClass } from '../../shared/scheme.js';
 import { menuSide } from './dash.js';
 
 const TRASH_URI = 'trash:///';
@@ -23,38 +22,6 @@ function openTrash(): void {
         logError(error as object, 'Macr: could not open the Trash');
     }
 }
-
-function emptyTrash(): void {
-    try {
-        Gio.Subprocess.new(['gio', 'trash', '--empty'], Gio.SubprocessFlags.NONE);
-    } catch (error) {
-        logError(error as object, 'Macr: could not empty the Trash');
-    }
-}
-
-/** macOS asks before it erases the Trash for good. */
-const EmptyTrashDialog = GObject.registerClass(
-    class EmptyTrashDialog extends ModalDialog.ModalDialog {
-        constructor() {
-            super({ styleClass: dialogClass('macr-dialog') });
-            this.contentLayout.add_child(
-                new St.Label({ text: _('Are you sure you want to permanently erase the items in the Trash?'), style_class: 'macr-dialog-title' }),
-            );
-            const hint = new St.Label({ text: _('You can’t undo this action.'), style_class: 'macr-dialog-text' });
-            hint.clutter_text.line_wrap = true;
-            this.contentLayout.add_child(hint);
-            this.addButton({ label: _('Cancel'), action: () => this.close(), key: Clutter.KEY_Escape });
-            this.addButton({
-                label: _('Empty Trash'),
-                action: () => {
-                    emptyTrash();
-                    this.close();
-                },
-                default: true,
-            });
-        }
-    },
-);
 
 /** The Trash at the end of the dock: open it, or empty it from its menu. */
 export const TrashItem = GObject.registerClass(
@@ -123,7 +90,7 @@ export const TrashItem = GObject.registerClass(
             this.menu.addMenuItem(new PopupMenu.PopupSeparatorMenuItem());
             const empty = new PopupMenu.PopupMenuItem(_('Empty Trash…'));
             empty.setSensitive(this.full);
-            empty.connect('activate', () => new EmptyTrashDialog().open());
+            empty.connect('activate', () => askToEmptyTrash());
             this.menu.addMenuItem(empty);
             this.hideLabel();
             this.menu.open(true);

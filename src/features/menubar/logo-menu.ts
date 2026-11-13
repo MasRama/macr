@@ -11,7 +11,7 @@ import type * as PopupMenu from 'resource:///org/gnome/shell/ui/popupMenu.js';
 
 import { AboutComputerDialog } from './dialogs/about-computer.js';
 import { ForceQuitDialog } from './dialogs/force-quit.js';
-import { recentFiles } from './logic/recent.js';
+import { recentFiles } from '../../shared/logic/recent-files.js';
 import { groups, item, launchApp, menuButton, submenu } from './menu-kit.js';
 
 const APPLE_GLYPH = '\uF8FF';

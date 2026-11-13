@@ -8,12 +8,15 @@ import { ensureActorVisibleInScrollView } from 'resource:///org/gnome/shell/misc
 import { gettext as _ } from 'resource:///org/gnome/shell/extensions/extension.js';
 import * as Main from 'resource:///org/gnome/shell/ui/main.js';
 
+import { clipboardHistory } from '../../shared/clipboard-link.js';
 import { previewUri } from '../../shared/logic/quick-look.js';
 import { quickLook } from '../../shared/quick-look.js';
 import { isLight } from '../../shared/scheme.js';
 import { answerProviders, type Provider, type ResultMeta } from './answers.js';
 import { APPS_PROVIDER, type Layout, layoutResults, type ProviderResults, wrapIndex } from './logic/results.js';
+import { dropRepeats, escapeStep, isSystemAction, repeatKey, type SpotlightView, viewForKey, viewProviders, VIEWS } from './logic/views.js';
 import { Online } from './online.js';
+import { macrViewProviders } from './views.js';
 
 interface Hit {
     provider: Provider;
@@ -32,8 +35,28 @@ type Easeable = {
 const DEBOUNCE_MS = 120;
 const OPEN_MS = 120;
 const CLOSE_MS = 100;
-/** Results asked of each provider: one more than shown, for the Top Hit. */
-const ASK = { apps: 7, other: 5 };
+/** Results asked of each provider: one more than shown, for the Top Hit; a view lists them all. */
+const ASK = { apps: 7, other: 5, view: 200 };
+/** The view buttons by the search field, as on Super+1..4. */
+const VIEW_BUTTONS: Record<(typeof VIEWS)[number], { icon: string; name: () => string }> = {
+    apps: { icon: 'view-app-grid-symbolic', name: () => _('Apps') },
+    files: { icon: 'folder-documents-symbolic', name: () => _('Files') },
+    actions: { icon: 'system-run-symbolic', name: () => _('Actions') },
+    clipboard: { icon: 'edit-paste-symbolic', name: () => _('Clipboard') },
+};
+
+function hintText(view: SpotlightView): string {
+    switch (view) {
+        case 'apps':
+            return _('Search Apps');
+        case 'files':
+            return _('Search Files');
+        case 'actions':
+            return _('Search Actions');
+        default:
+            return _('Spotlight Search');
+    }
+}
 
 /** GNOME's search providers, the overview's own list. */
 function gnomeProviders(): Provider[] {
@@ -51,11 +74,15 @@ function providerTitle(provider: Provider): string {
  * pointer, with GNOME's search providers (apps, files, settings, calculator
  * and whatever else is installed) listed under it as results arrive, with
  * Macr's own answers around them: conversions first, then a definition and
- * the web.
+ * the web. Super+1..4 (or the buttons by the field) narrow it to Apps,
+ * Files, Actions or the Clipboard, as macOS Tahoe's Spotlight does.
  */
 export class Spotlight {
     private readonly online = new Online();
     private readonly answers: { first: Provider[]; last: Provider[] };
+    private readonly views = macrViewProviders();
+    private view: SpotlightView = 'all';
+    private viewButtons = new Map<SpotlightView, St.Button>();
     private root: St.Widget | null = null;
     private entry: St.Entry | null = null;
     private list: St.BoxLayout | null = null;
@@ -108,7 +135,10 @@ export class Spotlight {
 
         const entry = new St.Entry({ style_class: 'macr-spotlight-entry', hint_text: _('Spotlight Search'), can_focus: true, x_expand: true });
         entry.set_primary_icon(new St.Icon({ icon_name: 'edit-find-symbolic', style_class: 'macr-spotlight-icon' }));
-        panel.add_child(entry);
+        const bar = new St.BoxLayout({ style_class: 'macr-spotlight-bar' });
+        bar.add_child(entry);
+        bar.add_child(this.viewBar());
+        panel.add_child(bar);
         // Long result lists scroll instead of running off the monitor.
         const scroll = new St.ScrollView({
             style_class: 'macr-spotlight-results',
@@ -127,6 +157,7 @@ export class Spotlight {
         this.list = list;
         this.scroll = scroll;
         this.closing = false;
+        this.view = 'all';
 
         root.connect('button-press-event', (_actor: Clutter.Actor, event: Clutter.Event) => {
             const target = (global.stage as Clutter.Stage).get_event_actor(event);
@@ -190,6 +221,7 @@ export class Spotlight {
         this.entry = null;
         this.list = null;
         this.scroll = null;
+        this.viewButtons.clear();
         this.rows = [];
         this.selected = -1;
         this.groups.clear();
@@ -219,14 +251,20 @@ export class Spotlight {
         this.terms = terms;
         this.groups.clear();
         this.picked = false;
-        if (!terms.length) {
+        const gnome = gnomeProviders();
+        const known = new Map<string, Provider>([...this.answers.first, ...gnome, ...this.answers.last, ...this.views.values()].map((provider) => [provider.id, provider]));
+        const all = viewProviders(
+            this.view,
+            !terms.length,
+            gnome.map((provider) => provider.id),
+        ).flatMap((id) => known.get(id) ?? []);
+        if (!all.length) {
             this.cancellable = null;
             this.render();
             return;
         }
         const cancellable = new Gio.Cancellable();
         this.cancellable = cancellable;
-        const all = [...this.answers.first, ...gnomeProviders(), ...this.answers.last];
         // Every provider has a slot from the start, so sections keep their order.
         for (const provider of all) this.groups.set(provider.id, { id: provider.id, title: providerTitle(provider), results: [] });
         let remaining = all.length;
@@ -254,8 +292,11 @@ export class Spotlight {
     }
 
     private async ask(provider: Provider, terms: string[], cancellable: Gio.Cancellable): Promise<Hit[]> {
-        const ids = await provider.getInitialResultSet(terms, cancellable);
-        const wanted = provider.filterResults(ids, provider.id === APPS_PROVIDER ? ASK.apps : ASK.other);
+        let ids = await provider.getInitialResultSet(terms, cancellable);
+        // The Apps view lists apps only, not the system actions GNOME puts with them.
+        if (this.view === 'apps' && provider.id === APPS_PROVIDER) ids = ids.filter((id) => !isSystemAction(id));
+        const ask = this.view !== 'all' ? ASK.view : provider.id === APPS_PROVIDER ? ASK.apps : ASK.other;
+        const wanted = provider.filterResults(ids, ask);
         if (!wanted.length) return [];
         const metas = await provider.getResultMetas(wanted, cancellable);
         return metas.map((meta) => ({ provider, meta }));
@@ -267,7 +308,10 @@ export class Spotlight {
         const previous = this.picked ? this.rows[this.selected]?.hit : undefined;
         list.destroy_all_children();
         this.rows = [];
-        const layout: Layout<Hit> = layoutResults([...this.groups.values()]);
+        // A file in Recent Files and the Files provider, or Lock Screen in
+        // GNOME's apps and Macr's Actions, shows once.
+        const groups = dropRepeats([...this.groups.values()], (hit: Hit) => repeatKey(hit.provider.id, hit.meta.id));
+        const layout: Layout<Hit> = layoutResults(groups, { topHit: this.view === 'all', capped: this.view === 'all' });
         if (layout.topHit) {
             list.add_child(this.header(_('Top Hit')));
             this.addRow(list, layout.topHit.item, true);
@@ -358,9 +402,28 @@ export class Spotlight {
                 if (!command) return Clutter.EVENT_PROPAGATE;
                 this.lookAtSelected();
                 return Clutter.EVENT_STOP;
+            // Cmd+1..4 on a Mac.
+            case Clutter.KEY_1:
+            case Clutter.KEY_2:
+            case Clutter.KEY_3:
+            case Clutter.KEY_4: {
+                if (!command) return Clutter.EVENT_PROPAGATE;
+                const view = viewForKey(event.get_key_symbol() - Clutter.KEY_0, this.view);
+                if (view) this.setView(view);
+                return Clutter.EVENT_STOP;
+            }
             case Clutter.KEY_Escape:
-                if (this.entry?.get_text()) this.entry.set_text('');
-                else this.close();
+                switch (escapeStep(this.entry?.get_text() ?? '', this.view)) {
+                    case 'clear':
+                        this.entry?.set_text('');
+                        break;
+                    case 'leave':
+                        this.setView('all');
+                        break;
+                    case 'close':
+                        this.close();
+                        break;
+                }
                 return Clutter.EVENT_STOP;
             case Clutter.KEY_Return:
             case Clutter.KEY_KP_Enter:
@@ -384,6 +447,50 @@ export class Spotlight {
             default:
                 return Clutter.EVENT_PROPAGATE;
         }
+    }
+
+    /** The round view buttons right of the field; Clipboard only while its history runs. */
+    private viewBar(): St.BoxLayout {
+        const box = new St.BoxLayout({ style_class: 'macr-spotlight-views', y_align: Clutter.ActorAlign.CENTER });
+        VIEWS.forEach((view, at) => {
+            if (view === 'clipboard' && !clipboardHistory()) return;
+            const button = new St.Button({
+                style_class: 'macr-spotlight-view',
+                child: new St.Icon({ icon_name: VIEW_BUTTONS[view].icon, icon_size: 16 }),
+                can_focus: false,
+                accessible_name: VIEW_BUTTONS[view].name(),
+            });
+            button.connect('clicked', () => {
+                const next = viewForKey(at + 1, this.view);
+                if (next) this.setView(next);
+            });
+            box.add_child(button);
+            this.viewButtons.set(view, button);
+        });
+        return box;
+    }
+
+    /**
+     * Shows only `view`'s results, searching again at once. The Clipboard
+     * view is the clipboard history's own panel: Spotlight hands it the text.
+     */
+    private setView(view: SpotlightView): void {
+        if (view === 'clipboard') {
+            const link = clipboardHistory();
+            if (!link) return;
+            const text = this.entry?.get_text() ?? '';
+            this.finishClose();
+            link.open(text);
+            return;
+        }
+        this.view = view;
+        for (const [at, button] of this.viewButtons) {
+            if (at === view) button.add_style_pseudo_class('checked');
+            else button.remove_style_pseudo_class('checked');
+        }
+        if (this.entry) this.entry.hint_text = hintText(view);
+        this.stopSearchTimer();
+        this.search();
     }
 
     private stopSearchTimer(): void {

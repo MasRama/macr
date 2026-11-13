@@ -64,7 +64,9 @@ export class ClipboardPanel {
         this.close();
     }
 
-    open(): void {
+    /** Opens the history, searching for `query` when given (Spotlight's Clipboard view). */
+    open(query = ''): void {
+        if (this.root) this.close();
         const monitor = Main.layoutManager.currentMonitor ?? Main.layoutManager.primaryMonitor;
         if (!monitor) return;
         const scale = St.ThemeContext.get_for_stage(global.stage as Clutter.Stage).scale_factor;
@@ -115,6 +117,7 @@ export class ClipboardPanel {
             return Clutter.EVENT_STOP;
         });
         entry.clutter_text.connect('key-press-event', (_actor: Clutter.Actor, event: Clutter.Event) => this.onKey(event));
+        entry.set_text(query);
         entry.clutter_text.connect('text-changed', () => this.fill());
         this.fill();
 

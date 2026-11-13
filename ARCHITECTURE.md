@@ -284,6 +284,27 @@ schemas/                GSettings schema
     cookies; each query's `Gio.Cancellable` cancels its requests.
     `spotlight-online` off keeps everything offline: no exchange rates,
     definitions or suggestions.
+- Views (macOS Tahoe): Super+1..4 or Ctrl+1..4, and round buttons right of
+  the field, narrow the search to Apps, Files, Actions or the Clipboard; the
+  same key again, or Esc on an empty field, goes back. `logic/views.ts`
+  picks each view's providers, and views list everything with no Top Hit or
+  caps. Macr's view providers live in `views.ts`:
+  - Apps: GNOME's app provider without its system actions; an empty field
+    lists `Shell.AppUsage`'s most used apps, then every app A to Z.
+  - Files: recent files (`recently-used.xbel`, read by
+    `shared/logic/recent-files.ts`, which the logo menu's Recent Items uses
+    too) and GNOME's file providers (Files, LocalSearch/Tracker). A file
+    both list shows once (`dropRepeats`).
+  - Actions: `SystemActions` (all available ones on an empty field, private
+    `_actions`), Macr's Dark Mode, Do Not Disturb, Empty Trash
+    (`shared/empty-trash.ts`, the dock's dialog), Mission Control and
+    Launchpad, and the apps' desktop actions (`Gio.DesktopAppInfo`
+    `list_actions`, launched with `Shell.App.launch_action`). In the
+    everything view they are a capped section after the apps, without the
+    system actions GNOME's app provider already lists.
+  - Clipboard: Spotlight closes and opens the clipboard history with the
+    typed text through `shared/clipboard-link.ts`, which the clipboard
+    module registers while it runs; no button without it.
 
 ## Quick Look
 
@@ -657,7 +678,8 @@ schemas/                GSettings schema
   click puts the clip back on the clipboard and, once the app's window has
   the focus back, `Paster` presses its paste keys on a virtual keyboard
   (Ctrl+Shift+V in terminals). With no window to paste into it shows a
-  Copied OSD. Delete takes a clip out.
+  Copied OSD. Delete takes a clip out. Spotlight's Clipboard view opens it
+  with a search already typed.
 
 ## Emoji & Symbols
 

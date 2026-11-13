@@ -28,7 +28,7 @@ export function recentFiles(xbel: string, limit: number): RecentFile[] {
     return files;
 }
 
-function fileName(uri: string): string {
+export function fileName(uri: string): string {
     const last = uri.replace(/\/+$/, '').split('/').pop() ?? uri;
     try {
         return decodeURIComponent(last);
