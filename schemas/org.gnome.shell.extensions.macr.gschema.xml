@@ -265,5 +265,14 @@
       <default><![CDATA[['<Super><Control><Shift>Down']]]></default>
       <summary>Keyboard shortcut that tiles the focused window at the bottom and the previous window at the top</summary>
     </key>
+    <key name="screenshot-enabled" type="b">
+      <default>true</default>
+      <summary>Take screenshots the macOS way</summary>
+      <description>Super+Shift+3 takes the whole screen at once. GNOME saves and copies each screenshot as usual, and Print, Shift+Print and Alt+Print keep working.</description>
+    </key>
+    <key name="screenshot-screen-shortcut" type="as">
+      <default><![CDATA[['<Super><Shift>3']]]></default>
+      <summary>Keyboard shortcut that takes a screenshot of the whole screen</summary>
+    </key>
   </schema>
 </schemalist>

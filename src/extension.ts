@@ -14,6 +14,7 @@ import { MenuBar } from './features/menubar/index.js';
 import { MissionControlModule } from './features/missioncontrol/index.js';
 import { NotificationsModule } from './features/notifications/index.js';
 import { OsdModule } from './features/osd/index.js';
+import { ScreenshotModule } from './features/screenshot/index.js';
 import { SpotlightModule } from './features/spotlight/index.js';
 import { SwitcherModule } from './features/switcher/index.js';
 import { TilingModule } from './features/tiling/index.js';
@@ -37,6 +38,7 @@ const MODULES: ModuleEntry[] = [
     { key: 'window-corners-enabled', create: (context) => new WindowCornersModule(context.settings) },
     { key: 'traffic-lights-enabled', create: (context) => new TrafficLightsModule(context.settings) },
     { key: 'tiling-enabled', create: (context) => new TilingModule(context.settings) },
+    { key: 'screenshot-enabled', create: (context) => new ScreenshotModule(context) },
     { key: 'lock-screen-enabled', screens: ['desktop', 'lock'], create: () => new LockScreenModule() },
     { key: 'login-screen-enabled', screens: ['login'], create: () => new LoginScreenModule() },
 ];
