@@ -151,7 +151,8 @@ are laid out like macOS System Settings.
 
 - Banners arrive as frosted cards at the top right.
 - The clock opens the **Notification Center**: notification cards stacked per
-  app, next to calendar, world clock and weather widgets.
+  app, next to calendar, world clock and weather widgets, with your pick of
+  Macr's widgets (batteries and photos at first) under the notifications.
 - Focus (Do Not Disturb) is one click away in the Control Center.
 
 <br clear="right">

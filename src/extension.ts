@@ -16,6 +16,7 @@ import { ClipboardModule } from './features/clipboard/index.js';
 import { EmojiModule } from './features/emoji/index.js';
 import { WallpaperClickModule } from './features/wallpaper/index.js';
 import { DesktopWidgetsModule } from './features/widgets/index.js';
+import { NotificationCenterWidgetsModule } from './features/widgets/notification-center.js';
 import { GesturesModule } from './features/gestures/index.js';
 import { HotCornersModule } from './features/hotcorners/index.js';
 import { KeyboardModule } from './features/keyboard/index.js';
@@ -70,6 +71,7 @@ const MODULES: ModuleEntry[] = [
     { key: 'clipboard-history-enabled', create: (context) => new ClipboardModule(context) },
     { key: 'app-expose-enabled', create: (context) => new AppExposeModule(context.settings) },
     { key: 'desktop-widgets-enabled', create: (context) => new DesktopWidgetsModule(context.settings) },
+    { key: 'notification-center-widgets-enabled', create: (context) => new NotificationCenterWidgetsModule(context) },
     // Day and night come round while the screen is locked too.
     { key: 'appearance-auto', screens: ['desktop', 'lock'], create: (context) => new AutoAppearanceModule(context.settings) },
     // The lock screen's picture follows the time of day too.

@@ -516,6 +516,17 @@ schemas/                GSettings schema
   close button clears the whole stack. Stacks close again with the
   Notification Center. Messages are only moved, hidden and styled; on
   destroy GNOME's order (critical first, then newest first) is put back.
+- Widgets (`notification-center-widgets-enabled`, in `widgets/notification-center.ts`):
+  the message list's sections (`_sectionList`) move into a column Macr sets
+  as its scroll view's child, with a box of desktop widget classes under
+  them (`notification-center-widgets`, sizes in
+  `notification-center-widget-sizes`), so the widgets scroll with the
+  notifications. `logic/notification-center.ts stackWidgets` lays them out
+  in rows two small widgets wide. While widgets show, GNOME's "No
+  Notifications" placeholder is at opacity 0. A click opens the app and
+  closes the Notification Center (`WidgetHost.opened`), a drag snaps back,
+  and Edit Widgets… opens Macr's settings. Disable puts the sections back as
+  the scroll view's child.
 
 ## Mission Control
 

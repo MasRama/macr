@@ -71,6 +71,9 @@ export function pages(): PageInfo[] {
             description: _('Banners at the top right and the Notification Center on the clock.'),
             build: ({ settings }) => [
                 group('', [switchRow(settings, 'notifications-enabled', _('macOS notifications'), _('Banners at the top right and a macOS Notification Center on the clock'))]),
+                group(_('Notification Center'), [
+                    widgetChoices(settings, 'notification-center-widgets', _('Widgets'), _('Under the notifications; click one to open its app')),
+                ]),
             ],
         },
         {
@@ -345,12 +348,19 @@ function stacksGroup({ settings, window, onClose }: PageContext): Adw.Preference
  * that puts dragged widgets back in their column.
  */
 function widgetsRow(settings: Gio.Settings): Gtk.Widget {
-    const expander = new Adw.ExpanderRow({
-        title: _('Widgets on the desktop'),
-        subtitle: _('Drag them anywhere; click one to open its app'),
-        show_enable_switch: true,
-    });
-    settings.bind('desktop-widgets-enabled', expander, 'enable-expansion', Gio.SettingsBindFlags.DEFAULT);
+    const expander = widgetChoices(settings, 'desktop-widgets', _('Widgets on the desktop'), _('Drag them anywhere; click one to open its app'));
+    const reset = new Adw.ActionRow({ title: _('Put widgets back in their column') });
+    const button = new Gtk.Button({ label: _('Reset'), valign: Gtk.Align.CENTER });
+    button.connect('clicked', () => settings.reset('desktop-widget-positions'));
+    reset.add_suffix(button);
+    expander.add_row(reset);
+    return expander;
+}
+
+/** An expander with an on switch (`<list>-enabled`) and a switch for each widget in `list`. */
+function widgetChoices(settings: Gio.Settings, list: string, title: string, subtitle: string): Adw.ExpanderRow {
+    const expander = new Adw.ExpanderRow({ title, subtitle, show_enable_switch: true });
+    settings.bind(`${list}-enabled`, expander, 'enable-expansion', Gio.SettingsBindFlags.DEFAULT);
     const choices: [string, string][] = [
         ['clock', _('Clock')],
         ['calendar', _('Calendar')],
@@ -362,26 +372,21 @@ function widgetsRow(settings: Gio.Settings): Gtk.Widget {
     const rows = choices.map(([id, title]) => {
         const row = new Adw.SwitchRow({ title });
         row.connect('notify::active', () => {
-            const list = settings.get_strv('desktop-widgets');
-            if (row.active === list.includes(id)) return;
+            const ids = settings.get_strv(list);
+            if (row.active === ids.includes(id)) return;
             // Keep the widgets in the order they are listed here.
-            const wanted = row.active ? [...list, id] : list.filter((name) => name !== id);
-            settings.set_strv('desktop-widgets', choices.map(([name]) => name).filter((name) => wanted.includes(name)));
+            const wanted = row.active ? [...ids, id] : ids.filter((name) => name !== id);
+            settings.set_strv(list, choices.map(([name]) => name).filter((name) => wanted.includes(name)));
         });
         expander.add_row(row);
         return [id, row] as const;
     });
     const sync = () => {
-        const list = settings.get_strv('desktop-widgets');
-        for (const [id, row] of rows) row.active = list.includes(id);
+        const ids = settings.get_strv(list);
+        for (const [id, row] of rows) row.active = ids.includes(id);
     };
     sync();
-    const reset = new Adw.ActionRow({ title: _('Put widgets back in their column') });
-    const button = new Gtk.Button({ label: _('Reset'), valign: Gtk.Align.CENTER });
-    button.connect('clicked', () => settings.reset('desktop-widget-positions'));
-    reset.add_suffix(button);
-    expander.add_row(reset);
-    const id = settings.connect('changed::desktop-widgets', sync);
+    const id = settings.connect(`changed::${list}`, sync);
     expander.connect('destroy', () => settings.disconnect(id));
     return expander;
 }

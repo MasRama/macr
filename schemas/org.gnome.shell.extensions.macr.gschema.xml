@@ -514,6 +514,21 @@
       <summary>Widgets on the desktop</summary>
       <description>Clock, calendar, weather, batteries and photo widgets on the desktop, under your windows.</description>
     </key>
+    <key name="notification-center-widgets-enabled" type="b">
+      <default>true</default>
+      <summary>Widgets in the Notification Center</summary>
+      <description>Widgets under the notifications in the Notification Center, as in macOS.</description>
+    </key>
+    <key name="notification-center-widgets" type="as">
+      <default>['batteries', 'photos']</default>
+      <summary>The widgets in the Notification Center</summary>
+      <description>Which widgets show under the notifications, in order: clock, calendar, weather, batteries, photos, media.</description>
+    </key>
+    <key name="notification-center-widget-sizes" type="a{ss}">
+      <default>{}</default>
+      <summary>The Notification Center widgets' sizes</summary>
+      <description>small, medium or large for each widget that has that size; small when left out.</description>
+    </key>
     <key name="desktop-widgets" type="as">
       <default>['clock', 'calendar', 'weather']</default>
       <summary>The widgets on the desktop</summary>

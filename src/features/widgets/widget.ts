@@ -20,6 +20,8 @@ export interface WidgetHost {
     remove(id: WidgetId): void;
     resize(id: WidgetId, size: WidgetSize): void;
     editWidgets(): void;
+    /** The widget opened its app. */
+    opened?(): void;
     /** Device pixels per logical pixel. */
     readonly scale: number;
 }
@@ -162,8 +164,12 @@ export abstract class DesktopWidget {
         if (!this.pressAt || event.get_button() !== Clutter.BUTTON_PRIMARY) return Clutter.EVENT_PROPAGATE;
         const dragged = this.dragging;
         this.release();
-        if (dragged) this.host.moved(this.id, { x: this.actor.x, y: this.actor.y });
-        else this.activate();
+        if (dragged) {
+            this.host.moved(this.id, { x: this.actor.x, y: this.actor.y });
+        } else {
+            this.activate();
+            this.host.opened?.();
+        }
         return Clutter.EVENT_STOP;
     }
 
