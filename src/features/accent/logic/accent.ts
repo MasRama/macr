@@ -61,6 +61,7 @@ export const ACCENT_RULES: AccentRule[] = [
     { selectors: ['.macr-stack-fan-item:hover .macr-stack-name'], property: 'background-color', alpha: 0.92, text: true },
     { selectors: ['.macr-gallery-done'], property: 'background-color', text: true },
     { selectors: ['.macr-gallery-done:hover'], property: 'background-color', lighten: 0.15 },
+    { selectors: ['#macrDash .macr-dock-progress-fill'], property: 'background-color' },
 ];
 
 const DARK_TEXT = '#1d1d1f';

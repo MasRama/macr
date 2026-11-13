@@ -12,6 +12,8 @@ import * as PopupMenu from 'resource:///org/gnome/shell/ui/popupMenu.js';
 
 import { expose } from '../../shared/expose-link.js';
 import { styleMenu, syncMenuScheme } from '../../shared/menu-style.js';
+import { launcherEntries } from './launcher.js';
+import { badgeText, progressOf } from './logic/launcher.js';
 import { clickAction, nextWindow } from './logic/rules.js';
 
 type Disconnectable = { disconnect(id: number): void };
@@ -83,6 +85,63 @@ function windowsHere(app: Shell.App): Meta.Window[] {
 /** An app in the dock. Clicking the focused app minimizes or cycles its windows. */
 export const MacrDashIcon = GObject.registerClass(
     class MacrDashIcon extends Dash.DashIcon {
+        private badge!: St.Label;
+        private progress!: St.Widget;
+        private progressFill!: St.Widget;
+        private launcherId = 0;
+
+        constructor(app: Shell.App) {
+            super(app);
+            // The count and progress the app sends (Unity launcher API), as on macOS.
+            const container = (this as unknown as { _iconContainer: St.Widget })._iconContainer;
+            this.badge = new St.Label({
+                style_class: 'macr-dock-badge',
+                x_expand: true,
+                y_expand: true,
+                x_align: Clutter.ActorAlign.END,
+                y_align: Clutter.ActorAlign.START,
+                visible: false,
+            });
+            this.progressFill = new St.Widget({ style_class: 'macr-dock-progress-fill', x_expand: true, y_expand: true });
+            this.progressFill.set_pivot_point(0, 0.5);
+            this.progress = new St.Widget({
+                style_class: 'macr-dock-progress',
+                layout_manager: new Clutter.BinLayout(),
+                x_expand: true,
+                y_expand: true,
+                x_align: Clutter.ActorAlign.CENTER,
+                y_align: Clutter.ActorAlign.END,
+                visible: false,
+            });
+            // Over the icon's top right corner, a little past it.
+            const scale = St.ThemeContext.get_for_stage(global.stage as Clutter.Stage).scale_factor;
+            this.badge.translation_x = 5 * scale;
+            this.badge.translation_y = -3 * scale;
+            this.progress.add_child(this.progressFill);
+            container.add_child(this.progress);
+            container.add_child(this.badge);
+            const entries = launcherEntries();
+            if (entries) {
+                this.launcherId = entries.connect((appId) => {
+                    if (appId === this.app.get_id()) this.syncLauncher();
+                });
+            }
+            this.syncLauncher();
+        }
+
+        private syncLauncher(): void {
+            const entry = launcherEntries()?.get(this.app.get_id());
+            const text = entry ? badgeText(entry) : null;
+            this.badge.visible = text !== null;
+            this.badge.text = text ?? '';
+            const progress = entry ? progressOf(entry) : null;
+            this.progress.visible = progress !== null;
+            this.progressFill.scale_x = progress ?? 0;
+            // As wide as most of the icon, at whatever size the dock has.
+            const scale = St.ThemeContext.get_for_stage(global.stage as Clutter.Stage).scale_factor;
+            this.progress.width = Math.round(currentIconSize * 0.72 * scale);
+        }
+
         override activate(button: number): void {
             const event = Clutter.get_current_event();
             const ctrl = ((event?.get_state() ?? 0) & Clutter.ModifierType.CONTROL_MASK) !== 0;
@@ -137,6 +196,8 @@ export const MacrDashIcon = GObject.registerClass(
         // GNOME 46 leaves the menu in the stage when the icon goes, and the
         // dock rebuilds its icons on every enable.
         protected override _onDestroy(): void {
+            if (this.launcherId) launcherEntries()?.disconnect(this.launcherId);
+            this.launcherId = 0;
             super._onDestroy();
             this.menu?.destroy();
         }

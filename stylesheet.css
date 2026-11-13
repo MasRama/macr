@@ -406,6 +406,33 @@
     background-color: rgba(0, 0, 0, 0.6);
 }
 
+/* The count and progress an app sends its dock icon. */
+#macrDash .macr-dock-badge {
+    min-width: 10px;
+    padding: 2px 5px;
+    border-radius: 10px;
+    background-color: #ff3b30;
+    color: #ffffff;
+    font-family: "SF Pro Text", "SF Pro", system-ui, sans-serif;
+    font-size: 12px;
+    font-weight: 600;
+    text-align: center;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.35);
+}
+
+#macrDash .macr-dock-progress {
+    height: 7px;
+    margin-bottom: 4px;
+    border-radius: 4px;
+    background-color: rgba(30, 30, 30, 0.75);
+    border: 1px solid rgba(255, 255, 255, 0.55);
+}
+
+#macrDash .macr-dock-progress-fill {
+    border-radius: 3px;
+    background-color: #0a84ff;
+}
+
 #macrDash .dash-separator,
 #macrDock .macr-dock-divider {
     width: 1px;
