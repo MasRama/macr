@@ -1,5 +1,31 @@
 # Changelog
 
+## [0.7.0](https://github.com/MasRama/macr/compare/v0.6.0...v0.7.0) (2026-11-13)
+
+
+### Features
+
+* **clashes:** notify when another extension clashes with Macr ([f1fb372](https://github.com/MasRama/macr/commit/f1fb37219c73a8ceeca169c0e7d286f5d8d6ac9f))
+* **dock:** remove recent apps from the dock's menu ([1c4ab79](https://github.com/MasRama/macr/commit/1c4ab7916a174d67de1f62c6c3b49b4960bd6958))
+* **hotcorners:** show an app's windows or sleep the displays from a corner ([3673854](https://github.com/MasRama/macr/commit/3673854111b90a6fabd6d2d8fd1c3855f6f1262c))
+* **menubar:** search every menu item from the Help menu ([068a803](https://github.com/MasRama/macr/commit/068a803bb78b6c9177c7303b95a712487ae1a17e))
+* **missioncontrol:** add and close Spaces from Mission Control ([3bec23d](https://github.com/MasRama/macr/commit/3bec23dd785069d299da102afcdcbb56fa98f154))
+* **prefs:** turn every feature on by default ([3ca74fe](https://github.com/MasRama/macr/commit/3ca74febc76655e8db18007b02626c042261e9b5))
+* **screensaver:** drift the wallpaper under a big clock when the screen sits idle ([1260716](https://github.com/MasRama/macr/commit/12607160dd35cbe3c8e7ca3e87e96fd5164d2fe3))
+* **sounds:** play macOS-style system sounds ([d107c55](https://github.com/MasRama/macr/commit/d107c55d306898082b442033acfb1b0b649b16f6))
+* **spacewallpapers:** give each desktop its own wallpaper ([a165cc8](https://github.com/MasRama/macr/commit/a165cc8668d86419298db448908dc32e3367012b))
+* **switcher:** hide or quit the chosen app with H and Q in Alt+Tab ([b2af799](https://github.com/MasRama/macr/commit/b2af7992f9096c4b213967f6a783ded0d8d0f5a7))
+* **widgets:** show widgets under the notifications in the Notification Center ([84c6724](https://github.com/MasRama/macr/commit/84c67247c1fd7429613aa5ab0a9670ec78054b92))
+
+
+### Bug Fixes
+
+* **dock:** keep magnified icons sharp on monitors at 100% scale ([e32bfd8](https://github.com/MasRama/macr/commit/e32bfd8c3cb03ca7ee90914ed8041fb0d595fc0b))
+* **hotcorners:** keep the primary monitor's corners next to another monitor ([7148fcb](https://github.com/MasRama/macr/commit/7148fcb5b7ba16b0a270656e29110f9dfc67e1fd))
+* **menubar:** tint Help's search field with the accent colour ([1197bc7](https://github.com/MasRama/macr/commit/1197bc79f70148ad9f94232c28537b05ca7f0a2d))
+* **missioncontrol:** show the wallpaper on every monitor ([ebe0639](https://github.com/MasRama/macr/commit/ebe06397daa29bc7180cbe1a936321b065440cac))
+* **trafficlights:** keep the lights 12px in Chrome ([27ded69](https://github.com/MasRama/macr/commit/27ded691b517a761793ebf8785576d58c957ef99))
+
 ## [0.6.0](https://github.com/MasRama/macr/compare/v0.5.0...v0.6.0) (2026-11-13)
 
 
