@@ -379,5 +379,10 @@
       <summary>Accent colour</summary>
       <description>The colour of highlighted menu items, default buttons and active toggles in Macr; wallpaper picks the macOS accent nearest the desktop picture's colours.</description>
     </key>
+    <key name="dynamic-desktop-enabled" type="b">
+      <default>false</default>
+      <summary>Dynamic desktop</summary>
+      <description>The desktop picture follows the time of day: warm at sunrise and sunset, dimmer and cooler at night.</description>
+    </key>
   </schema>
 </schemalist>

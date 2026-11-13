@@ -7,6 +7,7 @@ import { AppIconsModule } from './features/appicons/index.js';
 import { AppExposeModule } from './features/expose/index.js';
 import { ControlCenterModule } from './features/controlcenter/index.js';
 import { WindowCornersModule } from './features/corners/index.js';
+import { DynamicDesktopModule } from './features/desktop/index.js';
 import { DockModule } from './features/dock/index.js';
 import { HotCornersModule } from './features/hotcorners/index.js';
 import { KeyboardModule } from './features/keyboard/index.js';
@@ -49,6 +50,8 @@ const MODULES: ModuleEntry[] = [
     { key: 'screenshot-enabled', create: (context) => new ScreenshotModule(context) },
     { key: 'keyboard-enabled', create: (context) => new KeyboardModule(context.settings) },
     { key: 'app-expose-enabled', create: (context) => new AppExposeModule(context.settings) },
+    // The lock screen's picture follows the time of day too.
+    { key: 'dynamic-desktop-enabled', screens: ['desktop', 'lock'], create: () => new DynamicDesktopModule() },
     // Kept on while locked: turning off would move full-screen windows back.
     { key: 'fullscreen-spaces-enabled', screens: ['desktop', 'lock'], create: () => new FullscreenSpacesModule() },
     // Paused, not turned off, while locked: turning off would bring every window back.
