@@ -488,6 +488,13 @@ schemas/                GSettings schema
   and every `workspace-background` card at opacity 0 (looked up again on each
   `showing`, since GNOME builds workspaces lazily), so windows spread
   straight over the wallpaper.
+- The blurred widget shows a `Clutter.Clone` of the wallpaper actor, which
+  sits in a hidden holder (the manager's container; `changed` repoints the
+  clone at a new wallpaper's actor). `Shell.BlurEffect` (ACTOR mode) draws
+  its content offscreen once and keeps it, and mutter clips a wallpaper
+  actor at the stage origin to the redraw clip, which may belong to
+  another monitor's view: the monitor left of the primary one came out
+  grey. A clone is always drawn whole.
 - The Spaces bar always shows: `ThumbnailsBox.prototype._updateShouldShow` is
   swapped while the module runs (taken from the live instance, as 46 ships
   no typings for it) and its thumbnails are bigger (`_maxThumbnailScale`).

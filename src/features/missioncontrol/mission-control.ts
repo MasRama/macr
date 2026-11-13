@@ -8,7 +8,7 @@ type Signals = { connect(signal: string, callback: (...args: never[]) => void): 
 /** GNOME 46's workspace thumbnails (the Spaces bar). */
 type ThumbnailsBox = St.Widget & { _shouldShow: boolean; _maxThumbnailScale: number; _updateShouldShow(): void };
 type Controls = { _thumbnailsBox: ThumbnailsBox; _searchEntryBin: St.Widget };
-type BackgroundManager = { destroy(): void };
+type BackgroundManager = { backgroundActor: Clutter.Actor; connect(signal: 'changed', callback: () => void): number; destroy(): void };
 type BackgroundManagerClass = new (params: { container: Clutter.Actor; monitorIndex: number; controlPosition: boolean }) => BackgroundManager;
 
 /** The Spaces bar's height, as a share of the monitor (GNOME's is 0.05). */
@@ -95,15 +95,29 @@ export class MissionControl {
         for (const box of this.thumbnailBoxes()) box._maxThumbnailScale = THUMBNAIL_SCALE;
     }
 
+    /**
+     * Each monitor's wallpaper, blurred and dimmed. The blur draws its
+     * content offscreen once and keeps it, and mutter clips a wallpaper
+     * whose actor sits at the stage origin to the area being redrawn, which
+     * may be another monitor's: the picture came out empty there (the
+     * monitor left of the primary one). A clone is always drawn whole, so
+     * the blur gets a clone of the wallpaper, kept in a hidden holder.
+     */
     private buildBackgrounds(): void {
         this.clearBackgrounds();
         const Manager = Background.BackgroundManager as unknown as BackgroundManagerClass;
         Main.layoutManager.monitors.forEach((monitor, monitorIndex) => {
-            const actor = new St.Widget({ x: monitor.x, y: monitor.y, width: monitor.width, height: monitor.height });
-            const manager = new Manager({ container: actor, monitorIndex, controlPosition: false });
+            const { width, height } = monitor;
+            const actor = new St.Widget({ x: monitor.x, y: monitor.y, width, height });
+            const holder = new St.Widget({ visible: false, width, height });
+            const manager = new Manager({ container: holder, monitorIndex, controlPosition: false });
+            const picture = new Clutter.Clone({ source: manager.backgroundActor, width, height });
+            // A new wallpaper comes as a new actor.
+            manager.connect('changed', () => picture.set_source(manager.backgroundActor));
+            actor.add_child(holder);
+            actor.add_child(picture);
             actor.add_effect(new Shell.BlurEffect({ mode: Shell.BlurMode.ACTOR, radius: 30, brightness: 0.75 }));
-            const dim = new St.Widget({ style_class: 'macr-mission-control-dim', width: monitor.width, height: monitor.height });
-            actor.add_child(dim);
+            actor.add_child(new St.Widget({ style_class: 'macr-mission-control-dim', width, height }));
             this.group.insert_child_at_index(actor, 0);
             this.backgrounds.push({ actor, manager });
         });
