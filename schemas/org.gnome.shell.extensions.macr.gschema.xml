@@ -72,6 +72,11 @@
       <default><![CDATA[['<Control>space']]]></default>
       <summary>Keyboard shortcut that opens Spotlight</summary>
     </key>
+    <key name="spotlight-online" type="b">
+      <default>true</default>
+      <summary>Spotlight looks up exchange rates, definitions and web suggestions online</summary>
+      <description>What is typed goes to Frankfurter (exchange rates), the Free Dictionary API (single words) and Google (suggestions).</description>
+    </key>
     <key name="control-center-enabled" type="b">
       <default>true</default>
       <summary>Show quick settings as the macOS Control Center</summary>

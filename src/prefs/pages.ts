@@ -103,12 +103,19 @@ export function pages(): PageInfo[] {
             build: ({ settings }) => {
                 const superKey = switchRow(settings, 'launchpad-super-key', _('Super key opens Launchpad'), _('Instead of the overview or the distribution’s app menu'));
                 dependsOn(settings, 'launchpad-enabled', superKey);
+                const online = switchRow(
+                    settings,
+                    'spotlight-online',
+                    _('Online answers'),
+                    _('Exchange rates, word definitions and web suggestions. What you type is sent to Frankfurter, the Free Dictionary API and Google.'),
+                );
+                dependsOn(settings, 'spotlight-enabled', online);
                 return [
                     group(_('Launchpad'), [
                         switchRow(settings, 'launchpad-enabled', _('Launchpad'), _('Every app in a full-screen grid, from the dock’s Apps icon')),
                         superKey,
                     ]),
-                    group(_('Spotlight'), [switchRow(settings, 'spotlight-enabled', _('Spotlight'), _('Search apps, files and settings with Ctrl+Space'))]),
+                    group(_('Spotlight'), [switchRow(settings, 'spotlight-enabled', _('Spotlight'), _('Search apps, files and settings, convert units and currencies, and search the web with Ctrl+Space')), online]),
                 ];
             },
         },

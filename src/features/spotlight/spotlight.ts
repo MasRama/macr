@@ -5,29 +5,15 @@ import Pango from 'gi://Pango';
 import Shell from 'gi://Shell';
 import St from 'gi://St';
 import { ensureActorVisibleInScrollView } from 'resource:///org/gnome/shell/misc/animationUtils.js';
+import { gettext as _ } from 'resource:///org/gnome/shell/extensions/extension.js';
 import * as Main from 'resource:///org/gnome/shell/ui/main.js';
 
 import { previewUri } from '../../shared/logic/quick-look.js';
 import { quickLook } from '../../shared/quick-look.js';
 import { isLight } from '../../shared/scheme.js';
+import { answerProviders, type Provider, type ResultMeta } from './answers.js';
 import { APPS_PROVIDER, type Layout, layoutResults, type ProviderResults, wrapIndex } from './logic/results.js';
-
-/** What GNOME's search providers (the overview's own list) offer. */
-interface Provider {
-    id: string;
-    appInfo?: Gio.AppInfo | null;
-    getInitialResultSet(terms: string[], cancellable: Gio.Cancellable): Promise<string[]>;
-    filterResults(results: string[], max: number): string[];
-    getResultMetas(ids: string[], cancellable: Gio.Cancellable): Promise<ResultMeta[]>;
-    activateResult(id: string, terms: string[]): void;
-}
-
-interface ResultMeta {
-    id: string;
-    name: string;
-    description?: string;
-    createIcon?(size: number): Clutter.Actor | null;
-}
+import { Online } from './online.js';
 
 interface Hit {
     provider: Provider;
@@ -49,21 +35,27 @@ const CLOSE_MS = 100;
 /** Results asked of each provider: one more than shown, for the Top Hit. */
 const ASK = { apps: 7, other: 5 };
 
-function providers(): Provider[] {
+/** GNOME's search providers, the overview's own list. */
+function gnomeProviders(): Provider[] {
     const view = (Main.overview.searchController as unknown as { _searchResults?: { _providers?: Provider[] } })._searchResults;
     return view?._providers ?? [];
 }
 
 function providerTitle(provider: Provider): string {
-    return provider.id === APPS_PROVIDER ? 'Applications' : (provider.appInfo?.get_name() ?? provider.id);
+    if (provider.title) return provider.title;
+    return provider.id === APPS_PROVIDER ? _('Applications') : (provider.appInfo?.get_name() ?? provider.id);
 }
 
 /**
  * macOS Spotlight: a search field in the middle of the monitor under the
  * pointer, with GNOME's search providers (apps, files, settings, calculator
- * and whatever else is installed) listed under it as results arrive.
+ * and whatever else is installed) listed under it as results arrive, with
+ * Macr's own answers around them: conversions first, then a definition and
+ * the web.
  */
 export class Spotlight {
+    private readonly online = new Online();
+    private readonly answers: { first: Provider[]; last: Provider[] };
     private root: St.Widget | null = null;
     private entry: St.Entry | null = null;
     private list: St.BoxLayout | null = null;
@@ -78,6 +70,12 @@ export class Spotlight {
     private closing = false;
     /** Enter came before the results: open the first one when they arrive. */
     private activateWhenReady = false;
+    /** The user picked a result (arrows or pointer): it stays selected as others arrive. */
+    private picked = false;
+
+    constructor(settings: Gio.Settings) {
+        this.answers = answerProviders(settings, this.online);
+    }
 
     get isOpen(): boolean {
         return this.root !== null && !this.closing;
@@ -108,7 +106,7 @@ export class Spotlight {
         root.add_child(backdrop);
         root.add_child(panel);
 
-        const entry = new St.Entry({ style_class: 'macr-spotlight-entry', hint_text: 'Spotlight Search', can_focus: true, x_expand: true });
+        const entry = new St.Entry({ style_class: 'macr-spotlight-entry', hint_text: _('Spotlight Search'), can_focus: true, x_expand: true });
         entry.set_primary_icon(new St.Icon({ icon_name: 'edit-find-symbolic', style_class: 'macr-spotlight-icon' }));
         panel.add_child(entry);
         // Long result lists scroll instead of running off the monitor.
@@ -176,6 +174,7 @@ export class Spotlight {
 
     destroy(): void {
         this.finishClose();
+        this.online.destroy();
     }
 
     private releaseGrab(): void {
@@ -219,6 +218,7 @@ export class Spotlight {
         const terms = (this.entry?.get_text() ?? '').trim().split(/\s+/).filter(Boolean);
         this.terms = terms;
         this.groups.clear();
+        this.picked = false;
         if (!terms.length) {
             this.cancellable = null;
             this.render();
@@ -226,7 +226,7 @@ export class Spotlight {
         }
         const cancellable = new Gio.Cancellable();
         this.cancellable = cancellable;
-        const all = providers();
+        const all = [...this.answers.first, ...gnomeProviders(), ...this.answers.last];
         // Every provider has a slot from the start, so sections keep their order.
         for (const provider of all) this.groups.set(provider.id, { id: provider.id, title: providerTitle(provider), results: [] });
         let remaining = all.length;
@@ -264,12 +264,12 @@ export class Spotlight {
     private render(): void {
         const list = this.list;
         if (!list) return;
-        const previous = this.rows[this.selected]?.hit;
+        const previous = this.picked ? this.rows[this.selected]?.hit : undefined;
         list.destroy_all_children();
         this.rows = [];
         const layout: Layout<Hit> = layoutResults([...this.groups.values()]);
         if (layout.topHit) {
-            list.add_child(this.header('Top Hit'));
+            list.add_child(this.header(_('Top Hit')));
             this.addRow(list, layout.topHit.item, true);
         }
         for (const section of layout.sections) {
@@ -277,7 +277,8 @@ export class Spotlight {
             for (const hit of section.items) this.addRow(list, hit, false);
         }
         if (this.scroll) this.scroll.visible = this.rows.length > 0;
-        // Keep the selected result while slower providers fill in.
+        // Keep the result the user picked while slower providers fill in;
+        // otherwise the Top Hit, which can change as they do.
         const kept = previous ? this.rows.findIndex((row) => row.hit.provider === previous.provider && row.hit.meta.id === previous.meta.id) : -1;
         this.select(kept >= 0 ? kept : this.rows.length ? 0 : -1);
     }
@@ -306,7 +307,9 @@ export class Spotlight {
         const index = this.rows.length;
         button.connect('clicked', () => this.activate(index));
         button.connect('notify::hover', () => {
-            if (button.hover) this.select(index);
+            if (!button.hover) return;
+            this.picked = true;
+            this.select(index);
         });
         list.add_child(button);
         this.rows.push({ button, hit });
@@ -371,9 +374,11 @@ export class Spotlight {
                 }
                 return Clutter.EVENT_STOP;
             case Clutter.KEY_Down:
+                this.picked = true;
                 this.select(wrapIndex(this.selected, 1, this.rows.length), true);
                 return Clutter.EVENT_STOP;
             case Clutter.KEY_Up:
+                this.picked = true;
                 this.select(wrapIndex(this.selected, -1, this.rows.length), true);
                 return Clutter.EVENT_STOP;
             default:

@@ -14,7 +14,7 @@ export class SpotlightModule implements Module {
     constructor(private readonly context: ModuleContext) {}
 
     enable(): void {
-        const spotlight = new Spotlight();
+        const spotlight = new Spotlight(this.context.settings);
         this.spotlight = spotlight;
         // POPUP too, so the shortcut also closes it.
         Main.wm.addKeybinding(SHORTCUT, this.context.settings, Meta.KeyBindingFlags.NONE, Shell.ActionMode.NORMAL | Shell.ActionMode.OVERVIEW | Shell.ActionMode.POPUP, () => spotlight.toggle());
