@@ -5,6 +5,11 @@ export interface Rect {
     height: number;
 }
 
+/** True when the two rectangles share some area (touching edges do not count). */
+export function overlaps(a: Rect, b: Rect): boolean {
+    return a.x < b.x + b.width && b.x < a.x + a.width && a.y < b.y + b.height && b.y < a.y + a.height;
+}
+
 export type Half = 'left' | 'right' | 'top' | 'bottom';
 export type Quarter = 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right';
 export type Placement = Half | Quarter | 'fill' | 'center';

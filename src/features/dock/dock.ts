@@ -5,10 +5,11 @@ import Shell from 'gi://Shell';
 import St from 'gi://St';
 import * as Main from 'resource:///org/gnome/shell/ui/main.js';
 
+import { windowCovers } from '../../shared/covered.js';
 import { launchpad, onLaunchpadChanged } from '../../shared/launchpad-link.js';
+import type { Rect } from '../../shared/logic/geometry.js';
 import { MacrDash } from './dash.js';
 import { magnify } from './logic/magnify.js';
-import { overlaps, type Rect } from './logic/rules.js';
 import { TrashItem } from './trash.js';
 
 /** Gap between the dock and the bottom of the screen. */
@@ -197,20 +198,7 @@ export class Dock {
     }
 
     private covered(): boolean {
-        const dock = this.restingRect();
-        const workspace = global.workspace_manager.get_active_workspace();
-        return global
-            .get_window_actors()
-            .map((actor) => actor.meta_window)
-            .some(
-                (window) =>
-                    !window.minimized &&
-                    window.showing_on_its_workspace() &&
-                    window.located_on_workspace(workspace) &&
-                    window.get_monitor() === this.monitorIndex &&
-                    [Meta.WindowType.NORMAL, Meta.WindowType.DIALOG, Meta.WindowType.MODAL_DIALOG].includes(window.get_window_type()) &&
-                    overlaps(dock, window.get_frame_rect()),
-            );
+        return windowCovers(this.restingRect(), this.monitorIndex);
     }
 
     /** The pointer is over the dock or the strip below it down to the screen edge. */

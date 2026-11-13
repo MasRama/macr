@@ -1,4 +1,4 @@
-import type { Rect } from './rules.js';
+import type { Rect } from '../../../shared/logic/geometry.js';
 
 const clamp01 = (t: number): number => Math.min(Math.max(t, 0), 1);
 const smooth = (t: number): number => t * t * (3 - 2 * t);

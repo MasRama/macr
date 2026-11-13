@@ -1,15 +1,3 @@
-export interface Rect {
-    x: number;
-    y: number;
-    width: number;
-    height: number;
-}
-
-/** True when the two rectangles share some area (touching edges do not count). */
-export function overlaps(a: Rect, b: Rect): boolean {
-    return a.x < b.x + b.width && b.x < a.x + a.width && a.y < b.y + b.height && b.y < a.y + a.height;
-}
-
 /** The window after `current` in `windows`, wrapping around; the first one when `current` is not there. */
 export function nextWindow<T>(windows: T[], current: T | null): T | null {
     if (windows.length === 0) return null;

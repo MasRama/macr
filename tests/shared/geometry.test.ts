@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 
-import { placeWindow, reanchor, sameRect } from '../../src/shared/logic/geometry.js';
+import { overlaps, placeWindow, reanchor, sameRect } from '../../src/shared/logic/geometry.js';
 
 const area = { x: 0, y: 28, width: 1535, height: 836 };
 const current = { x: 100, y: 100, width: 800, height: 500 };
@@ -103,4 +103,12 @@ test('a window bigger than the work area is pinned to its top left', () => {
 test('rects within a pixel count as the same', () => {
     assert.equal(sameRect({ x: 0, y: 0, width: 10, height: 10 }, { x: 1, y: 0, width: 9, height: 11 }), true);
     assert.equal(sameRect({ x: 0, y: 0, width: 10, height: 10 }, { x: 2, y: 0, width: 10, height: 10 }), false);
+});
+
+test('rectangles overlap only when they share area', () => {
+    const dock = { x: 400, y: 800, width: 600, height: 64 };
+    assert.equal(overlaps(dock, { x: 0, y: 0, width: 1920, height: 1080 }), true);
+    assert.equal(overlaps(dock, { x: 0, y: 0, width: 1920, height: 800 }), false, 'touching the top edge');
+    assert.equal(overlaps(dock, { x: 1000, y: 700, width: 300, height: 300 }), false, 'touching the right edge');
+    assert.equal(overlaps(dock, { x: 999, y: 863, width: 10, height: 10 }), true);
 });

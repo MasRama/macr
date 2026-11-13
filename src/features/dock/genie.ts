@@ -5,8 +5,8 @@ import Shell from 'gi://Shell';
 import { adjustAnimationTime } from 'resource:///org/gnome/shell/misc/animationUtils.js';
 import * as Main from 'resource:///org/gnome/shell/ui/main.js';
 
+import type { Rect } from '../../shared/logic/geometry.js';
 import { genieVertex } from './logic/genie.js';
-import type { Rect } from './logic/rules.js';
 
 const DURATION = 480;
 const EFFECT_NAME = 'macr-genie';
