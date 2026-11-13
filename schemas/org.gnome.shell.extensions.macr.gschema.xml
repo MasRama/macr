@@ -483,6 +483,26 @@
       <summary>Apps assigned to desktops</summary>
       <description>Set from a Dock icon's Options > Assign To. Entries are app-id=all (every desktop) or app-id=N (desktop N, counted from 0).</description>
     </key>
+    <key name="focus-mode" type="s">
+      <default>''</default>
+      <summary>Focus mode that is on</summary>
+      <description>dnd, work, personal or sleep; empty when Focus is off. Any mode turns GNOME's Do Not Disturb on.</description>
+    </key>
+    <key name="focus-last-mode" type="s">
+      <default>'dnd'</default>
+      <summary>Focus mode the Control Center tile turns on</summary>
+      <description>The mode last turned on.</description>
+    </key>
+    <key name="focus-allowed-apps" type="as">
+      <default>[]</default>
+      <summary>Apps that still show banners in a Focus mode</summary>
+      <description>Entries are mode:app-id.desktop.</description>
+    </key>
+    <key name="focus-schedules" type="as">
+      <default>['sleep=off,22:00,07:00']</default>
+      <summary>Focus schedules</summary>
+      <description>Entries are mode=on|off,HH:MM,HH:MM; the mode turns on at the first time and off at the second, every day.</description>
+    </key>
     <key name="accent-enabled" type="b">
       <default>true</default>
       <summary>Accent colour</summary>

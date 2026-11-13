@@ -48,7 +48,7 @@ export class ControlCenter {
     private readonly grid: Clutter.Actor;
     private readonly blur = new Shell.BlurEffect({ mode: Shell.BlurMode.BACKGROUND, radius: 40, brightness: 1 });
     private readonly titled: Titled[] = [];
-    private readonly focus = new Focus();
+    private readonly focus: Focus;
     private readonly stageManager: StageManagerToggle;
     private readonly openId: number;
 
@@ -58,6 +58,7 @@ export class ControlCenter {
         extensionPath: string,
     ) {
         this.menu = qs.menu;
+        this.focus = new Focus(settings, extensionPath);
         this.stageManager = new StageManagerToggle(settings, extensionPath);
         this.grid = qs.menu._grid;
 

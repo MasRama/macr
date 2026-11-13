@@ -483,10 +483,27 @@ schemas/                GSettings schema
 - Layout: the slider items move to just after GNOME's last own toggle, before
   other extensions' toggles; each slider's box is wrapped with a title
   (Display, Sound, Microphone). Both are undone on disable.
-- Focus is a `QuickToggle` bound inverted to
-  `org.gnome.desktop.notifications show-banners`, added with
-  `addExternalIndicator` and moved after Bluetooth, with a moon indicator in
-  the bar while it is on.
+- Focus (`focus.ts`) is a `QuickMenuToggle` added with
+  `addExternalIndicator` and moved after Bluetooth. The modes are Do Not
+  Disturb, Work, Personal and Sleep (`logic/focus.ts`); `focus-mode` holds
+  the one that is on (empty for none), `focus-last-mode` the one the tile
+  turns on. The menu picks a mode; the tile, its subtitle and the bar icon
+  show it (Work's and Sleep's icons ship in `icons/`).
+  - Any mode is GNOME's Do Not Disturb (`show-banners` off), so GNOME's own
+    switch and the lock screen agree; turning `show-banners` off elsewhere
+    turns Do Not Disturb on, and on again turns Focus off.
+  - Allowed apps (`focus-allowed-apps`, `mode:app-id.desktop`) still show
+    banners: while a mode is on, the `showBanners` getter of
+    `MessageTray.NotificationApplicationPolicy.prototype` is Macr's, which
+    lets an allowed app through when its own GNOME setting allows banners.
+    The original getter is put back on disable. Everything still goes to
+    the Notification Center; critical notifications always show.
+  - Schedules (`focus-schedules`, `mode=on|off,HH:MM,HH:MM`, every day,
+    Sleep 22:00–07:00 off by default) are looked at every 30 s:
+    `scheduleStep` turns the mode on at the start and off at the end,
+    unless it was turned off or changed by hand in between.
+  - The Control Center page in Macr's settings lists each mode with its
+    schedule and allowed apps (`src/prefs/focus.ts`).
 - Stage Manager is a `QuickToggle` after Focus, bound to
   `stage-manager-enabled` with `Gio.Settings.bind`; its icon ships in
   `icons/`. It shows while the Control Center module is on.

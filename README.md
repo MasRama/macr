@@ -56,8 +56,10 @@ are laid out like macOS System Settings.
 - Wi-Fi, Bluetooth and battery menus of their own, a macOS clock and a
   translucent bar, on every monitor.
 - **Control Center**: GNOME's quick settings as macOS tiles, toggles first,
-  titled Display and Sound sliders, a Focus (Do Not Disturb) toggle with a moon
-  in the bar, and a Stage Manager toggle.
+  titled Display and Sound sliders, Focus, and a Stage Manager toggle.
+- **Focus modes**: Do Not Disturb, Work, Personal and Sleep, each with the
+  apps still allowed to show banners and an optional daily schedule; the
+  menu bar shows the mode's icon.
 - **Volume and brightness** show as a small frosted pill under the menu bar at
   the top right.
 
@@ -166,7 +168,8 @@ are laid out like macOS System Settings.
 - The clock opens the **Notification Center**: notification cards stacked per
   app, next to calendar, world clock and weather widgets, with your pick of
   Macr's widgets (batteries and photos at first) under the notifications.
-- Focus (Do Not Disturb) is one click away in the Control Center.
+- Focus is one click away in the Control Center; banners from the apps the
+  mode allows still show.
 
 <br clear="right">
 

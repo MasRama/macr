@@ -7,6 +7,7 @@ import { gettext as _ } from 'resource:///org/gnome/Shell/Extensions/js/extensio
 import { withStack } from '../features/dock/logic/stack.js';
 import { setAppearance } from '../shared/appearance.js';
 import { clashes, type Clash } from '../shared/logic/clashes.js';
+import { focusGroup } from './focus.js';
 import { comboRow, dependsOn, group, spinRow, switchRow } from './rows.js';
 import { tile, type TileColor } from './style.js';
 
@@ -26,6 +27,8 @@ export interface PageContext {
     settings: Gio.Settings;
     version: string;
     url: string;
+    /** The extension's folder, for its icons. */
+    path: string;
     window: Gtk.Window;
     /** Shows a short message at the bottom of the window. */
     toast: (title: string) => void;
@@ -58,12 +61,17 @@ export function pages(): PageInfo[] {
             id: 'controlcenter', section: 0, icon: 'emblem-system-symbolic', color: 'gray',
             title: _('Control Center'),
             description: _('Quick settings as macOS tiles, and the volume and brightness pill.'),
-            build: ({ settings }) => [
-                group('', [
-                    switchRow(settings, 'control-center-enabled', _('macOS Control Center'), _('Quick settings with Focus, titled sliders and macOS tiles')),
-                    switchRow(settings, 'osd-enabled', _('macOS volume and brightness'), _('A small pill under the menu bar at the top right')),
-                ]),
-            ],
+            build: ({ settings, path, onClose }) => {
+                const focus = focusGroup(settings, path, onClose);
+                dependsOn(settings, 'control-center-enabled', focus);
+                return [
+                    group('', [
+                        switchRow(settings, 'control-center-enabled', _('macOS Control Center'), _('Quick settings with Focus, titled sliders and macOS tiles')),
+                        switchRow(settings, 'osd-enabled', _('macOS volume and brightness'), _('A small pill under the menu bar at the top right')),
+                    ]),
+                    focus,
+                ];
+            },
         },
         {
             id: 'notifications', section: 0, icon: 'preferences-system-notifications-symbolic', color: 'red',

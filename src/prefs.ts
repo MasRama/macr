@@ -19,6 +19,7 @@ export default class MacrPreferences extends ExtensionPreferences {
             settings: this.getSettings(),
             version: String(this.metadata['version-name'] ?? this.metadata.version ?? ''),
             url: String(this.metadata.url ?? 'https://github.com/MasRama/macr'),
+            path: this.path,
             window,
             toast: (title) => toasts.add_toast(new Adw.Toast({ title })),
             onClose: (cleanup) => cleanups.push(cleanup),
