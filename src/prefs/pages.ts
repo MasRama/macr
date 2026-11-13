@@ -125,9 +125,15 @@ export function pages(): PageInfo[] {
                     ['hot-corner-bottom-right', _('Bottom right')],
                 ];
                 const cornerRows = corners.map(([key, title]) => comboRow(settings, key, title, actions));
+                const exposeShortcut = shortcutsRow(settings, _('For the focused app'), [['app-expose-shortcut', _('App Exposé')]]);
+                dependsOn(settings, 'app-expose-enabled', exposeShortcut);
                 dependsOn(settings, 'hot-corners-enabled', ...cornerRows);
                 return [
                     group('', [switchRow(settings, 'mission-control-enabled', _('macOS Mission Control'), _('Windows over the dimmed wallpaper, Spaces always at the top'))]),
+                    group(_('App Exposé'), [
+                        switchRow(settings, 'app-expose-enabled', _('App Exposé'), _('All of one app’s windows at a glance, from Show All Windows in the dock icon’s menu')),
+                        exposeShortcut,
+                    ]),
                     group(_('Stage Manager'), [
                         switchRow(settings, 'stage-manager-enabled', _('Stage Manager'), _('The app you use stays in the middle; your other apps wait on the left, a click away')),
                     ]),
