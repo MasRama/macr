@@ -7,15 +7,13 @@ import * as Main from 'resource:///org/gnome/shell/ui/main.js';
 
 import type { Module } from '../../shared/module.js';
 import { isLight } from '../../shared/scheme.js';
-import { type Box, boxOf, defaultSlots, fromFraction, isDesktopIconsTitle, placeWidget, type Point, type Rect, toFraction, type WidgetId, widgetIds, type WidgetSize, widgetSize } from './logic/widgets.js';
+import { type Box, boxOf, defaultSlots, fromFraction, isDesktopIconsTitle, placeWidget, type Point, type Rect, toFraction, WIDGET_GAP, WIDGET_UNIT, type WidgetId, widgetIds, type WidgetSize, widgetSize } from './logic/widgets.js';
 import { WidgetGallery } from './gallery.js';
 import { removeOldPictures } from './photos.js';
 import { WIDGETS } from './registry.js';
 import type { DesktopWidget, WidgetHost } from './widget.js';
 
-/** Logical pixels: macOS's small widget, the gap between widgets and their margin from the screen's edge. */
-const SIZE = 164;
-const GAP = 20;
+/** Logical pixels: the widgets' margin from the screen's edge. */
 const MARGIN = 28;
 
 type Disconnectable = { disconnect(id: number): void };
@@ -121,7 +119,7 @@ export class DesktopWidgetsModule implements Module, WidgetHost {
     /** One widget's box in stage px. */
     boxFor(size: WidgetSize): Box {
         const scale = this.scale;
-        const box = boxOf(size, SIZE, GAP);
+        const box = boxOf(size, WIDGET_UNIT, WIDGET_GAP);
         return { width: Math.round(box.width * scale), height: Math.round(box.height * scale) };
     }
 
@@ -157,7 +155,7 @@ export class DesktopWidgetsModule implements Module, WidgetHost {
         const slots = defaultSlots(
             this.widgets.map((widget) => widget.box),
             area,
-            GAP * scale,
+            WIDGET_GAP * scale,
             MARGIN * scale,
         );
         this.widgets.forEach((widget, index) => {

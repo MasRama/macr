@@ -2329,6 +2329,75 @@
   margin-top: 8px;
 }
 
+/* Large widgets */
+.macr-widget-today {
+  padding: 16px 16px 0 6px;
+}
+
+.macr-widget-today-weekday {
+  font-size: 9pt;
+  font-weight: 700;
+  color: #ff453a;
+}
+
+.macr-widget.macr-light .macr-widget-today-weekday {
+  color: #ff3b30;
+}
+
+.macr-widget-today-day {
+  font-family: "SF Pro Display", "SF Pro", system-ui, sans-serif;
+  font-size: 40pt;
+  font-weight: 300;
+}
+
+.macr-widget-events-large {
+  padding: 2px 16px 14px 16px;
+}
+
+.macr-widget-weather-days {
+  margin-top: 10px;
+  padding-top: 8px;
+  border-top: 1px solid rgba(255, 255, 255, 0.22);
+  spacing: 5px;
+}
+
+.macr-widget-weather-day {
+  spacing: 10px;
+}
+
+.macr-widget-weather-day-name {
+  font-size: 9.5pt;
+  font-weight: 700;
+}
+
+.macr-widget-weather-day-icon {
+  icon-size: 15px;
+}
+
+.macr-widget-weather-day-low,
+.macr-widget-weather-day-high {
+  font-size: 9.5pt;
+  font-weight: 700;
+  min-width: 30px;
+  text-align: right;
+}
+
+.macr-widget-weather-day-low {
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.macr-widget-weather-track {
+  border-radius: 2px;
+  background-color: rgba(0, 0, 0, 0.18);
+}
+
+.macr-widget-weather-bar {
+  border-radius: 2px;
+  background-gradient-direction: horizontal;
+  background-gradient-start: #8fd3ff;
+  background-gradient-end: #ffd25e;
+}
+
 /* Edit Widgets gallery */
 .macr-gallery-scrim {
   background-color: rgba(0, 0, 0, 0.42);
@@ -2374,6 +2443,10 @@
 
 .macr-gallery-done:focus {
   box-shadow: inset 0 0 0 2px rgba(255, 255, 255, 0.6);
+}
+
+.macr-gallery-rows {
+  spacing: 18px;
 }
 
 .macr-gallery-row {

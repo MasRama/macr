@@ -6,11 +6,14 @@ import St from 'gi://St';
 import { gettext as _ } from 'resource:///org/gnome/shell/extensions/extension.js';
 import * as Main from 'resource:///org/gnome/shell/ui/main.js';
 
-import { type Box, dayRange, hourlyForecast, type WidgetId, type WidgetSize } from './logic/widgets.js';
+import { type Box, dailyForecast, dayRange, type ForecastItem, hourlyForecast, rangeBar, type WidgetId, type WidgetSize } from './logic/widgets.js';
 import { DesktopWidget, type WidgetHost } from './widget.js';
 
 /** GWeather's TemperatureUnit.DEFAULT: the unit of the user's locale. */
 const DEFAULT_UNIT = 1;
+/** The large widget's days, and its range bars' track width (logical px). */
+const DAYS = 5;
+const TRACK_WIDTH = 96;
 /** GNOME's weather client asks again at most this often (seconds). */
 const REFRESH_SECONDS = 30 * 60;
 
@@ -49,7 +52,10 @@ function shellWeather(): WeatherClient | null {
     return dateMenu?._weatherItem?._weatherClient ?? null;
 }
 
-/** The macOS weather widget: the place, the temperature now, the sky and today's high and low. */
+/**
+ * The macOS weather widget: the place, the temperature now, the sky and
+ * today's high and low; medium adds the next hours, large the next days.
+ */
 export class WeatherWidget extends DesktopWidget {
     private readonly client: WeatherClient | null;
     private readonly clientId: number;
@@ -59,6 +65,7 @@ export class WeatherWidget extends DesktopWidget {
     private readonly sky: St.Label;
     private readonly range: St.Label;
     private readonly hours: St.BoxLayout | null = null;
+    private readonly days: St.BoxLayout | null = null;
     private timerId = 0;
     private readonly clockSettings = new Gio.Settings({ schema_id: 'org.gnome.desktop.interface' });
 
@@ -71,7 +78,7 @@ export class WeatherWidget extends DesktopWidget {
         this.range = new St.Label({ style_class: 'macr-widget-weather-range' });
         for (const label of [this.place, this.sky]) label.clutter_text.ellipsize = Pango.EllipsizeMode.END;
         const content = new St.BoxLayout({ style_class: 'macr-widget-weather-box', vertical: true, x_expand: true, y_expand: true });
-        if (size === 'medium') {
+        if (size !== 'small') {
             // The place and temperature on the left, the sky on the right, the next hours under them.
             const top = new St.BoxLayout({ x_expand: true });
             const left = new St.BoxLayout({ vertical: true, x_expand: true });
@@ -85,9 +92,13 @@ export class WeatherWidget extends DesktopWidget {
             top.add_child(left);
             top.add_child(right);
             content.add_child(top);
-            content.add_child(new St.Widget({ y_expand: true }));
+            if (size === 'medium') content.add_child(new St.Widget({ y_expand: true }));
             this.hours = new St.BoxLayout({ style_class: 'macr-widget-weather-hours', x_expand: true });
             content.add_child(this.hours);
+            if (size === 'large') {
+                this.days = new St.BoxLayout({ style_class: 'macr-widget-weather-days', vertical: true, x_expand: true, y_expand: true });
+                content.add_child(this.days);
+            }
         } else {
             content.add_child(this.place);
             content.add_child(this.temperature);
@@ -127,9 +138,10 @@ export class WeatherWidget extends DesktopWidget {
         this.temperature.visible = ready;
         this.icon.visible = ready;
         this.range.visible = ready;
-        if (this.hours) {
-            this.hours.visible = ready;
-            this.hours.destroy_all_children();
+        for (const box of [this.hours, this.days]) {
+            if (!box) continue;
+            box.visible = ready;
+            box.destroy_all_children();
         }
         if (!client || !info || !ready) {
             this.actor.remove_style_class_name('night');
@@ -154,18 +166,52 @@ export class WeatherWidget extends DesktopWidget {
         const range = dayRange([now, ...this.todaysForecast(info)]);
         this.range.text = range ? _('H:%s° L:%s°').format(String(range.high), String(range.low)) : '';
         if (this.hours) this.buildHours(info);
+        if (this.days) this.buildDays(info, now);
+    }
+
+    /** Every forecast with a time and a temperature. */
+    private forecastItems(info: WeatherInfo): ForecastItem[] {
+        const items: ForecastItem[] = [];
+        for (const forecast of info.get_forecast_list()) {
+            const [valid, time] = forecast.get_value_update();
+            const [ok, temperature] = forecast.get_value_temp(DEFAULT_UNIT);
+            if (valid && ok) items.push({ time, temperature, icon: forecast.get_symbolic_icon_name() });
+        }
+        return items;
+    }
+
+    /** Large: today and the next days, each with its sky, low, range bar and high. */
+    private buildDays(info: WeatherInfo, now: number): void {
+        const box = this.days;
+        if (!box) return;
+        const seconds = Math.floor(Date.now() / 1000);
+        const days = dailyForecast([{ time: seconds, temperature: now, icon: info.get_symbolic_icon_name() }, ...this.forecastItems(info)], seconds, DAYS);
+        if (days.length === 0) return;
+        const min = Math.min(...days.map((day) => day.low));
+        const max = Math.max(...days.map((day) => day.high));
+        const scale = this.host.scale;
+        const track = Math.round(TRACK_WIDTH * scale);
+        const thickness = Math.round(4 * scale);
+        days.forEach((day, index) => {
+            const row = new St.BoxLayout({ style_class: 'macr-widget-weather-day', x_expand: true });
+            const name = index === 0 ? _('Today') : (GLib.DateTime.new_from_unix_local(Math.floor(day.day / 1000)).format('%a') ?? '');
+            row.add_child(new St.Label({ text: name, style_class: 'macr-widget-weather-day-name', x_expand: true, y_align: Clutter.ActorAlign.CENTER }));
+            row.add_child(new St.Icon({ icon_name: day.icon, style_class: 'macr-widget-weather-day-icon', y_align: Clutter.ActorAlign.CENTER }));
+            row.add_child(new St.Label({ text: `${day.low}°`, style_class: 'macr-widget-weather-day-low', y_align: Clutter.ActorAlign.CENTER }));
+            const rail = new St.Widget({ style_class: 'macr-widget-weather-track', width: track, height: thickness, y_align: Clutter.ActorAlign.CENTER });
+            const bar = rangeBar(day.low, day.high, min, max, track, thickness);
+            rail.add_child(new St.Widget({ style_class: 'macr-widget-weather-bar', x: bar.x, width: bar.width, height: thickness }));
+            row.add_child(rail);
+            row.add_child(new St.Label({ text: `${day.high}°`, style_class: 'macr-widget-weather-day-high', y_align: Clutter.ActorAlign.CENTER }));
+            box.add_child(row);
+        });
     }
 
     /** Medium: the next six hours, each with its time, sky and temperature. */
     private buildHours(info: WeatherInfo): void {
         const hours = this.hours;
         if (!hours) return;
-        const items = [];
-        for (const forecast of info.get_forecast_list()) {
-            const [valid, time] = forecast.get_value_update();
-            const [ok, temperature] = forecast.get_value_temp(DEFAULT_UNIT);
-            if (valid && ok) items.push({ time, temperature, icon: forecast.get_symbolic_icon_name() });
-        }
+        const items = this.forecastItems(info);
         const twelve = this.clockSettings.get_string('clock-format') === '12h';
         for (const item of hourlyForecast(items, Math.floor(Date.now() / 1000), 6)) {
             const column = new St.BoxLayout({ style_class: 'macr-widget-weather-hour', vertical: true, x_expand: true });

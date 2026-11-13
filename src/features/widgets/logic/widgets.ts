@@ -21,15 +21,19 @@ export function widgetIds(list: readonly string[]): WidgetId[] {
     return ids;
 }
 
-export type WidgetSize = 'small' | 'medium';
+export type WidgetSize = 'small' | 'medium' | 'large';
+
+/** Logical pixels: macOS's small widget and the gap between widgets. */
+export const WIDGET_UNIT = 164;
+export const WIDGET_GAP = 20;
 
 /** The sizes macOS has for each widget; the first is the default. */
 const SIZES: Record<WidgetId, WidgetSize[]> = {
     clock: ['small'],
-    calendar: ['small', 'medium'],
-    weather: ['small', 'medium'],
+    calendar: ['small', 'medium', 'large'],
+    weather: ['small', 'medium', 'large'],
     batteries: ['small', 'medium'],
-    photos: ['small', 'medium'],
+    photos: ['small', 'medium', 'large'],
 };
 
 export function sizesOf(id: WidgetId): WidgetSize[] {
@@ -46,9 +50,11 @@ export interface Box {
     height: number;
 }
 
-/** A small widget is `unit` square; a medium one is two of them and the `gap` wide. */
+/** A small widget is `unit` square; a medium one is two of them and the `gap` wide, a large one four. */
 export function boxOf(size: WidgetSize, unit: number, gap: number): Box {
-    return size === 'medium' ? { width: 2 * unit + gap, height: unit } : { width: unit, height: unit };
+    const double = 2 * unit + gap;
+    if (size === 'large') return { width: double, height: double };
+    return size === 'medium' ? { width: double, height: unit } : { width: unit, height: unit };
 }
 
 /**
@@ -191,6 +197,56 @@ export function hourlyForecast<T extends ForecastItem>(items: readonly T[], now:
     return next;
 }
 
+export interface DayForecast {
+    /** The day's local midnight, as Date.getTime(). */
+    day: number;
+    low: number;
+    high: number;
+    icon: string;
+}
+
+/**
+ * Today and the next days from a forecast list (times in seconds), at most
+ * `count`: each day's lowest and highest temperature and the sky nearest
+ * its midday.
+ */
+export function dailyForecast(items: readonly ForecastItem[], now: number, count: number): DayForecast[] {
+    const today = dayOf(now * 1000);
+    const days = new Map<number, ForecastItem[]>();
+    for (const item of items) {
+        const day = dayOf(item.time * 1000);
+        if (day < today) continue;
+        days.set(day, [...(days.get(day) ?? []), item]);
+    }
+    return [...days.keys()]
+        .sort((a, b) => a - b)
+        .slice(0, count)
+        .map((day) => {
+            const list = days.get(day) ?? [];
+            const temperatures = list.map((item) => item.temperature);
+            const noon = new Date(day).setHours(12) / 1000;
+            const midday = list.reduce((best, item) => (Math.abs(item.time - noon) < Math.abs(best.time - noon) ? item : best));
+            return { day, low: Math.round(Math.min(...temperatures)), high: Math.round(Math.max(...temperatures)), icon: midday.icon };
+        });
+}
+
+/**
+ * Where a day's `low`..`high` bar sits on a track `width` px wide that spans
+ * the week's `min`..`max`: at least `least` px wide, inside the track.
+ */
+export function rangeBar(low: number, high: number, min: number, max: number, width: number, least = 0): { x: number; width: number } {
+    if (max <= min) return { x: 0, width };
+    const span = max - min;
+    let x = ((low - min) / span) * width;
+    let bar = ((high - low) / span) * width;
+    if (bar < least) {
+        x -= (least - bar) / 2;
+        bar = least;
+    }
+    x = Math.min(Math.max(x, 0), width - bar);
+    return { x: Math.round(x), width: Math.round(bar) };
+}
+
 /** The Edit Widgets gallery's previews: each widget at each of its sizes. */
 export function galleryTiles(): { id: WidgetId; size: WidgetSize }[] {
     return WIDGET_IDS.flatMap((id) => sizesOf(id).map((size) => ({ id, size })));
@@ -200,6 +256,30 @@ export function galleryTiles(): { id: WidgetId; size: WidgetSize }[] {
 export function fitScale(natural: number, available: number, max: number): number {
     if (natural <= 0) return max;
     return Math.min(max, (available / natural) * max);
+}
+
+/**
+ * Splits items `widths` wide, `gap` apart, into rows at most `available`
+ * wide, in order; returns each row's item indices. An item wider than a
+ * row gets a row of its own.
+ */
+export function wrapRows(widths: readonly number[], gap: number, available: number): number[][] {
+    const rows: number[][] = [];
+    let row: number[] = [];
+    let used = 0;
+    widths.forEach((width, index) => {
+        const needed = row.length ? used + gap + width : width;
+        if (row.length && needed > available) {
+            rows.push(row);
+            row = [index];
+            used = width;
+            return;
+        }
+        row.push(index);
+        used = needed;
+    });
+    if (row.length) rows.push(row);
+    return rows;
 }
 
 /** A preview dropped outside the gallery's panel lands on the desktop. */

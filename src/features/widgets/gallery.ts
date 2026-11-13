@@ -4,9 +4,9 @@ import { gettext as _ } from 'resource:///org/gnome/shell/extensions/extension.j
 import * as Main from 'resource:///org/gnome/shell/ui/main.js';
 
 import { isLight } from '../../shared/scheme.js';
-import { type Box, droppedOnDesktop, fitScale, galleryTiles, type Point, type Rect, type WidgetId, type WidgetSize } from './logic/widgets.js';
+import { type Box, droppedOnDesktop, fitScale, galleryTiles, type Point, type Rect, type WidgetId, type WidgetSize, wrapRows } from './logic/widgets.js';
 import { WIDGETS } from './registry.js';
-import type { DesktopWidget, WidgetHost } from './widget.js';
+import { type DesktopWidget, sizeName, type WidgetHost } from './widget.js';
 
 /** Previews are at most this fraction of a widget's size. */
 const PREVIEW_SCALE = 0.5;
@@ -14,7 +14,11 @@ const PREVIEW_SCALE = 0.5;
 const MARGIN = 24;
 const PADDING = 24;
 const TILE_GAP = 12;
+const TILE_PADDING = 12;
 const GROUP_GAP = 32;
+/** The previews take at most this many rows, each filled to about this much. */
+const ROWS = 2;
+const ROW_FILL = 0.85;
 const DRAG_THRESHOLD = 6;
 const FADE_MS = 180;
 
@@ -105,13 +109,21 @@ export class WidgetGallery {
         this.panel.add_child(header);
 
         const area = Main.layoutManager.getWorkAreaForMonitor(Main.layoutManager.primaryIndex);
-        // The previews' row at the largest scale, to shrink it when the screen is narrow.
+        // In the stage first: the theme sizes what is measured below.
+        this.scrim.add_child(this.panel);
+        // The previews at the largest scale, shrunk until they fit in two rows.
         const entries = galleryTiles();
         const groups = new Set(entries.map((entry) => entry.id)).size;
-        const natural = entries.reduce((sum, entry) => sum + host.boxFor(entry.size).width * PREVIEW_SCALE, 0) + ((entries.length - groups) * TILE_GAP + (groups - 1) * GROUP_GAP + 2 * PADDING) * scale;
-        const tileScale = fitScale(natural, area.width - 2 * MARGIN * scale, PREVIEW_SCALE);
+        const available = area.width - 2 * (MARGIN + PADDING) * scale;
+        const natural = entries.reduce((sum, entry) => sum + host.boxFor(entry.size).width * PREVIEW_SCALE, 0) + (entries.length * TILE_PADDING + (entries.length - groups) * TILE_GAP + (groups - 1) * GROUP_GAP) * scale;
+        const tileScale = fitScale(natural, ROWS * available * ROW_FILL, PREVIEW_SCALE);
 
-        const row = new St.BoxLayout({ style_class: 'macr-gallery-row' });
+        const rows = new St.BoxLayout({ style_class: 'macr-gallery-rows', vertical: true, x_align: Clutter.ActorAlign.CENTER });
+        this.panel.add_child(rows);
+        // Every group in one row first, so the theme sizes them for measuring.
+        const first = new St.BoxLayout({ style_class: 'macr-gallery-row', x_align: Clutter.ActorAlign.CENTER });
+        rows.add_child(first);
+        const columns: St.BoxLayout[] = [];
         let group: St.BoxLayout | null = null;
         let groupId: WidgetId | null = null;
         for (const entry of entries) {
@@ -121,12 +133,30 @@ export class WidgetGallery {
                 group = new St.BoxLayout({ style_class: 'macr-gallery-tiles', y_align: Clutter.ActorAlign.END, y_expand: true });
                 column.add_child(group);
                 column.add_child(new St.Label({ text: widgetName(entry.id), style_class: 'macr-gallery-name', x_align: Clutter.ActorAlign.CENTER }));
-                row.add_child(column);
+                first.add_child(column);
+                columns.push(column);
             }
             group?.add_child(this.tile(entry.id, entry.size, tileScale, light));
         }
-        this.panel.add_child(row);
-        this.scrim.add_child(this.panel);
+        // One row when it fits, else wrapped at the screen's width; every
+        // group as tall as the tallest, so the names line up.
+        const widths = columns.map((column) => column.get_preferred_width(-1)[1]);
+        const tallest = Math.max(...columns.map((column) => column.get_preferred_height(-1)[1]));
+        for (const column of columns) column.height = tallest;
+        const wrapped = wrapRows(widths, GROUP_GAP * scale, available);
+        for (const [index, members] of wrapped.entries()) {
+            let row = first;
+            if (index > 0) {
+                row = new St.BoxLayout({ style_class: 'macr-gallery-row', x_align: Clutter.ActorAlign.CENTER });
+                rows.add_child(row);
+            }
+            for (const member of members) {
+                const column = columns[member];
+                if (!column || column.get_parent() === row) continue;
+                first.remove_child(column);
+                row.add_child(column);
+            }
+        }
         this.sync();
 
         const [, width] = this.panel.get_preferred_width(-1);
@@ -184,10 +214,12 @@ export class WidgetGallery {
         const badge = new St.Icon({ icon_name: 'object-select-symbolic', style_class: 'macr-gallery-badge', x_expand: true, y_expand: true, x_align: Clutter.ActorAlign.END, y_align: Clutter.ActorAlign.START });
         const holder = new St.Widget({ layout_manager: new Clutter.BinLayout() });
         holder.add_child(frame);
+        // Takes the clicks over the preview, so its own buttons do not.
+        holder.add_child(new St.Widget({ reactive: true, x_expand: true, y_expand: true }));
         holder.add_child(badge);
         const actor = new St.BoxLayout({ style_class: 'macr-gallery-tile', vertical: true, reactive: true, track_hover: true, y_align: Clutter.ActorAlign.END });
         actor.add_child(holder);
-        actor.add_child(new St.Label({ text: size === 'small' ? _('Small') : _('Medium'), style_class: 'macr-gallery-size', x_align: Clutter.ActorAlign.CENTER }));
+        actor.add_child(new St.Label({ text: sizeName(size), style_class: 'macr-gallery-size', x_align: Clutter.ActorAlign.CENTER }));
         const tile: Tile = { id, size, actor, frame, badge, preview };
         actor.connect('button-press-event', (_actor: Clutter.Actor, event: Clutter.Event) => this.onPress(tile, event));
         actor.connect('motion-event', (_actor: Clutter.Actor, event: Clutter.Event) => this.onMotion(event));

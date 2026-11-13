@@ -12,9 +12,9 @@ import { DesktopWidget, type WidgetHost } from './widget.js';
 
 /** Checks for a new day, and asks for events again, this often (seconds). */
 const TICK_SECONDS = 30;
-/** The medium widget lists the events of this many days, at most this many. */
+/** The medium and large widgets list the events of this many days, at most this many. */
 const EVENT_DAYS = 7;
-const EVENT_ROWS = 3;
+const EVENT_ROWS: Record<WidgetSize, number> = { small: 0, medium: 3, large: 5 };
 
 /** The parts of GNOME's calendar event source (ui/calendar.js) the widget uses. */
 interface CalendarEvent {
@@ -42,12 +42,15 @@ function shellEvents(): EventSource | null {
 
 /**
  * The macOS calendar widget: the month in red, its days, today in a red
- * circle; the medium one lists the next events beside it.
+ * circle; the medium one lists the next events beside it, the large one
+ * shows today's date beside the month and more events under them.
  */
 export class CalendarWidget extends DesktopWidget {
     private readonly row: St.BoxLayout;
     private readonly month: St.BoxLayout;
     private readonly events: St.BoxLayout | null = null;
+    private readonly weekday: St.Label | null = null;
+    private readonly day: St.Label | null = null;
     private source: EventSource | null = null;
     private sourceId = 0;
     private shown = '';
@@ -56,11 +59,23 @@ export class CalendarWidget extends DesktopWidget {
 
     constructor(id: WidgetId, size: WidgetSize, box: Box, host: WidgetHost) {
         super(id, size, box, host);
-        this.row = new St.BoxLayout({ x_expand: true, y_expand: true });
-        this.month = new St.BoxLayout({ style_class: 'macr-widget-calendar-box', vertical: true, width: box.height, y_expand: true });
-        this.row.add_child(this.month);
-        if (size === 'medium') {
-            this.events = new St.BoxLayout({ style_class: 'macr-widget-events', vertical: true, x_expand: true, y_expand: true });
+        this.row = new St.BoxLayout({ x_expand: true, y_expand: true, vertical: size === 'large' });
+        this.month = new St.BoxLayout({ style_class: 'macr-widget-calendar-box', vertical: true, width: this.unit, height: this.unit });
+        if (size === 'large') {
+            const top = new St.BoxLayout({ x_expand: true });
+            top.add_child(this.month);
+            const today = new St.BoxLayout({ style_class: 'macr-widget-today', vertical: true, x_expand: true });
+            this.weekday = new St.Label({ style_class: 'macr-widget-today-weekday' });
+            this.day = new St.Label({ style_class: 'macr-widget-today-day' });
+            today.add_child(this.weekday);
+            today.add_child(this.day);
+            top.add_child(today);
+            this.row.add_child(top);
+        } else {
+            this.row.add_child(this.month);
+        }
+        if (size !== 'small') {
+            this.events = new St.BoxLayout({ style_class: `macr-widget-events macr-widget-events-${size}`, vertical: true, x_expand: true, y_expand: true });
             this.row.add_child(this.events);
         }
         this.actor.add_child(this.row);
@@ -94,13 +109,15 @@ export class CalendarWidget extends DesktopWidget {
 
     /** Builds the month again when the day has changed. */
     private buildMonth(now: GLib.DateTime): void {
+        if (this.weekday) this.weekday.text = (now.format('%A') ?? '').toUpperCase();
+        if (this.day) this.day.text = String(now.get_day_of_month());
         this.month.destroy_all_children();
         this.month.add_child(new St.Label({ text: (now.format('%B') ?? '').toUpperCase(), style_class: 'macr-widget-month' }));
         const layout = new Clutter.GridLayout({ orientation: Clutter.Orientation.HORIZONTAL });
         const grid = new St.Widget({ layout_manager: layout, style_class: 'macr-widget-month-grid', x_expand: true, y_expand: true });
         // Fixed cells: the grid fills the square whatever the labels' widths.
         const scale = this.host.scale;
-        const unit = this.box.height;
+        const unit = this.unit;
         const cellWidth = Math.floor((unit - 24 * scale) / 7);
         const cellHeight = Math.floor((unit - 46 * scale) / 7);
         const firstWeekday = Shell.util_get_week_start();
@@ -160,7 +177,7 @@ export class CalendarWidget extends DesktopWidget {
         box.destroy_all_children();
         const [begin, end] = this.range();
         const all = (this.source?.getEvents(begin, end) ?? []).map((event) => ({ summary: event.summary, start: event.date.getTime(), end: event.end.getTime() }));
-        const shown = upcomingEvents(all, Date.now(), EVENT_ROWS);
+        const shown = upcomingEvents(all, Date.now(), EVENT_ROWS[this.size]);
         if (shown.length === 0) {
             box.add_child(new St.Label({ text: _('No Events'), style_class: 'macr-widget-events-none', x_expand: true, y_expand: true, y_align: Clutter.ActorAlign.CENTER, x_align: Clutter.ActorAlign.CENTER }));
             return;

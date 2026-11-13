@@ -6,7 +6,7 @@ import * as Main from 'resource:///org/gnome/shell/ui/main.js';
 import * as PopupMenu from 'resource:///org/gnome/shell/ui/popupMenu.js';
 
 import { styleMenu, syncMenuScheme } from '../../shared/menu-style.js';
-import { type Box, type Point, sizesOf, type WidgetId, type WidgetSize } from './logic/widgets.js';
+import { type Box, type Point, sizesOf, WIDGET_UNIT, type WidgetId, type WidgetSize } from './logic/widgets.js';
 
 /** Pointer travel (logical px) before a press becomes a drag. */
 const DRAG_THRESHOLD = 6;
@@ -67,11 +67,10 @@ export abstract class DesktopWidget {
         this.menu.actor.hide();
         this.menuManager = new PopupMenu.PopupMenuManager(this.actor, {});
         this.menuManager.addMenu(this.menu, -1);
-        const names: Record<WidgetSize, string> = { small: _('Small'), medium: _('Medium') };
         const sizes = sizesOf(id);
         if (sizes.length > 1) {
             for (const choice of sizes) {
-                const item = new PopupMenu.PopupMenuItem(names[choice]);
+                const item = new PopupMenu.PopupMenuItem(sizeName(choice));
                 this.menu.addMenuItem(item);
                 item.setOrnament(choice === size ? PopupMenu.Ornament.CHECK : PopupMenu.Ornament.NONE);
                 item.connect('activate', () => {
@@ -111,6 +110,11 @@ export abstract class DesktopWidget {
         this.release();
         this.menu.destroy();
         this.actor.destroy();
+    }
+
+    /** A small widget's side in stage px: a medium is two wide, a large two by two. */
+    protected get unit(): number {
+        return Math.round(WIDGET_UNIT * this.host.scale);
     }
 
     /** Redraws what is drawn by hand; the default has nothing to draw. */
@@ -169,4 +173,10 @@ export abstract class DesktopWidget {
         this.pressAt = null;
         this.dragging = false;
     }
+}
+
+/** A widget size's name, as macOS writes it. */
+export function sizeName(size: WidgetSize): string {
+    const names: Record<WidgetSize, string> = { small: _('Small'), medium: _('Medium'), large: _('Large') };
+    return names[size];
 }

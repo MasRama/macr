@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 
-import { boxOf, cityCode, dayRange, defaultSlots, droppedOnDesktop, fitScale, fromFraction, galleryTiles, handAngles, hourlyForecast, isDesktopIconsTitle, monthGrid, placeWidget, sizesOf, toFraction, upcomingEvents, widgetIds, widgetSize } from '../../src/features/widgets/logic/widgets.js';
+import { boxOf, cityCode, dailyForecast, dayRange, defaultSlots, droppedOnDesktop, fitScale, fromFraction, galleryTiles, handAngles, hourlyForecast, isDesktopIconsTitle, monthGrid, placeWidget, rangeBar, sizesOf, toFraction, upcomingEvents, widgetIds, widgetSize, wrapRows } from '../../src/features/widgets/logic/widgets.js';
 
 const area = { x: 0, y: 32, width: 1920, height: 1048 };
 
@@ -44,17 +44,21 @@ test('a dropped widget snaps to the grid and stays on screen', () => {
 
 test('each widget comes in the sizes macOS has for it', () => {
     assert.deepEqual(sizesOf('clock'), ['small']);
-    assert.deepEqual(sizesOf('calendar'), ['small', 'medium']);
-    assert.deepEqual(sizesOf('weather'), ['small', 'medium']);
+    assert.deepEqual(sizesOf('calendar'), ['small', 'medium', 'large']);
+    assert.deepEqual(sizesOf('weather'), ['small', 'medium', 'large']);
+    assert.deepEqual(sizesOf('batteries'), ['small', 'medium']);
+    assert.deepEqual(sizesOf('photos'), ['small', 'medium', 'large']);
     assert.equal(widgetSize('calendar', 'medium'), 'medium');
-    assert.equal(widgetSize('clock', 'medium'), 'small');
+    assert.equal(widgetSize('clock', 'large'), 'small');
     assert.equal(widgetSize('weather', undefined), 'small');
-    assert.equal(widgetSize('weather', 'large'), 'small');
+    assert.equal(widgetSize('weather', 'huge'), 'small');
+    assert.equal(widgetSize('batteries', 'large'), 'small');
 });
 
 test('a medium widget is two small ones and the gap between them wide', () => {
     assert.deepEqual(boxOf('small', 164, 20), { width: 164, height: 164 });
     assert.deepEqual(boxOf('medium', 164, 20), { width: 348, height: 164 });
+    assert.deepEqual(boxOf('large', 164, 20), { width: 348, height: 348 });
 });
 
 test('a place is kept as fractions of the work area', () => {
@@ -147,12 +151,15 @@ test('the gallery shows every widget at each of its sizes, in order', () => {
         { id: 'clock', size: 'small' },
         { id: 'calendar', size: 'small' },
         { id: 'calendar', size: 'medium' },
+        { id: 'calendar', size: 'large' },
         { id: 'weather', size: 'small' },
         { id: 'weather', size: 'medium' },
+        { id: 'weather', size: 'large' },
         { id: 'batteries', size: 'small' },
         { id: 'batteries', size: 'medium' },
         { id: 'photos', size: 'small' },
         { id: 'photos', size: 'medium' },
+        { id: 'photos', size: 'large' },
     ]);
 });
 
@@ -162,9 +169,46 @@ test('gallery previews shrink to fit the screen, never above their size', () => 
     assert.equal(fitScale(0, 800, 0.5), 0.5);
 });
 
+test('gallery groups wrap into rows that fit the width', () => {
+    // 100 + 10 + 200 = 310 fits 320; 50 does not fit after it.
+    assert.deepEqual(wrapRows([100, 200, 50, 300], 10, 320), [[0, 1], [2], [3]]);
+    assert.deepEqual(wrapRows([100, 100, 100], 10, 1000), [[0, 1, 2]]);
+    // A group wider than the row still gets a row of its own.
+    assert.deepEqual(wrapRows([500, 100], 10, 320), [[0], [1]]);
+    assert.deepEqual(wrapRows([], 10, 320), []);
+});
+
 test('a widget dragged out of the gallery is added where it was dropped', () => {
     const panel = { x: 200, y: 800, width: 1000, height: 250 };
     assert.equal(droppedOnDesktop({ x: 500, y: 300 }, panel), true);
     assert.equal(droppedOnDesktop({ x: 500, y: 900 }, panel), false);
     assert.equal(droppedOnDesktop({ x: 100, y: 900 }, panel), true);
+});
+
+test('daily forecast: today and the next days, each with its low, high and midday sky', () => {
+    const h = (day: number, hour: number) => new Date(2026, 10, 13 + day, hour).getTime() / 1000;
+    const items = [
+        { time: h(0, 15), temperature: 31, icon: 'sun' },
+        { time: h(0, 21), temperature: 26, icon: 'moon' },
+        { time: h(1, 6), temperature: 23, icon: 'fog' },
+        { time: h(1, 12), temperature: 30, icon: 'rain' },
+        { time: h(1, 18), temperature: 27, icon: 'cloud' },
+        { time: h(2, 13), temperature: 29, icon: 'storm' },
+        { time: h(3, 12), temperature: 28, icon: 'sun' },
+    ];
+    const days = dailyForecast(items, h(0, 14), 3);
+    assert.equal(days.length, 3);
+    assert.deepEqual(days[0], { day: new Date(2026, 10, 13).getTime(), low: 26, high: 31, icon: 'sun' });
+    assert.deepEqual(days[1], { day: new Date(2026, 10, 14).getTime(), low: 23, high: 30, icon: 'rain' });
+    assert.equal(days[2].icon, 'storm');
+    assert.deepEqual(dailyForecast([], h(0, 14), 5), []);
+});
+
+test('a day\'s range bar sits where its low and high fall in the week', () => {
+    assert.deepEqual(rangeBar(20, 30, 20, 30, 100), { x: 0, width: 100 });
+    assert.deepEqual(rangeBar(24, 28, 20, 30, 100), { x: 40, width: 40 });
+    // Never thinner than a dot, never past the track.
+    assert.deepEqual(rangeBar(25, 25, 20, 30, 100, 6), { x: 47, width: 6 });
+    assert.deepEqual(rangeBar(30, 30, 20, 30, 100, 6), { x: 94, width: 6 });
+    assert.deepEqual(rangeBar(25, 25, 25, 25, 100, 6), { x: 0, width: 100 });
 });
