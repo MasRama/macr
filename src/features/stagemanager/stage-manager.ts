@@ -8,8 +8,8 @@ import { eligible, initialState, type Plan, type StageEvent, stages, type StageS
 import { Strip, type StripStage } from './strip.js';
 
 type Signals = { connect(signal: string, callback: (...args: never[]) => unknown): number; disconnect(id: number): void };
-/** `skipNextEffect` is public in GNOME 46 but has no typing. */
-type WindowManager = { skipNextEffect(actor: Meta.WindowActor): void };
+/** `skipNextEffect` is public in GNOME 46 but has no typing; `_skippedActors` is its set. */
+type WindowManager = { skipNextEffect(actor: Meta.WindowActor): void; _skippedActors: Set<Meta.WindowActor> };
 
 /** Events that only ask to settle again: one in the queue is enough. */
 const COALESCED = new Set<StageEvent['type']>(['focus', 'workspace']);
@@ -35,6 +35,8 @@ export class StageManager implements StageLink {
     private later = 0;
     /** Set while Stage Manager itself minimizes and unminimizes. */
     private applying = false;
+    /** Actors Stage Manager asked GNOME to skip an effect on. */
+    private readonly skipped = new Set<Meta.WindowActor>();
     private pauses = 0;
     private locked = false;
 
@@ -66,6 +68,11 @@ export class StageManager implements StageLink {
         this.ids.length = 0;
         // Everything it minimized comes back where it was, oldest first.
         this.run({ type: 'disable' });
+        // A window the shell could not show yet animates when it does, rather
+        // than leaving a skip nobody owns to eat the user's next animation.
+        const skippedNow = (Main.wm as unknown as WindowManager)._skippedActors;
+        for (const actor of this.skipped) skippedNow.delete(actor);
+        this.skipped.clear();
         for (const { window, ids } of this.windows.values()) for (const id of ids) window.disconnect(id);
         this.windows.clear();
         this.ready.clear();
@@ -173,28 +180,45 @@ export class StageManager implements StageLink {
 
     /** Unminimize, focus, then minimize, without animations. */
     private apply(plan: Plan): void {
-        const wm = Main.wm as unknown as WindowManager;
-        const skip = (window: Meta.Window) => {
-            const actor = window.get_compositor_private() as Meta.WindowActor | null;
-            if (actor) wm.skipNextEffect(actor);
-        };
+        // Forget the skips GNOME has used up.
+        const skippedNow = (Main.wm as unknown as WindowManager)._skippedActors;
+        for (const actor of this.skipped) if (!skippedNow.has(actor)) this.skipped.delete(actor);
         this.applying = true;
         try {
             for (const id of plan.unminimize) {
                 const window = this.windows.get(id)?.window;
                 if (!window?.minimized) continue;
-                skip(window);
+                this.skipEffect(window, false);
                 window.unminimize();
             }
             if (plan.focus !== null) this.windows.get(plan.focus)?.window.activate(global.get_current_time());
             for (const id of plan.minimize) {
                 const window = this.windows.get(id)?.window;
                 if (!window || window.minimized) continue;
-                skip(window);
+                this.skipEffect(window, true);
                 window.minimize();
             }
         } finally {
             this.applying = false;
+        }
+    }
+
+    /**
+     * Skips the effect the next minimize (`hiding`) or unminimize will play.
+     * Mutter plays one only when the actor's visibility really changes: a
+     * window minimized and brought back within one frame never hid, so the
+     * skip Stage Manager left on it is taken back instead of eating the
+     * user's next animation.
+     */
+    private skipEffect(window: Meta.Window, hiding: boolean): void {
+        const actor = window.get_compositor_private() as Meta.WindowActor | null;
+        if (!actor) return;
+        const wm = Main.wm as unknown as WindowManager;
+        if (actor.visible === hiding) {
+            wm.skipNextEffect(actor);
+            this.skipped.add(actor);
+        } else if (this.skipped.delete(actor)) {
+            wm._skippedActors.delete(actor);
         }
     }
 
