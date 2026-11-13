@@ -296,7 +296,7 @@ schemas/                GSettings schema
 
 ## Dynamic desktop
 
-- `dynamic-desktop-enabled` (off by default): the user's own wallpaper
+- `dynamic-desktop-enabled`: the user's own wallpaper
   follows the time of day, since Apple's dynamic pictures cannot ship.
   A `Shell.GLSLEffect` (`grade-effect.ts`) grades every `Meta.BackgroundActor`:
   brightness, a warm or cool shift and saturation.
@@ -330,7 +330,7 @@ schemas/                GSettings schema
 
 ## Desktop widgets
 
-- `desktop-widgets-enabled` (off by default): clock, calendar, weather,
+- `desktop-widgets-enabled`: clock, calendar, weather,
   batteries, photos and Now Playing widgets (`desktop-widgets`, in that
   order) in one actor in
   `global.window_group`, above the wallpaper and the desktop icons' window
@@ -573,7 +573,7 @@ schemas/                GSettings schema
 
 ## Stage Manager
 
-- Off by default (`stage-manager-enabled`); also a toggle after Focus in the
+- On by default (`stage-manager-enabled`); also a toggle after Focus in the
   Control Center and a switch on the Mission Control settings page. It
   declares `screens: ['desktop', 'lock']`: turning off on every lock would
   bring every window back and stage them again on unlock, so the lock screen
@@ -712,12 +712,12 @@ schemas/                GSettings schema
 
 ## Wallpaper click
 
-- `wallpaper-click-enabled` (off by default): a left click (no drag, under
+- `wallpaper-click-enabled`: a left click (no drag, under
   600 ms, `logic/click.ts`) on a `Meta.BackgroundActor`, or on a desktop
   icons window (type DESKTOP, or out of the taskbar on the bottom layer as
   DING's is), toggles Show Desktop, in the normal action mode only.
-- Off by default because a click on the desktop icons' window cannot be
-  told from a click on one of its icons.
+- A click on the desktop icons' window cannot be told from a click on one
+  of its icons, so clicking an icon reveals the desktop too.
 
 ## Window corners
 

@@ -31,7 +31,7 @@ between, instead of a stack of tweak extensions that each fix one corner.
 - **Trackpad gestures.** Pinch four fingers for Launchpad, spread them to show
   the desktop, swipe down for App Exposé.
 - **Show Desktop.** A hot corner slides your windows to the screen edges, as on
-  macOS, and clicking the wallpaper can do the same (opt in).
+  macOS, and clicking the wallpaper does the same.
 - **Shake to find.** Shake the pointer and it grows for a moment so you can
   spot it.
 - Mission Control keeps its windows above the Dock.
@@ -61,8 +61,8 @@ are laid out like macOS System Settings.
 - Icons bounce while their app opens and when it needs your attention.
 - A Downloads stack that fans out or shows your newest downloads in a grid,
   stacks for any folder you add, and the apps you quit last.
-- Minimized windows as thumbnails before the Trash, and the genie effect when
-  you minimize.
+- Minimized windows go into their app's icon, or wait as thumbnails before the
+  Trash, with the genie effect when you minimize.
 - Hides when a window covers it. Sits along the bottom or down the left or
   right side, on every monitor.
 
@@ -87,10 +87,10 @@ are laid out like macOS System Settings.
 
 ![Stage Manager with Files in the middle and the other apps waiting on the left](docs/screenshots/stage-manager.webp)
 
-- **Stage Manager** (opt in): the app you use stays in the middle and your
+- **Stage Manager**: the app you use stays in the middle and your
   other apps wait as tilted thumbnails on the left of each monitor. Click one
   to swap it in, or reach it from the Dock, Alt+Tab or Mission Control. Turn
-  it on in the Control Center.
+  it off in the Control Center.
 - **Mission Control**: your windows spread over the dimmed wallpaper, above
   the Dock, with the Spaces bar always at the top.
 - **App Exposé**: all of one app's windows spread over the blurred screen,
@@ -119,22 +119,22 @@ are laid out like macOS System Settings.
 
 ![Desktop widgets: Now Playing, world clocks, a calendar with events and a weather forecast](docs/screenshots/desktop-widgets.webp)
 
-- **Desktop widgets** (opt in): clock, calendar, weather, batteries, photo and
+- **Desktop widgets**: clock, calendar, weather, batteries, photo and
   Now Playing widgets under your windows, in small, medium or large (world
   clocks, upcoming events, a five-day forecast, play and skip buttons). Add
   them from a macOS-style widget gallery, drag them anywhere and click one to
   open its app.
 - **Accent colour**: the macOS accent colours, or one picked from your
   wallpaper, for Macr's menus, buttons and toggles.
-- **Dynamic desktop** (opt in): the wallpaper follows the time of day, warm at
+- **Dynamic desktop**: the wallpaper follows the time of day, warm at
   sunrise and golden hour, dimmer and cooler at night.
-- **Auto appearance** (opt in): light during the day and dark at night,
+- **Auto appearance**: light during the day and dark at night,
   switching your GTK and shell theme to their light or dark variant too.
 - **App icon tiles**: apps your icon theme does not cover get their icon on a
   macOS squircle tile in the Dock, Launchpad, Spotlight and the app switcher.
 - **Hot corners**: each screen corner can open Mission Control, Launchpad, the
   desktop or the Notification Center, or lock the screen.
-- **Click the wallpaper to reveal the desktop** (opt in): your windows slide
+- **Click the wallpaper to reveal the desktop**: your windows slide
   aside; click again to bring them back.
 
 ### Notifications

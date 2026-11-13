@@ -8,8 +8,8 @@ import { isClick, type Press } from './logic/click.js';
 
 /**
  * A desktop-icons window (DING and its forks): below everything, out of
- * the taskbar. A click on it cannot be told from a click on an icon, which
- * is why clicking the wallpaper is off unless the user turns it on.
+ * the taskbar. A click on it cannot be told from a click on an icon, so
+ * clicking an icon reveals the desktop too.
  */
 function isDesktopWindow(window: Meta.Window | null): boolean {
     if (!window) return false;

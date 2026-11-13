@@ -60,9 +60,9 @@
       <summary>Magnify dock icons under the pointer</summary>
     </key>
     <key name="dock-minimize-to-app" type="b">
-      <default>false</default>
+      <default>true</default>
       <summary>Minimize windows into their app's icon</summary>
-      <description>Off shows each minimized window as a thumbnail before the Trash, as macOS does by default.</description>
+      <description>Off shows each minimized window as a thumbnail before the Trash instead.</description>
     </key>
     <key name="dock-bounce" type="b">
       <default>true</default>
@@ -128,7 +128,7 @@
       <description>Windows spread over the dimmed wallpaper, with the Spaces bar always at the top.</description>
     </key>
     <key name="stage-manager-enabled" type="b">
-      <default>false</default>
+      <default>true</default>
       <summary>Use macOS Stage Manager</summary>
       <description>The focused app stays in the middle of the primary monitor and the other apps' windows wait as stages in a strip on the left; clicking a stage swaps it in.</description>
     </key>
@@ -143,9 +143,9 @@
       <description>A quick wiggle of the mouse or touchpad makes the pointer three times as big for a moment.</description>
     </key>
     <key name="wallpaper-click-enabled" type="b">
-      <default>false</default>
+      <default>true</default>
       <summary>Click the wallpaper to reveal the desktop</summary>
-      <description>A click on the wallpaper slides the windows aside; another click brings them back. Off by default: with desktop icons, clicking an icon counts too.</description>
+      <description>A click on the wallpaper slides the windows aside; another click brings them back. With desktop icons, clicking an icon counts too.</description>
     </key>
     <key name="hot-corners-enabled" type="b">
       <default>true</default>
@@ -447,12 +447,12 @@
       <description>The colour of highlighted menu items, default buttons and active toggles in Macr; wallpaper picks the macOS accent nearest the desktop picture's colours.</description>
     </key>
     <key name="dynamic-desktop-enabled" type="b">
-      <default>false</default>
+      <default>true</default>
       <summary>Dynamic desktop</summary>
       <description>The desktop picture follows the time of day: warm at sunrise and sunset, dimmer and cooler at night.</description>
     </key>
     <key name="appearance-auto" type="b">
-      <default>false</default>
+      <default>true</default>
       <summary>Auto appearance</summary>
       <description>Light from sunrise to sunset and dark at night, as macOS's Auto appearance; the GTK and shell themes follow when they have a light and a dark variant.</description>
     </key>
@@ -477,7 +477,7 @@
       <description>Kept by Macr: desktop file ids of the apps last quit, newest first.</description>
     </key>
     <key name="desktop-widgets-enabled" type="b">
-      <default>false</default>
+      <default>true</default>
       <summary>Widgets on the desktop</summary>
       <description>Clock, calendar, weather, batteries and photo widgets on the desktop, under your windows.</description>
     </key>
