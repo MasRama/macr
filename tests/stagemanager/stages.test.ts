@@ -219,7 +219,7 @@ test('the first window after an empty centre becomes the centre', () => {
 });
 
 test('portal dialogs and other windows that are not eligible never count', () => {
-    const base = { normal: true, skipTaskbar: false, onActiveWorkspace: true, onPrimary: true, sticky: false, above: false, transient: false, app: 'org.gnome.TextEditor.desktop' };
+    const base = { normal: true, skipTaskbar: false, onActiveWorkspace: true, sticky: false, above: false, transient: false, app: 'org.gnome.TextEditor.desktop' };
     assert.equal(eligible(base), true);
     assert.equal(eligible({ ...base, app: 'xdg-desktop-portal-gnome.desktop' }), false);
     assert.equal(eligible({ ...base, app: 'window:12', wmClass: 'xdg-desktop-portal-gnome' }), false);
@@ -228,7 +228,6 @@ test('portal dialogs and other windows that are not eligible never count', () =>
     assert.equal(eligible({ ...base, normal: false }), false);
     assert.equal(eligible({ ...base, skipTaskbar: true }), false);
     assert.equal(eligible({ ...base, onActiveWorkspace: false }), false);
-    assert.equal(eligible({ ...base, onPrimary: false }), false);
     assert.equal(eligible({ ...base, sticky: true }), false);
     assert.equal(eligible({ ...base, above: true }), false);
     assert.equal(eligible({ ...base, app: null }), false);

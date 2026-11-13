@@ -1,7 +1,7 @@
 /**
- * Stage Manager's decisions, free of the shell. The world is the eligible
- * windows (primary monitor, active workspace) in most-recently-used order and
- * the focused one; the controller turns the plan into minimize, unminimize
+ * Stage Manager's decisions, free of the shell. Each monitor has its own
+ * stages: the world is one monitor's eligible windows (active workspace) in
+ * most-recently-used order and the focused one; the controller turns the plan into minimize, unminimize
  * and activate calls, in that order: unminimize, focus, then minimize, so the
  * window Mutter would focus next is always one Stage Manager wants shown.
  */
@@ -79,8 +79,7 @@ export interface WindowFacts {
     normal: boolean;
     skipTaskbar: boolean;
     onActiveWorkspace: boolean;
-    onPrimary: boolean;
-    /** On all workspaces. */
+    /** Put on all workspaces by the user (not just for being on another monitor). */
     sticky: boolean;
     /** Always on top (picture in picture and the like). */
     above: boolean;
@@ -92,7 +91,7 @@ export interface WindowFacts {
 
 /** Whether Stage Manager handles a window at all. */
 export function eligible(facts: WindowFacts): boolean {
-    if (!facts.normal || facts.skipTaskbar || !facts.onActiveWorkspace || !facts.onPrimary) return false;
+    if (!facts.normal || facts.skipTaskbar || !facts.onActiveWorkspace) return false;
     if (facts.sticky || facts.above || facts.transient || !facts.app) return false;
     const names = [facts.app.replace(/\.desktop$/, ''), facts.wmClass ?? ''];
     return !names.some((name) => PORTALS.includes(name));

@@ -106,7 +106,7 @@ class StageView {
 }
 
 /**
- * The strip of stages down the left edge of the primary monitor. It floats
+ * The strip of stages down the left edge of one monitor. It floats
  * over windows (no struts), slides away when a window covers it and comes
  * back when the pointer reaches the screen's left edge. Hidden in Mission
  * Control, over full-screen windows and while paused.
@@ -124,7 +124,10 @@ export class Strip {
     private hidden = false;
     private hideTimeout = 0;
 
-    constructor(private readonly onSelect: (app: string) => void) {
+    constructor(
+        private readonly monitor: number,
+        private readonly onSelect: (app: string) => void,
+    ) {
         this.actor = new St.Widget({ name: 'macrStageStrip', style_class: 'macr-stage-strip', reactive: true, track_hover: true, visible: false });
         this.edge = new St.Widget({ name: 'macrStageEdge', reactive: true, track_hover: true, width: 1, visible: false });
         // Not trackFullscreen: the layout manager would set `visible` behind the strip's back.
@@ -141,12 +144,12 @@ export class Strip {
         this.listen(global.display, 'restacked', () => this.updateVisibility());
         this.listen(global.display, 'grab-op-end', () => this.updateVisibility());
         this.listen(global.display, 'notify::focus-window', () => this.trackFocusWindow());
+        // Stage Manager makes new strips when the monitors change.
         this.listen(global.display, 'workareas-changed', () => this.build());
-        this.listen(Main.layoutManager, 'monitors-changed', () => this.build());
         this.trackFocusWindow();
     }
 
-    /** How many stages fit on the primary monitor. */
+    /** How many stages fit on its monitor. */
     capacity(): number {
         return stripLayout(this.area(), 0).capacity;
     }
@@ -184,7 +187,7 @@ export class Strip {
     }
 
     private area(): Rect {
-        return Main.layoutManager.getWorkAreaForMonitor(Main.layoutManager.primaryIndex);
+        return Main.layoutManager.getWorkAreaForMonitor(this.monitor);
     }
 
     private clear(): void {
@@ -231,11 +234,11 @@ export class Strip {
     }
 
     private suspended(): boolean {
-        return this.paused || this.views.length === 0 || Main.overview.visible || Boolean(Main.layoutManager.primaryMonitor?.inFullscreen);
+        return this.paused || this.views.length === 0 || Main.overview.visible || Boolean(Main.layoutManager.monitors[this.monitor]?.inFullscreen);
     }
 
     private covered(): boolean {
-        return windowCovers(this.rest, Main.layoutManager.primaryIndex);
+        return windowCovers(this.rest, this.monitor);
     }
 
     private pointerOnStrip(): boolean {
@@ -300,7 +303,7 @@ export class Strip {
         });
     }
 
-    /** The pointer reached the left edge: slide in, and away again unless it moves onto the strip. */
+    /** The pointer reached the monitor's left edge: slide in, and away again unless it moves onto the strip. */
     private reveal(): void {
         this.cancelHide();
         this.setHidden(false);

@@ -567,8 +567,16 @@ schemas/                GSettings schema
   declares `screens: ['desktop', 'lock']`: turning off on every lock would
   bring every window back and stage them again on unlock, so the lock screen
   pauses it instead (`Main.sessionMode` `updated`) and hides the strip.
-- Eligible windows: NORMAL, not `skip_taskbar`, on the active workspace and
-  the primary monitor, not on all workspaces, not always on top, not
+- Every monitor has its own stages: one `StageState` and one strip per
+  monitor index, and each window's events go to its monitor's state (focus,
+  workspace, pause and the like to all of them). When the monitors change,
+  every window comes back and each monitor starts over, since indexes now
+  mean other monitors. A window dragged to another monitor becomes the
+  middle there.
+- Eligible windows: NORMAL, not `skip_taskbar`, on the active workspace,
+  not pinned to all workspaces (with `workspaces-only-on-primary`, GNOME's
+  default, the other monitors' windows are on every workspace without being
+  pinned, so they count), not always on top, not
   transient (Mutter hides dialogs with their parent; a focused dialog stands
   for its root window) and not from a portal app (`xdg-desktop-portal-*`).
   A parentless modal dialog, such as an extension's settings window, is
@@ -608,7 +616,7 @@ schemas/                GSettings schema
 - Turning off unminimizes every window it minimized, oldest first and on any
   workspace, and activates the focused window: nothing was moved, so every
   window is back where it was.
-- The strip (`strip.ts`): stages in slots down the left of the primary
+- The strip (`strip.ts`): stages in slots down the left of its monitor's
   work area (`logic/slots.ts`: as many as fit, at most six, centred). Each is
   an `St.Button` holding a `Shell.WindowPreviewLayout` of up to three of the
   app's windows (clones, which paint minimized windows), turned 22° on the
@@ -624,7 +632,7 @@ schemas/                GSettings schema
   honour Wayland's suspended state (GTK 4, Firefox, Chromium): Mutter
   suspends hidden windows, mapped clones or not.
 - Not done: swap animations, dragging windows between stages, showing all of
-  an app's windows at once, other monitors and per-workspace stages (a
+  an app's windows at once, per-workspace stages (a
   workspace switch settles the new one; stages minimized on another
   workspace stay minimized until turned off), struts so new windows avoid
   the strip, and macOS's click-the-desktop behaviour.
