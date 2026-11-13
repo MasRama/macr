@@ -1,6 +1,7 @@
 import GLib from 'gi://GLib';
 import Meta from 'gi://Meta';
 
+import { arrangePartner, arrangement, type Arrangement } from './logic/arrange.js';
 import { placeWindow, reanchor, sameRect, type Placement, type Rect } from './logic/geometry.js';
 import { tileState, updateTileState } from './tiling-store.js';
 
@@ -22,8 +23,9 @@ export function rectOf(rect: { x: number; y: number; width: number; height: numb
 }
 
 /**
- * Puts windows in halves, quarters, Fill and Center, remembering what it
- * did in the tiling store. `gap` is the margin tiles keep (0 without margins).
+ * Puts windows in halves, quarters, Fill and Center, arranges two side by
+ * side and gives them back their size, remembering what it did in the
+ * tiling store. `gap` is the margin tiles keep (0 without margins).
  */
 export class Tiler {
     private readonly watches = new Map<Meta.Window, Watch>();
@@ -67,6 +69,41 @@ export class Tiler {
         window.move_resize_frame(true, target.x, target.y, target.width, target.height);
         updateTileState(window, { tile: target, placement });
         this.watch(window, placement, target, rectOf(window.get_work_area_for_monitor(monitor)));
+    }
+
+    /** The other window `arrange` would use, if any. */
+    partner(window: Meta.Window): Meta.Window | null {
+        const windows = global.display.get_tab_list(Meta.TabList.NORMAL, window.get_workspace());
+        const id = arrangePartner(windows.map((w) => ({
+            id: w.get_id(),
+            monitor: w.get_monitor(),
+            minimized: w.minimized,
+            tileable: this.canPlace(w),
+        })), window.get_id());
+        return windows.find((w) => w.get_id() === id) ?? null;
+    }
+
+    /** Tiles `window` and the window used before it side by side (or one above the other). */
+    arrange(window: Meta.Window, kind: Arrangement): void {
+        if (!this.canPlace(window)) return;
+        const [first, second] = arrangement(kind);
+        const monitor = window.get_monitor();
+        const partner = this.partner(window);
+        this.place(window, first, monitor);
+        if (!partner) return;
+        this.place(partner, second, monitor);
+        partner.raise();
+        window.raise();
+    }
+
+    /** Return to Previous Size: the frame the window had before it was tiled. */
+    returnToPrevious(window: Meta.Window): void {
+        const restore = tileState(window)?.restore;
+        if (!restore || !window.allows_move()) return;
+        this.unwatch(window);
+        if (window.get_maximized()) window.unmaximize(Meta.MaximizeFlags.BOTH);
+        window.move_resize_frame(true, restore.x, restore.y, restore.width, restore.height);
+        updateTileState(window, { restore: null, tile: null, placement: null });
     }
 
     /** Forgets the tile of a window that was moved or resized out of it by hand. */
