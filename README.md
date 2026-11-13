@@ -8,33 +8,39 @@ One GNOME Shell extension that turns GNOME into macOS: the menu bar, the Dock,
 Launchpad, Spotlight, Stage Manager, Mission Control and the small touches in
 between, instead of a stack of tweak extensions that each fix one corner.
 
-[Install](#install) · [What's new](#whats-new-in-06) · [Features](#features) · [Shortcuts](#keyboard-shortcuts)
+[Install](#install) · [What's new](#whats-new-in-07) · [Features](#features) · [Shortcuts](#keyboard-shortcuts)
 
 </div>
 
 ![A GNOME desktop with Macr: the menu bar, a Files window with traffic lights, desktop widgets and the Dock](docs/screenshots/hero.webp)
 
-## What's new in 0.6
+## What's new in 0.7
 
-- **Folders in Launchpad.** Drag one app onto another to make a folder, named
-  after what the apps have in common. Click its name to rename it, drop more
-  apps in, or drag one out to take it back to the grid.
-- **Bouncing Dock icons.** An app's icon bounces while it opens, and three
-  times when it needs your attention.
-- **Stage Manager on every monitor.** Each screen keeps its own app in the
-  middle and its own strip on the left.
-- **Minimized windows in the Dock.** They wait as small thumbnails before the
-  Trash, with their app's icon in the corner, until you click one.
-- **The Dock on the left or right**, as well as along the bottom.
-- **Clipboard history.** Ctrl+Super+V lists what you copied in the last
-  eight hours, text and pictures, kept in memory only.
-- **Trackpad gestures.** Pinch four fingers for Launchpad, spread them to show
-  the desktop, swipe down for App Exposé.
-- **Show Desktop.** A hot corner slides your windows to the screen edges, as on
-  macOS, and clicking the wallpaper does the same.
-- **Shake to find.** Shake the pointer and it grows for a moment so you can
-  spot it.
-- Mission Control keeps its windows above the Dock.
+- **Screen saver.** After a few idle minutes your wallpaper drifts slowly
+  under a big clock until you touch a key or the mouse. A playing video keeps
+  it away.
+- **A wallpaper for each desktop.** Pick a wallpaper and only the desktop on
+  screen gets it; switching desktops crossfades to each one's.
+- **Add and close Spaces in Mission Control.** A **+** at the end of the
+  Spaces bar adds a desktop that stays until you close it with the **×** on
+  its thumbnail. Drop a window on **+** to give it a desktop of its own.
+- **Search the menus from Help.** Type in the Help menu's search field to find
+  any item in the app's menus, and press Enter to run it.
+- **Widgets in the Notification Center**, under your notifications. Batteries
+  and photos at first; pick others in Macr's settings.
+- **Quit or hide from Alt+Tab.** Press Q to quit the chosen app or H to hide it
+  without letting go.
+- **macOS-style system sounds** for the volume pop, screenshots, emptying the
+  Trash, plugging in power, alerts and notifications.
+- **Two more hot corner actions**: the focused app's windows, and putting the
+  displays to sleep.
+- **Every feature is on from the start**, and a notification tells you when
+  another extension clashes with Macr, with a button to turn it off.
+- **Clear the Dock's recent apps**: right-click one for Remove from Dock or
+  Clear Recent Apps.
+- Fixes: the wallpaper shows on every monitor in Mission Control, the hot
+  corner on the side next to a second monitor works, magnified Dock icons stay
+  sharp at 100% scale, and the traffic lights keep their size in Chrome.
 
 ## Features
 
@@ -61,7 +67,8 @@ are laid out like macOS System Settings.
   bars from apps such as Telegram and Thunderbird.
 - Icons bounce while their app opens and when it needs your attention.
 - A Downloads stack that fans out or shows your newest downloads in a grid,
-  stacks for any folder you add, and the apps you quit last.
+  stacks for any folder you add, and the apps you quit last (right-click
+  one to remove it).
 - Minimized windows go into their app's icon, or wait as thumbnails before the
   Trash, with the genie effect when you minimize.
 - Hides when a window covers it. Sits along the bottom or down the left or
@@ -253,7 +260,9 @@ back when turned off.
 
 Macr leaves your GTK theme alone, apart from the window buttons it draws as
 traffic lights (a stylesheet it adds to `~/.config/gtk-3.0` and `gtk-4.0` and
-takes out again when turned off). It pairs well with a macOS-style theme such
+takes out again when turned off). The system sounds come as a sound theme in
+`~/.local/share/sounds/macr` that builds on yours and is removed again too. It
+pairs well with a macOS-style theme such
 as [MacTahoe](https://github.com/vinceliuice/MacTahoe-gtk-theme), and with
 [Nokta](https://github.com/MasRama/nokta) for a dynamic island in the middle
 of the bar.
