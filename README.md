@@ -132,6 +132,9 @@ are laid out like macOS System Settings.
   wallpaper, for Macr's menus, buttons and toggles.
 - **Dynamic desktop**: the wallpaper follows the time of day, warm at
   sunrise and golden hour, dimmer and cooler at night.
+- **A wallpaper for each desktop**: pick a wallpaper and only the desktop on
+  screen gets it; switching desktops crossfades to each one's. Desktops you
+  have not given one show Desktop 1's.
 - **Auto appearance**: light during the day and dark at night,
   switching your GTK and shell theme to their light or dark variant too.
 - **App icon tiles**: apps your icon theme does not cover get their icon on a

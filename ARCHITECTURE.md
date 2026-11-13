@@ -322,6 +322,25 @@ schemas/                GSettings schema
   `shared/sun.ts` (`SunWatcher`) reads them for this module and Auto
   appearance.
 
+## Wallpaper per desktop
+
+- `space-wallpapers-enabled` (runs on the lock screen too, so locking does
+  not swap the wallpaper): GNOME has one wallpaper, so Macr writes the
+  desktop on screen's into `org.gnome.desktop.background` (`picture-uri` and
+  `picture-uri-dark` together, through a second `Gio.Settings` in delay mode)
+  on `active-workspace-changed`, and GNOME's `BackgroundManager` crossfades to
+  it.
+- A change of either key that Macr did not write is the user's pick, from
+  GNOME's Settings or anywhere else, and goes to the active desktop only.
+- Each `Meta.Workspace` maps to its own wallpaper; a desktop without one shows
+  Desktop 1's (`logic/wallpapers.ts shownWallpaper`), so a new desktop starts
+  with it. When desktops are added, removed or reordered the map is pruned and
+  a new Desktop 1 that had none takes the old Desktop 1's.
+- Saved by index in `space-wallpapers` (`a(ss)`, empty strings for a desktop
+  that follows Desktop 1). On enable GNOME's wallpaper is Desktop 1's (Macr
+  writes Desktop 1's back on disable, so a different one was picked while Macr
+  was off) and the rest come back from the key (`startWallpapers`).
+
 ## Auto appearance
 
 - `appearance-auto` (the Auto button next to Light and Dark): light from

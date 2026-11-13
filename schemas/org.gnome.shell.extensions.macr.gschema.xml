@@ -157,6 +157,16 @@
       <summary>The sound theme before Macr's</summary>
       <description>Put back in org.gnome.desktop.sound theme-name when Macr's sounds are turned off. Empty when nothing is saved.</description>
     </key>
+    <key name="space-wallpapers-enabled" type="b">
+      <default>true</default>
+      <summary>A wallpaper for each desktop</summary>
+      <description>A wallpaper picked while a desktop is on screen goes to that desktop only, and switching desktops shows each one's. Desktops with none of their own show Desktop 1's, which GNOME keeps when this is turned off.</description>
+    </key>
+    <key name="space-wallpapers" type="a(ss)">
+      <default>[]</default>
+      <summary>Each desktop's wallpaper</summary>
+      <description>picture-uri and picture-uri-dark for each desktop in order; empty strings follow Desktop 1.</description>
+    </key>
     <key name="wallpaper-click-enabled" type="b">
       <default>true</default>
       <summary>Click the wallpaper to reveal the desktop</summary>

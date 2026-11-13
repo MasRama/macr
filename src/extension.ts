@@ -29,6 +29,7 @@ import { OsdModule } from './features/osd/index.js';
 import { ScreenshotModule } from './features/screenshot/index.js';
 import { FullscreenSpacesModule } from './features/spaces/index.js';
 import { SoundsModule } from './features/sounds/index.js';
+import { SpaceWallpapersModule } from './features/spacewallpapers/index.js';
 import { SpotlightModule } from './features/spotlight/index.js';
 import { StageManagerModule } from './features/stagemanager/index.js';
 import { SwitcherModule } from './features/switcher/index.js';
@@ -58,6 +59,8 @@ const MODULES: ModuleEntry[] = [
     { key: 'shake-to-find-enabled', create: () => new ShakeToFindModule() },
     { key: 'sounds-enabled', screens: ['desktop', 'lock'], create: (context) => new SoundsModule(context) },
     { key: 'wallpaper-click-enabled', create: () => new WallpaperClickModule() },
+    // Kept on while locked, so locking does not swap the wallpaper.
+    { key: 'space-wallpapers-enabled', screens: ['desktop', 'lock'], create: (context) => new SpaceWallpapersModule(context.settings) },
     { key: 'window-corners-enabled', create: (context) => new WindowCornersModule(context.settings) },
     { key: 'traffic-lights-enabled', create: (context) => new TrafficLightsModule(context.settings) },
     { key: 'tiling-enabled', create: (context) => new TilingModule(context.settings) },
