@@ -854,7 +854,11 @@ schemas/                GSettings schema
   set to 3 with an asynchronous call, since a blocking one would wait on
   the shell itself; an idle watch of 1 s, then a user-active watch sets it
   back to 0, so the push into the corner does not wake the displays at
-  once; destroy wakes them if they still sleep).
+  once; destroy wakes them if they still sleep), and Quick Note
+  (`quick-note.ts`: a new yellow note in `widget-notes`, shown as a card in
+  top chrome by the corner on the pointer's monitor, typed into through
+  `Editing`; Esc or a click outside saves it, drops it when empty, and
+  fades it out; the corner again puts it away).
 - GNOME's own hot corner is destroyed while this runs: the layout manager's
   `_updateHotCorners` is wrapped on the instance, and a handler on
   `enable-hot-corners` destroys the one GNOME rebuilds from its own bound

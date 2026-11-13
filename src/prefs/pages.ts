@@ -155,6 +155,7 @@ export function pages(): PageInfo[] {
                     ['notification-center', _('Notification Center')],
                     ['lock-screen', _('Lock Screen')],
                     ['display-sleep', _('Put Display to Sleep')],
+                    ['quick-note', _('Quick Note')],
                 ];
                 const corners: [string, string][] = [
                     ['hot-corner-top-left', _('Top left')],

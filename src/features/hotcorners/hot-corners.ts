@@ -11,6 +11,7 @@ import { expose } from '../../shared/expose-link.js';
 import { launchpad } from '../../shared/launchpad-link.js';
 import { DisplaySleep } from './display-sleep.js';
 import { type Barrier, type CornerName, type Corner, cornerBarriers, hotCorners } from './logic/corners.js';
+import { QuickNote } from './quick-note.js';
 
 /** The setting that holds each corner's action. */
 export const CORNER_KEYS: Record<CornerName, string> = {
@@ -63,9 +64,11 @@ export class HotCorners {
     private pressures: PressureBarrier[] = [];
     private readonly reveal = useDesktopReveal();
     private readonly displaySleep = new DisplaySleep();
+    private readonly quickNote: QuickNote;
     private lastFired = 0;
 
     constructor(private readonly settings: Gio.Settings) {
+        this.quickNote = new QuickNote(settings);
         const update = this.layout._updateHotCorners;
         this.layout._updateHotCorners = () => {
             update.call(this.layout);
@@ -85,6 +88,7 @@ export class HotCorners {
         this.ids.length = 0;
         this.clear();
         this.displaySleep.destroy();
+        this.quickNote.destroy();
         releaseDesktopReveal();
         delete (this.layout as Partial<LayoutManager>)._updateHotCorners;
         this.layout._updateHotCorners();
@@ -181,6 +185,10 @@ export class HotCorners {
             break;
         case 'display-sleep':
             this.displaySleep.sleep();
+            break;
+        case 'quick-note':
+            if (Main.overview.visible) Main.overview.hide();
+            this.quickNote.toggle(corner);
             break;
         }
     }
