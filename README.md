@@ -13,12 +13,13 @@ stack of tweak extensions that each fix one corner. It ships module by module.
 | **Dock**: frosted glass, magnification, running dots, Trash, hides when a window covers it, genie minimize, on every monitor | Dash to Dock, Magic Lamp | done |
 | **Launchpad**: every app in a full-screen grid with pages and search, on Super and the dock's Apps icon | the distribution's app menu | done |
 | **Spotlight**: Ctrl+Space search over apps, files, settings and the calculator, using GNOME's search providers | Ulauncher | done |
-| **Control Center**: GNOME's quick settings as macOS tiles, toggles first, titled Display and Sound sliders, a Focus (Do Not Disturb) toggle with a moon in the bar | GNOME quick settings styling | done |
+| **Control Center**: GNOME's quick settings as macOS tiles, toggles first, titled Display and Sound sliders, a Focus (Do Not Disturb) toggle with a moon in the bar and a Stage Manager toggle | GNOME quick settings styling | done |
 | **App icon tiles**: apps your icon theme does not cover get their icon on a macOS squircle tile, in the dock, Launchpad, Spotlight and the app switcher | mixed icon styles | done |
 | **Volume and brightness**: a small frosted pill under the menu bar at the top right, like macOS, on every monitor | GNOME's on-screen display at the bottom | done |
 | **App switcher**: Alt+Tab as a frosted macOS panel with big icons, a soft highlight and only the chosen app's name; Alt+\` and the other switchers match | GNOME's switcher styling | done |
 | **Notifications**: banners as frosted cards at the top right, and the clock opens a macOS Notification Center with notification cards and calendar, world clock and weather widgets | GNOME's centred banners and calendar popover | done |
 | **Mission Control**: the overview's windows spread over the dimmed wallpaper with the Spaces bar always at the top | GNOME's overview look | done |
+| **Stage Manager** (opt in): the app you use stays in the middle and your other apps wait as tilted thumbnails on the left; click one to swap it in, or reach it from the dock, Alt+Tab or Mission Control. Turn it on in the Control Center | nothing in GNOME | done |
 | **Hot corners**: each screen corner can open Mission Control, Launchpad, the desktop or the Notification Center, or lock the screen | GNOME's top-left hot corner | done |
 | **Window corners**: rounded macOS corners on windows that do not round their own, such as frameless (Electron) and older X11 apps, with a soft shadow on frameless ones; square when maximized | Rounded Window Corners | done |
 | **Traffic lights**: red, yellow and green window buttons first on the left of app windows, grey in windows in the background, with their symbols on hover; in GTK and libadwaita apps, Chrome and X11 apps (Qt 6 apps on Wayland and Electron apps with their own title bar draw their own buttons) | a macOS GTK theme's window buttons | done |

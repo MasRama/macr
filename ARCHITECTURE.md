@@ -151,6 +151,9 @@ schemas/                GSettings schema
   `org.gnome.desktop.notifications show-banners`, added with
   `addExternalIndicator` and moved after Bluetooth, with a moon indicator in
   the bar while it is on.
+- Stage Manager is a `QuickToggle` after Focus, bound to
+  `stage-manager-enabled` with `Gio.Settings.bind`; its icon ships in
+  `icons/`. It shows while the Control Center module is on.
 
 ## App icon tiles
 
@@ -216,6 +219,76 @@ schemas/                GSettings schema
   no typings for it) and its thumbnails are bigger (`_maxThumbnailScale`).
 - The search box is hidden (opacity 0, height 0); typing still searches.
 
+## Stage Manager
+
+- Off by default (`stage-manager-enabled`); also a toggle after Focus in the
+  Control Center and a switch on the Mission Control settings page. It
+  declares `screens: ['desktop', 'lock']`: turning off on every lock would
+  bring every window back and stage them again on unlock, so the lock screen
+  pauses it instead (`Main.sessionMode` `updated`) and hides the strip.
+- Eligible windows: NORMAL, not `skip_taskbar`, on the active workspace and
+  the primary monitor, not on all workspaces, not always on top, not
+  transient (Mutter hides dialogs with their parent; a focused dialog stands
+  for its root window) and not from a portal app (`xdg-desktop-portal-*`).
+  A parentless modal dialog, such as an extension's settings window, is
+  left alone and never swaps the middle.
+- Stages are other apps' windows minimized by Stage Manager, grouped by app
+  (`Shell.WindowTracker`), most recent first. Minimizing is Mutter's own
+  state, so the dock, Alt+Tab and Mission Control already show and restore
+  them, and the window keeps its frame and stacking slot. Each minimize and
+  unminimize first calls `Main.wm.skipNextEffect` (untyped, public), only
+  when the actor's visibility will really change, so neither the genie nor
+  GNOME's animation plays. A skip whose effect never played (a window
+  minimized and brought back within one frame) is taken back from
+  `Main.wm._skippedActors` (private), and turning off drops any skip still
+  pending, so no stale skip eats the user's next animation.
+- `logic/stages.ts` decides everything from the eligible windows (in
+  `get_tab_list` MRU order), the focus and an event: focus, a stage
+  clicked, a minimize or unminimize Stage Manager did not do, close, first
+  `shown`, workspace or monitor changes, pause, resume, enable and disable.
+  The plan is carried out as unminimize, activate, then minimize, so the
+  window Mutter would focus next is always one meant to show. Events are
+  queued and handled in one `BEFORE_REDRAW` later (after Mutter's own
+  `CALC_SHOWING` focus changes), not while Mission Control is open; the
+  module's own minimizes are ignored by a flag while the plan runs.
+- One path for every way in: a focus change to another app's window, or
+  someone else unminimizing a stage window (dock, Alt+Tab,
+  `Main.activateWindow`, Mission Control), brings that app's whole stage in
+  and sends the old middle to the strip. A user minimize (yellow light, the
+  dock's click-to-minimize) takes the window out of Stage Manager into the
+  dock; a middle left empty by that or by a close brings in the latest stage.
+  A focused new window becomes the middle; an unfocused one of another app
+  goes to the strip. A middle left with nothing showing is kept until the
+  close or minimize that emptied it is handled, as the focus change often
+  arrives first.
+- Show Desktop (hot corners) pauses Stage Manager around its minimize-all
+  through `src/shared/stage-link.ts`. On resume, windows that showed at the
+  pause and are minimized now become one stage and the middle is empty, as
+  on macOS; showing the desktop again brings them back as the middle.
+- Turning off unminimizes every window it minimized, oldest first and on any
+  workspace, and activates the focused window: nothing was moved, so every
+  window is back where it was.
+- The strip (`strip.ts`): stages in slots down the left of the primary
+  work area (`logic/slots.ts`: as many as fit, at most six, centred). Each is
+  an `St.Button` holding a `Shell.WindowPreviewLayout` of up to three of the
+  app's windows (clones, which paint minimized windows), turned 22° on the
+  Y axis with its pivot on the left edge, a CSS shadow and the app icon over
+  its bottom left corner; hovering turns it towards the viewer. The strip is
+  rebuilt only when the stages change.
+- It floats over windows (no struts) and slides away when a showing window
+  overlaps it (`src/shared/covered.ts`, shared with the dock); a 1 px edge
+  actor at the left of the work area brings it back. Chrome is not hidden in
+  the overview and `trackFullscreen` would set `visible` behind the strip's
+  back, so it hides itself in Mission Control and on `in-fullscreen-changed`.
+- Thumbnails freeze about 3 s after a window is minimized for clients that
+  honour Wayland's suspended state (GTK 4, Firefox, Chromium): Mutter
+  suspends hidden windows, mapped clones or not.
+- Not done: swap animations, dragging windows between stages, showing all of
+  an app's windows at once, other monitors and per-workspace stages (a
+  workspace switch settles the new one; stages minimized on another
+  workspace stay minimized until turned off), struts so new windows avoid
+  the strip, and macOS's click-the-desktop behaviour.
+
 ## Hot corners
 
 - One 1 px reactive chrome actor per configured corner, on the corners the
@@ -224,7 +297,8 @@ schemas/                GSettings schema
   full-screen windows. Each corner fires at most once per 600 ms.
 - Actions: Mission Control, Launchpad (through `launchpad-link`, else GNOME's
   app grid), Desktop (minimizes the workspace's windows and brings the same
-  ones back next time, `logic/desktop.ts`), Notification Center (the
+  ones back next time, `logic/desktop.ts`, with Stage Manager paused
+  meanwhile), Notification Center (the
   dateMenu, anchored on Macr's clock) and Lock Screen.
 - GNOME's own hot corner is destroyed while this runs: the layout manager's
   `_updateHotCorners` is wrapped on the instance, and a handler on
