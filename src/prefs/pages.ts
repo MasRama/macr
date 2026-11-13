@@ -130,6 +130,9 @@ export function pages(): PageInfo[] {
                 dependsOn(settings, 'hot-corners-enabled', ...cornerRows);
                 return [
                     group('', [switchRow(settings, 'mission-control-enabled', _('macOS Mission Control'), _('Windows over the dimmed wallpaper, Spaces always at the top'))]),
+                    group(_('Spaces'), [
+                        switchRow(settings, 'fullscreen-spaces-enabled', _('Full-screen apps get their own Space'), _('A window that goes full screen moves to a new workspace, and back when it leaves full screen')),
+                    ]),
                     group(_('App Exposé'), [
                         switchRow(settings, 'app-expose-enabled', _('App Exposé'), _('All of one app’s windows at a glance, from Show All Windows in the dock icon’s menu')),
                         exposeShortcut,
