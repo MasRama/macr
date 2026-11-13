@@ -1,4 +1,4 @@
-/** What the Now Playing widget knows of an MPRIS player. */
+/** What Now Playing (the widget, the Control Center tile) knows of an MPRIS player. */
 export interface PlayerState {
     /** MPRIS PlaybackStatus: Playing, Paused or Stopped. */
     status: string;
@@ -6,7 +6,7 @@ export interface PlayerState {
     changedAt: number;
 }
 
-/** The player the widget shows: one that is playing, else the one used last. */
+/** The player Now Playing shows: one that is playing, else the one used last. */
 export function pickPlayer<T extends PlayerState>(players: readonly T[]): T | null {
     let best: T | null = null;
     for (const player of players) {

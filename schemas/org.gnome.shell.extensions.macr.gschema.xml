@@ -483,6 +483,11 @@
       <summary>Apps assigned to desktops</summary>
       <description>Set from a Dock icon's Options > Assign To. Entries are app-id=all (every desktop) or app-id=N (desktop N, counted from 0).</description>
     </key>
+    <key name="control-center-hidden" type="as">
+      <default>[]</default>
+      <summary>Control Center tiles that are hidden</summary>
+      <description>Tile ids: wifi, bluetooth, focus, stage-manager, now-playing, airplane-mode, night-light, dark-style, power-mode, display, sound, microphone.</description>
+    </key>
     <key name="focus-mode" type="s">
       <default>''</default>
       <summary>Focus mode that is on</summary>

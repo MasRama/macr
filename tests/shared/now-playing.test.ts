@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 
-import { pickPlayer } from '../../src/features/widgets/logic/media.js';
+import { pickPlayer } from '../../src/shared/logic/now-playing.js';
 
 test('the widget follows the player that is playing, else the last one used', () => {
     const a = { name: 'a', status: 'Paused', changedAt: 30 };

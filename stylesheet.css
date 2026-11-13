@@ -1304,6 +1304,60 @@
   color: #ffffff !important;
 }
 
+.macr-cc-now-playing {
+  padding: 8px 8px 8px 10px;
+  spacing: 2px;
+  border-radius: 16px;
+  background-color: rgba(255, 255, 255, 0.09);
+  color: #ffffff;
+}
+
+.macr-cc-now-playing-info {
+  padding: 0;
+  border-radius: 10px;
+  color: inherit;
+}
+
+.macr-cc-now-playing-info > StBoxLayout {
+  spacing: 10px;
+}
+
+.macr-cc-now-playing-art {
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
+  background-color: rgba(255, 255, 255, 0.12);
+}
+
+.macr-cc-now-playing-placeholder {
+  icon-size: 18px;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.macr-cc-now-playing-title {
+  font-size: 13px;
+  font-weight: bold;
+}
+
+.macr-cc-now-playing-artist {
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.macr-cc-now-playing-button {
+  padding: 7px;
+  border-radius: 99px;
+  color: #ffffff;
+}
+
+.macr-cc-now-playing-button:hover {
+  background-color: rgba(255, 255, 255, 0.12);
+}
+
+.macr-cc-now-playing-button StIcon {
+  icon-size: 16px;
+}
+
 /* Light */
 
 .macr-cc.macr-light .quick-settings {
@@ -1337,6 +1391,28 @@
 .macr-cc.macr-light .quick-toggle .quick-toggle-icon {
   background-color: rgba(0, 0, 0, 0.08) !important;
   color: #1d1d1f !important;
+}
+
+.macr-cc.macr-light .macr-cc-now-playing {
+  background-color: rgba(0, 0, 0, 0.05);
+  color: #1d1d1f;
+}
+
+.macr-cc.macr-light .macr-cc-now-playing-art {
+  background-color: rgba(0, 0, 0, 0.08);
+}
+
+.macr-cc.macr-light .macr-cc-now-playing-placeholder,
+.macr-cc.macr-light .macr-cc-now-playing-artist {
+  color: rgba(0, 0, 0, 0.5);
+}
+
+.macr-cc.macr-light .macr-cc-now-playing-button {
+  color: #1d1d1f;
+}
+
+.macr-cc.macr-light .macr-cc-now-playing-button:hover {
+  background-color: rgba(0, 0, 0, 0.08);
 }
 
 .macr-cc.macr-light .quick-toggle:checked .quick-toggle-icon {

@@ -8,6 +8,7 @@ import { withStack } from '../features/dock/logic/stack.js';
 import { setAppearance } from '../shared/appearance.js';
 import { clashes, type Clash } from '../shared/logic/clashes.js';
 import { focusGroup } from './focus.js';
+import { tilesGroup } from './tiles.js';
 import { comboRow, dependsOn, group, spinRow, switchRow } from './rows.js';
 import { tile, type TileColor } from './style.js';
 
@@ -62,13 +63,16 @@ export function pages(): PageInfo[] {
             title: _('Control Center'),
             description: _('Quick settings as macOS tiles, and the volume and brightness pill.'),
             build: ({ settings, path, onClose }) => {
+                const tiles = tilesGroup(settings, onClose);
                 const focus = focusGroup(settings, path, onClose);
+                dependsOn(settings, 'control-center-enabled', tiles);
                 dependsOn(settings, 'control-center-enabled', focus);
                 return [
                     group('', [
                         switchRow(settings, 'control-center-enabled', _('macOS Control Center'), _('Quick settings with Focus, titled sliders and macOS tiles')),
                         switchRow(settings, 'osd-enabled', _('macOS volume and brightness'), _('A small pill under the menu bar at the top right')),
                     ]),
+                    tiles,
                     focus,
                 ];
             },

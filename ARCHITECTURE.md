@@ -457,10 +457,13 @@ schemas/                GSettings schema
   server keeps one time range for all its clients, and a new range clears
   its events, so the widget asks for one only when the last request does
   not already cover it.
-- Now Playing (`media.ts`) reuses the date menu's media section: its
-  `MprisPlayer`s (`_players`) and the ones it shows (`_messages`, followed
-  through `_list` child-added/removed; the section has no signal of its
-  own). `pickPlayer()` takes the one playing, else the one changed last.
+- Now Playing (`media.ts`) follows its player through `NowPlaying`
+  (`src/shared/now-playing.ts`), shared with the Control Center's tile. It
+  reuses the date menu's media section: its `MprisPlayer`s (`_players`)
+  and the ones it shows (`_messages`, followed through `_list`
+  child-added/removed; the section has no signal of its own).
+  `pickPlayer()` (`shared/logic/now-playing.ts`) takes the one playing,
+  else the one changed last.
 - Edit Widgets… opens `WidgetGallery` (`gallery.ts`): a modal scrim in
   `Main.uiGroup`, a `Clutter.Clone` of the widgets layer on it, and a panel
   of live previews (real widgets made non-reactive and scaled, at most half
@@ -480,7 +483,7 @@ schemas/                GSettings schema
 - Look: `macr-cc` on the menu (plus `macr-light`, synced on open) and a blur
   on its box. The rules use `!important` where shell themes such as MacTahoe
   do, so the look holds with any theme.
-- Layout: the slider items move to just after GNOME's last own toggle, before
+- Layout: the slider items move to just after the Now Playing tile, before
   other extensions' toggles; each slider's box is wrapped with a title
   (Display, Sound, Microphone). Both are undone on disable.
 - Focus (`focus.ts`) is a `QuickMenuToggle` added with
@@ -507,6 +510,16 @@ schemas/                GSettings schema
 - Stage Manager is a `QuickToggle` after Focus, bound to
   `stage-manager-enabled` with `Gio.Settings.bind`; its icon ships in
   `icons/`. It shows while the Control Center module is on.
+- Now Playing (`now-playing.ts`) is a two-column tile added with
+  `menu.addItem(actor, 2)` before the slider cards: cover, title and
+  artist (a click raises the player and closes the menu), then back,
+  play/pause and forward. It follows the same `NowPlaying` as the widget
+  and hides while no player can play.
+- Tiles (`logic/tiles.ts`): `control-center-hidden` lists the tiles a user
+  hid on the Control Center page (`src/prefs/tiles.ts`). Their items are
+  taken out of the grid after the layout is built, keeping each one's
+  index and `column-span`, and put back first thing on destroy. A change
+  to the key rebuilds the Control Center.
 
 ## App icon tiles
 

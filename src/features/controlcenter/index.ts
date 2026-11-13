@@ -9,6 +9,7 @@ import { ControlCenter, type QuickSettingsButton } from './control-center.js';
 export class ControlCenterModule implements Module {
     private center: ControlCenter | null = null;
     private waitId = 0;
+    private hiddenId = 0;
     private readonly settings: Gio.Settings;
     private readonly path: string;
 
@@ -19,9 +20,18 @@ export class ControlCenterModule implements Module {
 
     enable(): void {
         this.tryStart();
+        // Built again when tiles are shown or hidden in Macr's settings.
+        this.hiddenId = this.settings.connect('changed::control-center-hidden', () => {
+            if (!this.center) return;
+            this.center.destroy();
+            this.center = null;
+            this.tryStart();
+        });
     }
 
     disable(): void {
+        if (this.hiddenId) this.settings.disconnect(this.hiddenId);
+        this.hiddenId = 0;
         if (this.waitId) GLib.source_remove(this.waitId);
         this.waitId = 0;
         this.center?.destroy();

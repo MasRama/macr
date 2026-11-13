@@ -2,43 +2,10 @@ import Clutter from 'gi://Clutter';
 import Pango from 'gi://Pango';
 import St from 'gi://St';
 import { gettext as _ } from 'resource:///org/gnome/shell/extensions/extension.js';
-import * as Main from 'resource:///org/gnome/shell/ui/main.js';
 
-import { pickPlayer } from './logic/media.js';
+import { NowPlaying, type Player } from '../../shared/now-playing.js';
 import type { Box, WidgetId, WidgetSize } from './logic/widgets.js';
 import { DesktopWidget, type WidgetHost } from './widget.js';
-
-/** The parts of the shell's MprisPlayer (ui/mpris.js) the widget uses. */
-interface Player {
-    readonly status: string;
-    readonly trackTitle: string;
-    readonly trackArtists: string[];
-    readonly trackCoverUrl: string;
-    readonly canGoNext: boolean;
-    readonly canGoPrevious: boolean;
-    readonly app: { get_name(): string } | null;
-    playPause(): void;
-    next(): void;
-    previous(): void;
-    raise(): void;
-    connect(signal: 'changed' | 'closed', callback: () => void): number;
-    disconnect(id: number): void;
-}
-
-/** The date menu's media section: it keeps one MprisPlayer per app on the bus, and a message per playable one. */
-interface MediaSection {
-    _players: Map<string, Player>;
-    _messages: { _player?: Player }[];
-    _list: Clutter.Actor;
-}
-
-function mediaSection(): MediaSection | null {
-    const dateMenu = Main.panel.statusArea.dateMenu as unknown as { _messageList?: { _mediaSection?: MediaSection } } | undefined;
-    return dateMenu?._messageList?._mediaSection ?? null;
-}
-
-/** Counts changes across players: the last one changed is the one used last. */
-let changes = 0;
 
 /**
  * The macOS Now Playing widget: the song an MPRIS player is playing, its
@@ -46,9 +13,7 @@ let changes = 0;
  * The players are the shell's own, from the date menu's media section.
  */
 export class MediaWidget extends DesktopWidget {
-    private readonly section: MediaSection | null = mediaSection();
-    private readonly sectionIds: number[] = [];
-    private readonly watched = new Map<Player, { ids: number[]; changedAt: number }>();
+    private readonly players: NowPlaying;
     private player: Player | null = null;
     private readonly art: St.Widget;
     private readonly placeholder: St.Icon;
@@ -100,19 +65,11 @@ export class MediaWidget extends DesktopWidget {
             content.add_child(side);
         }
         this.actor.add_child(content);
-
-        // A player gets a message in the section once it can play, and loses it when it goes.
-        const list = this.section?._list;
-        if (list) this.sectionIds.push(list.connect('child-added', () => this.watch()), list.connect('child-removed', () => this.watch()));
-        this.watch();
+        this.players = new NowPlaying((player) => this.sync(player));
     }
 
     override destroy(): void {
-        const list = this.section?._list;
-        if (list) for (const id of this.sectionIds) list.disconnect(id);
-        this.sectionIds.length = 0;
-        for (const [player, { ids }] of this.watched) for (const id of ids) player.disconnect(id);
-        this.watched.clear();
+        this.players.destroy();
         this.player = null;
         super.destroy();
     }
@@ -128,35 +85,8 @@ export class MediaWidget extends DesktopWidget {
         return button;
     }
 
-    /** Follows the section's players: one signal set each, dropped when they go. */
-    private watch(): void {
-        const players = [...(this.section?._players.values() ?? [])];
-        for (const [player, { ids }] of this.watched) {
-            if (players.includes(player)) continue;
-            for (const id of ids) player.disconnect(id);
-            this.watched.delete(player);
-        }
-        for (const player of players) {
-            if (this.watched.has(player)) continue;
-            const state = { ids: [] as number[], changedAt: ++changes };
-            state.ids.push(
-                player.connect('changed', () => {
-                    state.changedAt = ++changes;
-                    this.sync();
-                }),
-                player.connect('closed', () => this.watch()),
-            );
-            this.watched.set(player, state);
-        }
-        this.sync();
-    }
-
-    private sync(): void {
-        // Only players the shell shows: those that can play.
-        const shown = new Set(this.section?._messages.map((message) => message._player) ?? []);
-        const candidates = [...this.watched].filter(([player]) => shown.has(player)).map(([player, { changedAt }]) => ({ player, status: player.status, changedAt }));
-        this.player = pickPlayer(candidates)?.player ?? null;
-        const player = this.player;
+    private sync(player: Player | null): void {
+        this.player = player;
         const cover = player?.trackCoverUrl ?? '';
         this.art.set_style(cover ? `background-image: url("${cover}"); background-size: cover;` : null);
         this.placeholder.visible = !cover;
