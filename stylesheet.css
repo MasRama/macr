@@ -173,6 +173,137 @@
   background-color: rgba(255, 255, 255, 0.08);
 }
 
+/* Emoji picker (emoji/picker.ts) */
+.macr-emoji {
+  padding: 8px 6px 4px;
+  spacing: 4px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.13);
+  background-color: rgba(36, 36, 40, 0.78);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.35);
+  color: #ffffff;
+  font-family: "SF Pro Text", "SF Pro", system-ui, sans-serif;
+  font-size: 13px;
+}
+
+.macr-emoji-search {
+  margin: 0 2px;
+  min-height: 22px;
+  padding: 3px 8px;
+  border-radius: 7px;
+  border: none;
+  background-color: rgba(255, 255, 255, 0.1);
+  box-shadow: none;
+  color: #ffffff;
+  caret-color: #ffffff;
+  selection-background-color: rgba(10, 132, 255, 0.6);
+  selected-color: #ffffff;
+}
+
+.macr-emoji-search:focus,
+.macr-emoji-search:hover {
+  border: none;
+  background-color: rgba(255, 255, 255, 0.12);
+  box-shadow: none;
+}
+
+.macr-emoji-search StLabel.hint-text {
+  color: rgba(255, 255, 255, 0.42);
+}
+
+.macr-emoji-search-icon {
+  icon-size: 14px;
+  padding-right: 6px;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.macr-emoji-heading {
+  padding: 4px 6px 0;
+  font-size: 11px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.macr-emoji-row {
+  spacing: 0;
+}
+
+.macr-emoji-cell {
+  width: 36px;
+  height: 34px;
+  border-radius: 7px;
+}
+
+.macr-emoji-cell:hover {
+  background-color: rgba(255, 255, 255, 0.12);
+}
+
+.macr-emoji-cell:selected {
+  background-color: #0a84ff;
+}
+
+.macr-emoji-char {
+  font-size: 23px;
+}
+
+.macr-emoji-tabs {
+  padding-top: 4px;
+  border-top: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.macr-emoji-tab {
+  padding: 4px 0;
+  border-radius: 6px;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.macr-emoji-tab:hover {
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.macr-emoji-tab:checked {
+  color: #ffffff;
+  background-color: rgba(255, 255, 255, 0.12);
+}
+
+.macr-emoji-tab-icon {
+  icon-size: 15px;
+}
+
+.macr-emoji.macr-light {
+  border-color: rgba(0, 0, 0, 0.1);
+  background-color: rgba(246, 246, 248, 0.8);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.18);
+  color: #1d1d1f;
+}
+
+.macr-emoji.macr-light .macr-emoji-search {
+  background-color: rgba(0, 0, 0, 0.06);
+  color: #1d1d1f;
+  caret-color: #1d1d1f;
+}
+
+.macr-emoji.macr-light .macr-emoji-search StLabel.hint-text,
+.macr-emoji.macr-light .macr-emoji-search-icon,
+.macr-emoji.macr-light .macr-emoji-heading,
+.macr-emoji.macr-light .macr-emoji-tab {
+  color: rgba(0, 0, 0, 0.45);
+}
+
+.macr-emoji.macr-light .macr-emoji-cell:hover,
+.macr-emoji.macr-light .macr-emoji-tab:checked {
+  background-color: rgba(0, 0, 0, 0.07);
+}
+
+.macr-emoji.macr-light .macr-emoji-tab:hover,
+.macr-emoji.macr-light .macr-emoji-tab:checked {
+  color: #1d1d1f;
+}
+
+.macr-emoji.macr-light .macr-emoji-tabs {
+  border-top-color: rgba(0, 0, 0, 0.1);
+}
+
 /* Green light menu (trafficlights/zoom-menu.ts) */
 .macr-zoom-menu {
   min-width: 200px;

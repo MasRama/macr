@@ -202,7 +202,7 @@ export function pages(): PageInfo[] {
         {
             id: 'keyboard', section: 1, icon: 'input-keyboard-symbolic', color: 'gray',
             title: _('Keyboard'),
-            description: _('The Mac’s Command shortcuts on the Super key.'),
+            description: _('The Mac’s Command shortcuts on the Super key, and the emoji picker.'),
             build: ({ settings }) => {
                 const shortcuts = keyboardShortcutsRow(settings);
                 dependsOn(settings, 'keyboard-enabled', shortcuts);
@@ -210,6 +210,9 @@ export function pages(): PageInfo[] {
                     group('', [
                         switchRow(settings, 'keyboard-enabled', _('Mac keyboard shortcuts'), _('Quit, minimize and hide apps as on a Mac; GNOME’s own Super+H and Super+M give way')),
                         shortcuts,
+                    ]),
+                    group(_('Emoji & Symbols'), [
+                        switchRow(settings, 'emoji-picker-enabled', _('Emoji picker'), _('Ctrl+Super+Space opens it; the emoji you pick goes into the app you are typing in')),
                     ]),
                 ];
             },

@@ -10,6 +10,7 @@ import { ControlCenterModule } from './features/controlcenter/index.js';
 import { WindowCornersModule } from './features/corners/index.js';
 import { DynamicDesktopModule } from './features/desktop/index.js';
 import { DockModule } from './features/dock/index.js';
+import { EmojiModule } from './features/emoji/index.js';
 import { DesktopWidgetsModule } from './features/widgets/index.js';
 import { HotCornersModule } from './features/hotcorners/index.js';
 import { KeyboardModule } from './features/keyboard/index.js';
@@ -51,6 +52,7 @@ const MODULES: ModuleEntry[] = [
     { key: 'tiling-enabled', create: (context) => new TilingModule(context.settings) },
     { key: 'screenshot-enabled', create: (context) => new ScreenshotModule(context) },
     { key: 'keyboard-enabled', create: (context) => new KeyboardModule(context.settings) },
+    { key: 'emoji-picker-enabled', create: (context) => new EmojiModule(context) },
     { key: 'app-expose-enabled', create: (context) => new AppExposeModule(context.settings) },
     { key: 'desktop-widgets-enabled', create: (context) => new DesktopWidgetsModule(context.settings) },
     // Day and night come round while the screen is locked too.

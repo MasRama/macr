@@ -298,6 +298,19 @@
       <summary>Show a floating thumbnail after each screenshot</summary>
       <description>A small copy of the screenshot at the bottom right for a few seconds, instead of GNOME's notification banner. Click it to open the picture, swipe it right to put it away, or right-click it to copy, show or delete the file.</description>
     </key>
+    <key name="emoji-picker-enabled" type="b">
+      <default>true</default>
+      <summary>Emoji &amp; Symbols picker</summary>
+      <description>Its shortcut opens a macOS emoji picker that types the emoji into the app you are in.</description>
+    </key>
+    <key name="emoji-picker-shortcut" type="as">
+      <default><![CDATA[['<Control><Super>space']]]></default>
+      <summary>Keyboard shortcut that opens the emoji picker</summary>
+    </key>
+    <key name="emoji-recent" type="as">
+      <default>[]</default>
+      <summary>The emoji picked last, newest first, for Frequently Used</summary>
+    </key>
     <key name="keyboard-enabled" type="b">
       <default>true</default>
       <summary>Mac keyboard shortcuts</summary>

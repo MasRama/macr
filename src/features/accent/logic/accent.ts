@@ -44,6 +44,7 @@ export const ACCENT_RULES: AccentRule[] = [
     { selectors: ['.macr-dialog .modal-dialog-linked-button:default:hover'], property: 'background-color', lighten: 0.15 },
     { selectors: ['.macr-force-quit-row:checked'], property: 'background-color', text: true },
     { selectors: ['.macr-spotlight-entry'], property: 'selection-background-color', alpha: 0.6 },
+    { selectors: ['.macr-emoji-search'], property: 'selection-background-color', alpha: 0.6 },
     { selectors: ['.macr-spotlight-row:selected'], property: 'background-color', alpha: 0.9, text: true },
     {
         selectors: ['.macr-cc .quick-toggle:checked .quick-toggle-icon', '.macr-cc .quick-toggle-menu .header .icon.active', '.macr-cc.macr-light .quick-toggle:checked .quick-toggle-icon'],
@@ -65,6 +66,7 @@ export const ACCENT_RULES: AccentRule[] = [
     { selectors: ['.macr-zoom-glyph:hover .macr-zoom-part'], property: 'background-color' },
     { selectors: ['.macr-zoom-glyph:hover .macr-zoom-part.macr-zoom-partner'], property: 'background-color', alpha: 0.45 },
     { selectors: ['.macr-zoom-item:hover'], property: 'background-color', text: true },
+    { selectors: ['.macr-emoji-cell:selected'], property: 'background-color' },
 ];
 
 const DARK_TEXT = '#1d1d1f';
