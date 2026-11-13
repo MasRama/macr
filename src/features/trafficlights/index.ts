@@ -3,6 +3,7 @@ import GLib from 'gi://GLib';
 
 import type { Module } from '../../shared/module.js';
 import { macLayout } from './logic/layout.js';
+import { ZoomMenu } from './zoom-menu.js';
 import { ASSETS, STYLESHEET, lightFiles, trafficLightsCss, withImport, withoutImport, type UserCss } from './logic/stylesheet.js';
 
 const SAVED = 'traffic-lights-saved-layout';
@@ -18,6 +19,7 @@ const VERSIONS = [3, 4] as const;
  */
 export class TrafficLightsModule implements Module {
     private readonly wm = new Gio.Settings({ schema_id: 'org.gnome.desktop.wm.preferences' });
+    private zoomMenu: ZoomMenu | null = null;
 
     constructor(private readonly settings: Gio.Settings) {}
 
@@ -29,9 +31,12 @@ export class TrafficLightsModule implements Module {
             this.wm.set_string('button-layout', mac);
         }
         for (const version of VERSIONS) this.guard(() => install(configDir(version), version));
+        this.zoomMenu = new ZoomMenu();
     }
 
     disable(): void {
+        this.zoomMenu?.destroy();
+        this.zoomMenu = null;
         for (const version of VERSIONS) this.guard(() => uninstall(configDir(version)));
         const saved = this.settings.get_string(SAVED);
         // Put the user's layout back, unless they changed it since.

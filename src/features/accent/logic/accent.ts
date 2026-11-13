@@ -62,6 +62,9 @@ export const ACCENT_RULES: AccentRule[] = [
     { selectors: ['.macr-gallery-done'], property: 'background-color', text: true },
     { selectors: ['.macr-gallery-done:hover'], property: 'background-color', lighten: 0.15 },
     { selectors: ['#macrDash .macr-dock-progress-fill'], property: 'background-color' },
+    { selectors: ['.macr-zoom-glyph:hover .macr-zoom-part'], property: 'background-color' },
+    { selectors: ['.macr-zoom-glyph:hover .macr-zoom-part.macr-zoom-partner'], property: 'background-color', alpha: 0.45 },
+    { selectors: ['.macr-zoom-item:hover'], property: 'background-color', text: true },
 ];
 
 const DARK_TEXT = '#1d1d1f';
