@@ -25,6 +25,13 @@ type Disconnectable = { disconnect(id: number): void };
 type Connectable = Disconnectable & { connect(signal: string, callback: (...args: never[]) => unknown): number };
 type SizedIcon = { setIconSize(size: number): void };
 type Delegated = Clutter.Actor & { _delegate?: { icon?: SizedIcon; app?: Shell.App } };
+/** GNOME's BaseIcon, as far as drawing its icon goes. */
+type IconMaker = SizedIcon & {
+    createIcon(size: number): Clutter.Actor;
+    icon: Clutter.Actor | null;
+    update(): void;
+    macrDetailed?: boolean;
+};
 
 /** The signals Dash._init connects on shell-wide objects and never disconnects. */
 const LEAKED_SIGNALS = new Set([
@@ -121,6 +128,42 @@ function windowsHere(app: Shell.App): Meta.Window[] {
 }
 
 /** An app in the dock. Clicking the focused app minimizes or cycles its windows. */
+/**
+ * An icon drawn bigger than it is shown: `inner` is scaled by `ratio` and
+ * takes that much room, so a magnified dock icon keeps its pixels.
+ */
+const DetailedIcon = GObject.registerClass(
+    class DetailedIcon extends St.Widget {
+        private inner!: Clutter.Actor;
+        private ratio!: number;
+
+        constructor(inner: Clutter.Actor, ratio: number) {
+            super();
+            this.inner = inner;
+            this.ratio = ratio;
+            inner.set_pivot_point(0, 0);
+            inner.set_scale(ratio, ratio);
+            this.add_child(inner);
+        }
+
+        override vfunc_get_preferred_width(_forHeight: number): [number, number] {
+            const [min, natural] = this.inner.get_preferred_width(-1);
+            return [min * this.ratio, natural * this.ratio];
+        }
+
+        override vfunc_get_preferred_height(_forWidth: number): [number, number] {
+            const [min, natural] = this.inner.get_preferred_height(-1);
+            return [min * this.ratio, natural * this.ratio];
+        }
+
+        override vfunc_allocate(box: Clutter.ActorBox): void {
+            this.set_allocation(box);
+            const [, , width, height] = this.inner.get_preferred_size();
+            this.inner.allocate(new Clutter.ActorBox({ x1: 0, y1: 0, x2: width, y2: height }));
+        }
+    },
+);
+
 export const MacrDashIcon = GObject.registerClass(
     class MacrDashIcon extends Dash.DashIcon {
         private badge!: St.Label;
@@ -326,12 +369,14 @@ export const MacrDash = GObject.registerClass(
     class MacrDash extends Dash.Dash {
         private leaked!: [Disconnectable, number][];
         private pixels!: number;
+        /** How many times bigger than shown icons are drawn (see iconDetail). */
+        private detail!: number;
         /** Extra items (the Trash) that follow the icon size too. */
         extraItems!: Dash.DashItemContainer[];
         /** Recent apps shown after the running ones (see RecentApps). */
         recentApps!: () => Shell.App[];
 
-        constructor(iconSize: number, extensionPath: string, edge: DockEdge) {
+        constructor(iconSize: number, extensionPath: string, edge: DockEdge, detail: number) {
             currentEdge = edge;
             const targets = [
                 Shell.AppSystem.get_default() as unknown as Connectable,
@@ -347,6 +392,7 @@ export const MacrDash = GObject.registerClass(
             }
             this.leaked = recorder.stop();
             this.pixels = iconSize;
+            this.detail = detail;
             currentIconSize = iconSize;
             this.extraItems = [];
             this.recentApps = () => [];
@@ -383,6 +429,30 @@ export const MacrDash = GObject.registerClass(
             return this.pixels;
         }
 
+        /** Draws the icons `detail` times bigger than shown, again. */
+        setIconDetail(detail: number): void {
+            if (detail === this.detail) return;
+            this.detail = detail;
+            for (const icon of this.iconMakers()) if (icon.macrDetailed && icon.icon) icon.update();
+        }
+
+        /**
+         * Makes `icon` draw at the dash's detail. GNOME draws icons at the
+         * monitor's scale, so on a 100% screen a magnified icon would be a
+         * stretched 1x bitmap.
+         */
+        private detailed(icon: IconMaker): void {
+            if (icon.macrDetailed) return;
+            icon.macrDetailed = true;
+            const create = icon.createIcon.bind(icon);
+            icon.createIcon = (size: number) => {
+                if (!(this.detail > 1)) return create(size);
+                const drawn = Math.round(size * this.detail);
+                return new DetailedIcon(create(drawn), size / drawn);
+            };
+            if (icon.icon) icon.update();
+        }
+
         setIconPixels(size: number): void {
             this.pixels = size;
             currentIconSize = size;
@@ -397,6 +467,7 @@ export const MacrDash = GObject.registerClass(
             item.setChild(appIcon);
             appIcon.label_actor = null as unknown as Clutter.Actor;
             item.setLabelText(app.get_name());
+            this.detailed(appIcon.icon as unknown as IconMaker);
             (appIcon.icon as unknown as SizedIcon).setIconSize(this.pixels);
             growAway(appIcon);
             this._hookUpLabel(item, appIcon);
@@ -441,6 +512,16 @@ export const MacrDash = GObject.registerClass(
 
         override _adjustIconSize(): void {
             this.iconSize = this.pixels;
+            for (const icon of this.iconMakers()) {
+                // Dash._init sizes the icons before the constructor sets the detail.
+                if (this.detail) this.detailed(icon);
+                icon.setIconSize(this.pixels);
+            }
+            this.sizeSeparator();
+        }
+
+        /** The icons of the apps, Show Apps and the extra items. */
+        private iconMakers(): IconMaker[] {
             const items = [
                 ...this._box.get_children().filter((actor) => {
                     const item = actor as Dash.DashItemContainer;
@@ -449,10 +530,9 @@ export const MacrDash = GObject.registerClass(
                 this._showAppsIcon,
                 ...this.extraItems,
             ] as Dash.DashItemContainer[];
-            for (const item of items) {
-                (item.child as Delegated | null)?._delegate?.icon?.setIconSize(this.pixels);
-            }
-            this.sizeSeparator();
+            return items
+                .map((item) => (item.child as Delegated | null)?._delegate?.icon as IconMaker | undefined)
+                .filter((icon): icon is IconMaker => !!icon);
         }
 
         /** Items in the order they are drawn, left to right or top to bottom. */

@@ -49,3 +49,14 @@ export function magnify(centers: number[], width: number, pointer: number | null
     });
     return { scales, shifts, extra, extraLeft };
 }
+
+/**
+ * How many times bigger than its size an icon is drawn so it stays sharp at
+ * full magnification. GNOME draws icons at the monitor's scale rounded up
+ * (1x on a 100% screen, 2x at 125%), which leaves a magnified icon short of
+ * pixels on a screen at a whole scale. Never below 1, rounded to hundredths.
+ */
+export function iconDetail(monitorScale: number, maxScale: number): number {
+    const drawn = Math.ceil(monitorScale);
+    return Math.max(1, Math.round((monitorScale * maxScale * 100) / drawn) / 100);
+}

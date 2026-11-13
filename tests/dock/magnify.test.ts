@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 
-import { magnify } from '../../src/features/dock/logic/magnify.js';
+import { iconDetail, magnify } from '../../src/features/dock/logic/magnify.js';
 
 const width = 48;
 const centers = [24, 72, 120, 168, 216];
@@ -55,4 +55,16 @@ test('fixed items such as separators keep their size but still make room', () =>
     assert.ok(m.shifts[2] > 0, 'the separator moves away from the pointer');
     const growth = m.scales.reduce((sum: number, s: number, i: number) => sum + (fixed[i] ? 0 : (s - 1) * width), 0);
     assert.ok(Math.abs(m.extra - growth) < 1e-9);
+});
+
+test('icons carry enough pixels to stay sharp when magnified on every monitor', () => {
+    // GNOME draws icons at the monitor's scale rounded up: 1x on a 100%
+    // screen, 2x at 125%. Magnified 1.6 times, a 1x icon needs 1.6x pixels.
+    assert.equal(iconDetail(1, 1.6), 1.6);
+    assert.equal(iconDetail(1.25, 1.6), 1);
+    assert.equal(iconDetail(1.5, 1.6), 1.2);
+    assert.equal(iconDetail(2, 1.6), 1.6);
+    // Without magnification nothing changes.
+    assert.equal(iconDetail(1, 1), 1);
+    assert.equal(iconDetail(1.75, 1), 1);
 });

@@ -121,6 +121,12 @@ schemas/                GSettings schema
 - Magnification moves and scales the icons along the dock with
   `translation_x` (`translation_y` down a side) and `set_scale`; the
   background grows with them. The maths is in `logic/magnify.ts`.
+- GNOME draws an icon at its monitor's scale rounded up, so on a 100%
+  screen a magnified icon would be a stretched 1x bitmap. `MacrDash` wraps
+  each item's `BaseIcon.createIcon`: the icon is drawn `iconDetail` times
+  its size (1.6 on a 100% screen, 1 at 125%) inside a `DetailedIcon` that
+  scales it back down and takes its normal room. The docks are rebuilt when
+  monitors change, so each picks the detail of its own monitor.
 - Autohide: the dock hides when the focused window overlaps it or is
   fullscreen, and a 1 px strip along its screen edge brings it back.
 - Clicking the focused app minimizes its window, or cycles its windows on the

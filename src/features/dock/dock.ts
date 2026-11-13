@@ -13,7 +13,7 @@ import type { Rect } from '../../shared/logic/geometry.js';
 import { growAway, liftLabel, MacrDash } from './dash.js';
 import type { BounceKind } from './logic/bounce.js';
 import { type DockEdge, type DockLayout, dockLayout, isSide } from './logic/edge.js';
-import { magnify } from './logic/magnify.js';
+import { iconDetail, magnify } from './logic/magnify.js';
 import { MinimizedItem } from './minimized.js';
 import { StackItem, stackSources } from './stack.js';
 import { TrashItem } from './trash.js';
@@ -88,7 +88,7 @@ export class Dock {
         this.background.add_effect_with_name('macr-blur', new Shell.BlurEffect({ mode: Shell.BlurMode.BACKGROUND, radius: 40, brightness: 0.95 }));
         this.actor.add_child(this.background);
 
-        this.dash = new MacrDash(options.iconSize, options.extensionPath, this.edge);
+        this.dash = new MacrDash(options.iconSize, options.extensionPath, this.edge, this.iconDetail(options));
         this.dash.recentApps = options.recentApps;
         this.actor.add_child(this.dash);
         const container = this.dash._dashContainer;
@@ -221,6 +221,7 @@ export class Dock {
     setOptions(options: DockOptions): void {
         const sizeChanged = options.iconSize !== this.options.iconSize;
         this.options = options;
+        this.dash.setIconDetail(this.iconDetail(options));
         if (sizeChanged) this.dash.setIconPixels(options.iconSize);
         if (!options.magnification) this.applyMagnification(null);
         this.updateVisibility();
@@ -416,6 +417,12 @@ export class Dock {
             this.applyMagnification(isSide(this.edge) ? y : x);
         }
         return Clutter.EVENT_PROPAGATE;
+    }
+
+    /** How many times bigger than shown this dock draws its icons, to stay sharp magnified. */
+    private iconDetail(options: DockOptions): number {
+        const scale = global.display.get_monitor_scale(this.monitorIndex);
+        return iconDetail(scale, options.magnification ? MAGNIFY.maxScale : 1);
     }
 
     /** Magnifies the icons around `pointer` (stage x, or y down a side), or puts them back with null. */
