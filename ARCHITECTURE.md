@@ -96,19 +96,30 @@ schemas/                GSettings schema
 
 - GNOME's own `Dash` (favourites, running apps, drag to reorder, app menus),
   subclassed to take its icon size from the `dock-icon-size` setting and
-  placed in a chrome actor at the bottom of a monitor: one dock per monitor,
+  placed in a chrome actor along an edge of a monitor: one dock per monitor,
   or only the primary with `dock-all-monitors` off. Show Apps
   moves to the start; a divider and the Trash follow the apps.
+- Position (`dock-position`: `left`, `bottom` or `right`): the docks are
+  built again when it changes. `logic/edge.ts` places the shelf, the hit
+  area out to the screen edge, the reveal strip and the hidden slide for
+  each edge, and places labels and stack grids next to an icon. Down a side
+  the dash's container and icon box turn vertical, the separators and the
+  divider lie across, icons grow away from the edge (`growAway()`), the
+  running dot moves between the icon and the edge, menus open beside the
+  dock (`menuSide()`: `AppIcon.popupMenu` is called directly because
+  `DashIcon` always opens upwards) and stacks always open as a grid. The
+  dash module keeps the edge the docks were built with (`dockEdge()`) for
+  the items it does not build itself.
 - `Dash` never disconnects what it connects on `AppSystem`, `AppFavorites`
   and `Main.overview`, and GNOME 46 never destroys an app icon's menu. The
   dock records those handlers while the dash is built and destroys the menus
   with their icons, so turning Macr off leaves nothing behind.
 - The overview's own dash is hidden (not destroyed) and restored on disable.
-- Magnification moves and scales the icons with `translation_x` and
-  `set_scale`; the background grows with them. The maths is in
-  `logic/magnify.ts`.
+- Magnification moves and scales the icons along the dock with
+  `translation_x` (`translation_y` down a side) and `set_scale`; the
+  background grows with them. The maths is in `logic/magnify.ts`.
 - Autohide: the dock hides when the focused window overlaps it or is
-  fullscreen, and a 1 px strip at the bottom edge brings it back.
+  fullscreen, and a 1 px strip along its screen edge brings it back.
 - Clicking the focused app minimizes its window, or cycles its windows on the
   workspace (`logic/rules.ts`). Everything else is GNOME's default.
 - Downloads stack (`stack.ts`, `dock-downloads`): a `DashItemContainer`
@@ -145,11 +156,23 @@ schemas/                GSettings schema
   right and a progress bar under it.
 - Show All Windows in an app icon's menu (after GNOME's window list) opens
   App Exposé through `src/shared/expose-link.ts`, while that module runs.
+- Minimized windows (`minimized.ts`, unless `dock-minimize-to-app` is on):
+  `MinimizedWindows` follows `notify::minimized` on every window, in the
+  order they were minimized, and each dock shows its monitor's (the
+  primary's when that monitor has no dock, `logic/minimized.ts`) as
+  `MinimizedItem`s before the Trash: a `Shell.WindowPreviewLayout` of the
+  window fitted into the icon square, which paints minimized windows, with
+  the app's icon in its corner. A click activates the window; its item
+  animates out and stays the genie's target until it is destroyed.
 - Genie: GNOME's minimize and unminimize handlers on `global.window_manager`
-  are blocked, and a `Clutter.DeformEffect` bends the window into its app's
-  icon in the dock on its monitor (`logic/genie.ts`). A window with no icon
-  in the dock gets GNOME's animation. The headless devshell does not paint
-  deform effects, so the genie can only be seen in a real session.
+  are blocked, and a `Clutter.DeformEffect` bends the window into its
+  thumbnail, else its app's icon in the dock on its monitor
+  (`logic/genie.ts`; sideways into a side dock, worked out as the bottom
+  case on the turned window). It follows the icon every frame, waits up to
+  200 ms for a thumbnail the dock just added to get its place, and keeps
+  the last place when the icon is destroyed. A window with no icon in the
+  dock gets GNOME's animation. The headless devshell does not paint deform
+  effects, so the genie can only be seen in a real session.
 
 ## Launchpad
 
@@ -483,6 +506,22 @@ schemas/                GSettings schema
   (`notify::focus-app`: dock, Alt+Tab, launching it) the rest come back
   too. Show All and `Macr.disable()` forget them.
 
+## Clipboard history
+
+- `clipboard-history-enabled`: `ClipboardHistory` reads every new clipboard
+  owner (`Meta.Selection` `owner-changed`) through `St.Clipboard`: its text,
+  else its image (PNG when offered, at most 24 MB). What a password manager
+  marks with `x-kde-passwordManagerHint` is skipped. As on macOS Tahoe it
+  keeps the last eight hours in memory only: never written to disk, at
+  most 60 clips and 8 images (`logic/history.ts`). It survives the lock
+  screen; turning it off or disabling Macr clears it.
+- Ctrl+Super+V (`clipboard-history-shortcut`) opens a modal frosted panel
+  (`panel.ts`) with a search field over the clips, newest first. Enter or a
+  click puts the clip back on the clipboard and, once the app's window has
+  the focus back, `Paster` presses its paste keys on a virtual keyboard
+  (Ctrl+Shift+V in terminals). With no window to paste into it shows a
+  Copied OSD. Delete takes a clip out.
+
 ## Emoji & Symbols
 
 - `emoji-picker-shortcut` (Ctrl+Super+Space, as Ctrl+Cmd+Space on a Mac)
@@ -540,10 +579,9 @@ schemas/                GSettings schema
   goes to the strip. A middle left with nothing showing is kept until the
   close or minimize that emptied it is handled, as the focus change often
   arrives first.
-- Show Desktop (hot corners) pauses Stage Manager around its minimize-all
-  through `src/shared/stage-link.ts`. On resume, windows that showed at the
-  pause and are minimized now become one stage and the middle is empty, as
-  on macOS; showing the desktop again brings them back as the middle.
+- Show Desktop (see Show Desktop) pauses Stage Manager while the windows
+  are slid aside, through `src/shared/stage-link.ts`, so the sliding does not
+  read as windows leaving the middle.
 - Turning off unminimizes every window it minimized, oldest first and on any
   workspace, and activates the focused window: nothing was moved, so every
   window is back where it was.
@@ -575,14 +613,67 @@ schemas/                GSettings schema
   monitor continues is skipped). `trackFullscreen` hides them over
   full-screen windows. Each corner fires at most once per 600 ms.
 - Actions: Mission Control, Launchpad (through `launchpad-link`, else GNOME's
-  app grid), Desktop (minimizes the workspace's windows and brings the same
-  ones back next time, `logic/desktop.ts`, with Stage Manager paused
-  meanwhile), Notification Center (the
+  app grid), Desktop (toggles Show Desktop, below), Notification Center (the
   dateMenu, anchored on Macr's clock) and Lock Screen.
 - GNOME's own hot corner is destroyed while this runs: the layout manager's
   `_updateHotCorners` is wrapped on the instance, and a handler on
   `enable-hot-corners` destroys the one GNOME rebuilds from its own bound
   handler. Disable deletes the wrapper and lets GNOME rebuild.
+
+## Show Desktop
+
+- `src/shared/desktop-reveal.ts`, one `DesktopReveal` shared by the hot
+  corners, the gestures and the wallpaper click (`useDesktopReveal()`, and
+  `releaseDesktopReveal()` in each module's `disable()`: the windows come
+  back once the last one lets go).
+- As on macOS, the window actors (not the windows) slide to the side edges
+  of their monitor with `translation_x`/`translation_y`, leaving a 32 px
+  sliver of each on screen (`src/shared/logic/reveal.ts`: the nearer side by
+  the window's centre, never a side another monitor continues on, else
+  down). A reactive sliver actor over each one brings every window back
+  and focuses the clicked one. The focus is unset meanwhile and given back
+  after.
+- It is undone when a window takes the focus, on a workspace switch, when
+  the overview shows and when the monitors change. A generation counter
+  drops ease callbacks of an older reveal. `track(progress)` and
+  `settle(reveal)` let a gesture move the windows part of the way.
+
+## Trackpad gestures
+
+- `gestures-enabled`: four-finger touchpad gestures, read with
+  `Clutter.Event.add_filter` on the stage, which sees events even while
+  Launchpad or App Exposé hold a modal grab (a stage `captured-event`
+  handler does not). Three-finger gestures stay GNOME's.
+- Pinch in opens Launchpad, spread shows the desktop, swipe down opens App
+  Exposé of the focused app; the opposite gesture closes each. What they
+  open follows the fingers (`track()`/`settle()` on `launchpad-link`,
+  `expose-link` and the shared Show Desktop) and finishes open past a
+  quarter of the way (`logic/gestures.ts`: dead zones, ranges and which
+  action a direction means given what is showing).
+- Gestures run in the normal and overview action modes, and while
+  Launchpad or App Exposé are open. The devshell has no touchpad, so the
+  gestures were tried there with fake events; the feel needs a real one.
+
+## Shake to find
+
+- `shake-to-find-enabled`: an event filter feeds pointer motion to
+  `logic/shake.ts` (four turns of at least 60 px within 700 ms, on x or y;
+  never while a button is held, so drags do not count).
+- The real pointer is hidden (`Meta.CursorTracker.set_pointer_visible`) and
+  an actor on `global.stage` draws the cursor theme's arrow three times as
+  big at the pointer's hotspot. The arrow is read from the theme's Xcursor
+  file (`default` or `left_ptr`, following `Inherits` to Adwaita,
+  `logic/xcursor.ts`) at its biggest size, so it stays sharp. It shrinks
+  back 900 ms after the last shake.
+
+## Wallpaper click
+
+- `wallpaper-click-enabled` (off by default): a left click (no drag, under
+  600 ms, `logic/click.ts`) on a `Meta.BackgroundActor`, or on a desktop
+  icons window (type DESKTOP, or out of the taskbar on the bottom layer as
+  DING's is), toggles Show Desktop, in the normal action mode only.
+- Off by default because a click on the desktop icons' window cannot be
+  told from a click on one of its icons.
 
 ## Window corners
 
