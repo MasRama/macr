@@ -122,6 +122,11 @@
       <summary>Shake the pointer to find it</summary>
       <description>A quick wiggle of the mouse or touchpad makes the pointer three times as big for a moment.</description>
     </key>
+    <key name="wallpaper-click-enabled" type="b">
+      <default>false</default>
+      <summary>Click the wallpaper to reveal the desktop</summary>
+      <description>A click on the wallpaper slides the windows aside; another click brings them back. Off by default: with desktop icons, clicking an icon counts too.</description>
+    </key>
     <key name="hot-corners-enabled" type="b">
       <default>true</default>
       <summary>Use macOS hot corners</summary>

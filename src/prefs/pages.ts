@@ -244,6 +244,7 @@ export function pages(): PageInfo[] {
                 group(_('Desktop'), [
                     switchRow(settings, 'dynamic-desktop-enabled', _('Dynamic desktop'), _('Your desktop picture follows the time of day: warm at sunrise and sunset, dimmer and cooler at night')),
                     widgetsRow(settings),
+                    switchRow(settings, 'wallpaper-click-enabled', _('Click wallpaper to reveal desktop'), _('The windows slide aside; click again to bring them back. With desktop icons, clicking an icon does it too.')),
                 ]),
                 group(_('Pointer'), [switchRow(settings, 'shake-to-find-enabled', _('Shake to find'), _('Wiggle the mouse or touchpad quickly and the pointer grows for a moment'))]),
                 group(_('App icons'), [switchRow(settings, 'app-icon-tiles', _('macOS tiles for other icons'), _('Apps your icon theme does not cover get their icon on a macOS tile'))]),

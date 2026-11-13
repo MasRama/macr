@@ -14,6 +14,7 @@ import { DockModule } from './features/dock/index.js';
 import { resetClipboardHistory } from './features/clipboard/history.js';
 import { ClipboardModule } from './features/clipboard/index.js';
 import { EmojiModule } from './features/emoji/index.js';
+import { WallpaperClickModule } from './features/wallpaper/index.js';
 import { DesktopWidgetsModule } from './features/widgets/index.js';
 import { GesturesModule } from './features/gestures/index.js';
 import { HotCornersModule } from './features/hotcorners/index.js';
@@ -53,6 +54,7 @@ const MODULES: ModuleEntry[] = [
     { key: 'hot-corners-enabled', create: (context) => new HotCornersModule(context.settings) },
     { key: 'gestures-enabled', create: () => new GesturesModule() },
     { key: 'shake-to-find-enabled', create: () => new ShakeToFindModule() },
+    { key: 'wallpaper-click-enabled', create: () => new WallpaperClickModule() },
     { key: 'window-corners-enabled', create: (context) => new WindowCornersModule(context.settings) },
     { key: 'traffic-lights-enabled', create: (context) => new TrafficLightsModule(context.settings) },
     { key: 'tiling-enabled', create: (context) => new TilingModule(context.settings) },
