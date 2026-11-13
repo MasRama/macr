@@ -8,6 +8,7 @@ import { AutoAppearanceModule } from './features/appearance/index.js';
 import { AppExposeModule } from './features/expose/index.js';
 import { ControlCenterModule } from './features/controlcenter/index.js';
 import { WindowCornersModule } from './features/corners/index.js';
+import { ShakeToFindModule } from './features/cursor/index.js';
 import { DynamicDesktopModule } from './features/desktop/index.js';
 import { DockModule } from './features/dock/index.js';
 import { resetClipboardHistory } from './features/clipboard/history.js';
@@ -51,6 +52,7 @@ const MODULES: ModuleEntry[] = [
     { key: 'mission-control-enabled', create: () => new MissionControlModule() },
     { key: 'hot-corners-enabled', create: (context) => new HotCornersModule(context.settings) },
     { key: 'gestures-enabled', create: () => new GesturesModule() },
+    { key: 'shake-to-find-enabled', create: () => new ShakeToFindModule() },
     { key: 'window-corners-enabled', create: (context) => new WindowCornersModule(context.settings) },
     { key: 'traffic-lights-enabled', create: (context) => new TrafficLightsModule(context.settings) },
     { key: 'tiling-enabled', create: (context) => new TilingModule(context.settings) },
