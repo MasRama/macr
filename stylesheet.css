@@ -826,6 +826,53 @@
   background-color: rgba(255, 255, 255, 0.95);
 }
 
+.macr-launchpad-app:drop {
+  background-color: rgba(255, 255, 255, 0.24);
+}
+
+/* A folder: its apps' icons on a frosted square. */
+.macr-launchpad-folder {
+  background-color: rgba(255, 255, 255, 0.22);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+}
+
+.macr-launchpad-folder-shade {
+  background-color: rgba(0, 0, 0, 0.35);
+}
+
+.macr-launchpad-folder-panel {
+  padding: 16px 28px 22px;
+  spacing: 6px;
+  border-radius: 30px;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  background-color: rgba(64, 64, 72, 0.9);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.35);
+}
+
+.macr-launchpad-folder-title {
+  min-width: 140px;
+  min-height: 34px;
+  padding: 2px 10px;
+  border-radius: 9px;
+  border: 1px solid transparent;
+  background-color: transparent;
+  box-shadow: none;
+  color: #ffffff;
+  font-size: 22px;
+  font-weight: 600;
+  caret-color: #ffffff;
+}
+
+.macr-launchpad-folder-title:hover {
+  background-color: rgba(255, 255, 255, 0.06);
+}
+
+.macr-launchpad-folder-title:focus {
+  border-color: rgba(255, 255, 255, 0.22);
+  background-color: rgba(255, 255, 255, 0.12);
+  box-shadow: none;
+}
+
 /* ---------- Spotlight ---------- */
 
 .macr-spotlight-backdrop {

@@ -189,6 +189,22 @@ schemas/                GSettings schema
 - Apps are `Shell.AppSystem.get_installed()` that `should_show()`, sorted by
   name. Filtering (`logic/filter.ts`) and the grid size, paging and arrow-key
   moves (`logic/grid.ts`) are pure.
+- Folders are GNOME's own app folders (`org.gnome.desktop.app-folders`), so
+  GNOME's app grid shows the same ones. `folders.ts` reads and writes them the
+  way `appDisplay.js` does; `logic/folders.ts` decides what a folder holds (its
+  `apps`, plus apps of its `categories`, minus `excluded-apps`), what the grid
+  shows (non-empty folders and the apps no folder holds, by name) and how an
+  app goes in or out (out of a category folder means excluded). A new folder
+  is named after a category its apps share whose `.directory` file has a
+  name, else "Untitled Folder", and opens with its name ready to edit.
+  Searching shows matching apps flat, inside folders too.
+- Cells are reactive `St.Bin`s, not buttons: a button's grab on press would
+  hide the drag from the root, whose `captured-event` handles press, drag
+  (past 8 px) and release. Dropping an app on an app makes a folder, on a
+  folder adds it, and out of an open folder's panel takes it out (an emptied
+  folder is removed from `folder-children` and its keys reset). Holding a
+  dragged app at the screen's side turns the page. An open folder is a panel
+  over the blurred grid; Esc or a click beside it closes it first.
 - `SuperKey` takes the Super key while `launchpad-super-key` is on: it blocks
   the shell's own `overlay-key` handler on `global.display` (the overview),
   connects Macr's, and allows `overlay-key` in POPUP mode so Super closes it
