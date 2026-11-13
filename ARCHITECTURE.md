@@ -1035,6 +1035,32 @@ schemas/                GSettings schema
   there a dialog is built by hand from `ui/unlockDialog.js`; the real lock,
   its blur and the session mode switch are checked in a real session.
 
+## Screen saver
+
+- `screensaver/index.ts` adds an idle watch on the core idle monitor. Its
+  time comes from `screensaver-delay`, moved before GNOME's blank when
+  `org.gnome.desktop.session idle-delay` comes sooner (`logic/screensaver.ts
+  saverDelay`), and is set again when either key changes.
+- When it fires, `org.gnome.SessionManager.IsInhibited(8)` is asked
+  asynchronously: an app that keeps the session from idling (a video, a
+  call) keeps the screen as it is. Without a session manager (the devshell)
+  nothing inhibits. Input during the call, or a locked session, also stops it.
+- The saver is one actor over `Main.uiGroup` with a clipped screen per
+  monitor: a `BackgroundManager` on a drift actor, and the lock screen's
+  date and time (`lockscreen/logic/clock.ts`) a little below the top. It
+  holds a modal grab, so the input that ends it reaches nothing else; a
+  user-active watch ends it and the grab goes at once, before the fade.
+- The drift eases scale and offset to the next point of `driftAt` every
+  24 s. Every point leaves room around the screen, so no edge shows. Moves
+  are chained from a timer, not from the ease's end: with animations off an
+  ease ends at once, and chaining on it would never stop.
+- The lock (session mode `isLocked`), a monitor change and disable all
+  remove it at once. The module runs on the desktop only.
+- The devshell renders in software: a full-screen actor moving for long
+  fills mutter's shared frame memory up to the 3 GB cap. Check the drift
+  there with `enable-animations` off, or briefly; the moving picture is a
+  real-session check.
+
 ## Login screen
 
 - GDM runs a GNOME Shell of its own as the `gdm` user, in the `gdm` session

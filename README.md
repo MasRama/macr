@@ -178,6 +178,10 @@ are laid out like macOS System Settings.
 
 ### Lock and login screens
 
+- **Screen saver**: after five idle minutes (you choose how many) your
+  wallpaper drifts slowly under a big clock, until the next key press or
+  pointer move. A playing video keeps it away, and it always comes before
+  the screen blanks.
 - **Lock screen**: the date and a big time at the top over the unblurred
   wallpaper, your picture and name low in the middle, and the password field
   fading in on a key press or click.

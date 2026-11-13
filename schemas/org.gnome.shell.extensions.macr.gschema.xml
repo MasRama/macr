@@ -147,6 +147,17 @@
       <summary>Shake the pointer to find it</summary>
       <description>A quick wiggle of the mouse or touchpad makes the pointer three times as big for a moment.</description>
     </key>
+    <key name="screensaver-enabled" type="b">
+      <default>true</default>
+      <summary>macOS screen saver</summary>
+      <description>After screensaver-delay minutes without input, the wallpaper drifts slowly under a big clock until the next key press, click or pointer move. Not while an app keeps the session from going idle, such as a playing video. It starts before GNOME blanks the screen.</description>
+    </key>
+    <key name="screensaver-delay" type="u">
+      <range min="1" max="60"/>
+      <default>5</default>
+      <summary>Minutes without input before the screen saver starts</summary>
+      <description>When GNOME blanks the screen sooner (org.gnome.desktop.session idle-delay), the screen saver starts a minute before the blank.</description>
+    </key>
     <key name="sounds-enabled" type="b">
       <default>true</default>
       <summary>macOS-style system sounds</summary>

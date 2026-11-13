@@ -275,8 +275,14 @@ export function pages(): PageInfo[] {
                     subtitle: _('The same look on the login screen needs Macr installed for the login screen with scripts/login-screen.sh'),
                 });
                 login.add_suffix(linkButton(_('How'), `${url}#login-screen`, window));
+                const delay = spinRow(settings, 'screensaver-delay', _('Start after'), _('Minutes without input; always before the screen blanks'), 1, 60, 1);
+                dependsOn(settings, 'screensaver-enabled', delay);
                 return [
                     group('', [switchRow(settings, 'lock-screen-enabled', _('macOS lock screen'), _('A big clock at the top, your picture and the password field below'))]),
+                    group(_('Screen saver'), [
+                        switchRow(settings, 'screensaver-enabled', _('macOS screen saver'), _('The wallpaper drifts slowly under a big clock; any key or move ends it. Not while a video plays.')),
+                        delay,
+                    ]),
                     group(_('Login screen'), [login]),
                 ];
             },

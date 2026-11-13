@@ -2108,6 +2108,31 @@
   border: 2px solid rgba(10, 132, 255, 0.85);
 }
 
+/* ---------- Screen saver ---------- */
+/* The lock screen's clock, over the drifting wallpaper. */
+
+.macr-screensaver-clock {
+  spacing: 0;
+  color: white;
+}
+
+.macr-screensaver-date {
+  font-family: "SF Pro Display", "SF Pro", system-ui, sans-serif;
+  font-size: 22px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.92);
+  text-shadow: 0 1px 8px rgba(0, 0, 0, 0.25);
+}
+
+.macr-screensaver-time {
+  font-family: "SF Pro Display", "SF Pro", system-ui, sans-serif;
+  font-size: 104px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.86);
+  text-shadow: 0 2px 16px rgba(0, 0, 0, 0.22);
+  font-feature-settings: "tnum";
+}
+
 /* ---------- Lock and login screens ---------- */
 /* Date over a big time at the top; user and password low in the middle.
    .unlock-dialog.macr-lock and .login-dialog.macr-login outrank GNOME's and

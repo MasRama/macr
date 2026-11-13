@@ -29,6 +29,7 @@ import { NotificationsModule } from './features/notifications/index.js';
 import { OsdModule } from './features/osd/index.js';
 import { ScreenshotModule } from './features/screenshot/index.js';
 import { FullscreenSpacesModule } from './features/spaces/index.js';
+import { ScreenSaverModule } from './features/screensaver/index.js';
 import { SoundsModule } from './features/sounds/index.js';
 import { SpaceWallpapersModule } from './features/spacewallpapers/index.js';
 import { SpotlightModule } from './features/spotlight/index.js';
@@ -80,6 +81,7 @@ const MODULES: ModuleEntry[] = [
     { key: 'fullscreen-spaces-enabled', screens: ['desktop', 'lock'], create: () => new FullscreenSpacesModule() },
     // Paused, not turned off, while locked: turning off would bring every window back.
     { key: 'stage-manager-enabled', screens: ['desktop', 'lock'], create: () => new StageManagerModule() },
+    { key: 'screensaver-enabled', create: (context) => new ScreenSaverModule(context.settings) },
     { key: 'lock-screen-enabled', screens: ['desktop', 'lock'], create: () => new LockScreenModule() },
     { key: 'login-screen-enabled', screens: ['login'], create: () => new LoginScreenModule() },
 ];
