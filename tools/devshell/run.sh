@@ -52,6 +52,9 @@ if [ -z "${MACR_DEVSHELL_INNER:-}" ]; then
     done
     # A few recent files so Recent Items has something to show.
     mkdir -p "$STATE/home"
+    # Screenshots taken in here are saved in here, not in your Pictures.
+    mkdir -p "$STATE/home/Pictures"
+    printf 'XDG_PICTURES_DIR="%s"\n' "$STATE/home/Pictures" > "$STATE/config/user-dirs.dirs"
     for name in "Budget 2026.ods" "Trip notes.md" "Logo draft.svg"; do
         printf 'demo\n' > "$STATE/home/$name"
     done
@@ -59,7 +62,7 @@ if [ -z "${MACR_DEVSHELL_INNER:-}" ]; then
 import sys, urllib.parse, pathlib
 state = pathlib.Path(sys.argv[1])
 rows = []
-for i, path in enumerate(sorted((state / 'home').iterdir())):
+for i, path in enumerate(sorted(p for p in (state / 'home').iterdir() if p.is_file())):
     uri = 'file://' + urllib.parse.quote(str(path))
     stamp = f'2026-11-12T0{i}:00:00Z'
     rows.append(f'  <bookmark href="{uri}" added="{stamp}" modified="{stamp}" visited="{stamp}"></bookmark>')
@@ -127,7 +130,8 @@ echo "$$" > "$STATE/run.pid"
 set -- --virtual-monitor 1920x1080
 [ "${MACR_DEVSHELL_MONITORS:-1}" = 2 ] && set -- "$@" --virtual-monitor 1920x1080
 [ "${MACR_DEVSHELL_MODE:-user}" = gdm ] && set -- "$@" --mode=gdm
-DBUS_SYSTEM_BUS_ADDRESS="$DBUS_SESSION_BUS_ADDRESS" gnome-shell --headless --wayland --no-x11 \
+# Its home is in here too, so nothing it saves lands in your home folder.
+HOME="$STATE/home" DBUS_SYSTEM_BUS_ADDRESS="$DBUS_SESSION_BUS_ADDRESS" gnome-shell --headless --wayland --no-x11 \
     "$@" --wayland-display macr-devshell > "$STATE/shell.log" 2>&1 &
 SHELL_PID=$!
 
