@@ -22,6 +22,7 @@ stack of tweak extensions that each fix one corner. It ships module by module.
 | **Hot corners**: each screen corner can open Mission Control, Launchpad, the desktop or the Notification Center, or lock the screen | GNOME's top-left hot corner | done |
 | **Window corners**: rounded macOS corners on windows that do not round their own, such as frameless (Electron) and older X11 apps, with a soft shadow on frameless ones; square when maximized | Rounded Window Corners | done |
 | **Traffic lights**: red, yellow and green window buttons first on the left of app windows, grey in windows in the background, with their symbols on hover; in GTK and libadwaita apps, Chrome and X11 apps (Qt 6 apps on Wayland and Electron apps with their own title bar draw their own buttons) | a macOS GTK theme's window buttons | done |
+| **Window tiling**: drag a window to the left or right edge of the screen for a half, to a corner for a quarter or to the top to fill it, with a frosted preview of where it goes; drag it away to get its size back. Super+Ctrl with the arrow keys, F, C and R, Super+Ctrl+Shift with the arrows to arrange two windows, and Move & Resize in the Window menu, with margins between tiles | Tiling Shell / Zorin Tiling Shell, Tiling Assistant | done |
 | **Lock screen**: the date and a big time at the top over the unblurred wallpaper, your picture and name low in the middle, and the password field fading in under them on a key press or click | GNOME's centred clock and blurred lock screen | done |
 | **Login screen** (opt in): the lock screen's look on GDM's login screen, with your users side by side low in the middle, installed with `scripts/login-screen.sh` | GDM's centred user list | done |
 
@@ -58,8 +59,9 @@ gnome-extensions install --force build/macr@masrama.github.io.shell-extension.zi
 Log out and back in, then turn Macr on in Extensions. Turn off the
 extensions Macr replaces, or the two will fight over the same UI: Just
 Perfection and Blur my Shell's top bar blur for the menu bar, Dash to Dock and
-Magic Lamp for the dock, and any launcher bound to Ctrl+Space (Ulauncher) for
-Spotlight. Launchpad takes the Super key from Zorin Menu while it runs and
+Magic Lamp for the dock, any launcher bound to Ctrl+Space (Ulauncher) for
+Spotlight, and Tiling Shell (Zorin Tiling Shell) or Tiling Assistant for
+window tiling. Launchpad takes the Super key from Zorin Menu while it runs and
 gives it back when turned off. Each module can be turned off in Macr's settings,
 laid out like macOS System Settings, and its About Macr page lists the
 enabled extensions that clash with Macr, with a button to turn them off.

@@ -279,6 +279,59 @@ schemas/                GSettings schema
   apps with a custom title bar draw their own buttons and are left as they
   are.
 
+## Window tiling
+
+- Drag to tile: `global.display` `grab-op-begin`/`grab-op-end` follow pointer
+  moves only (`(op & ~0x400) === MOVING`; keyboard moves and resizes do not
+  snap). During the grab the pointer is polled every 16 ms, because a window
+  stops at the top of the work area while the pointer goes on into the menu
+  bar, where Fill is. `logic/zones.ts` maps the pointer to a placement: the
+  left and right edges a half, the corners a quarter, the top edge Fill; an
+  edge where another monitor continues does not snap.
+- The preview (`macr-tile-preview`, + `macr-light`) is an `St.Widget` with a
+  background blur in `global.window_group`, just below the dragged window. It
+  grows out of the window's frame and eases to the target.
+- Escape gives no sign of its own: a drop counts as cancelled when the window
+  moved during the drag and is back at its start position.
+- Dragging a tiled window away gives it back its size from before it was
+  tiled, mid-drag, with `move_resize_frame`. Mutter 46 keeps the grab's
+  relative anchor across the resize, so `logic/restore.ts` places the window
+  the same way (the grab point keeps its share of the width and height) and
+  the drag carries on without a jump.
+- Placing is `src/shared/tiler.ts`, shared with the Window menu: unfullscreen,
+  unmaximize (GNOME's own Super+Left tiles are vertically maximized), move to
+  the target monitor, `move_resize_frame` (`Meta.Window.tile()` is not
+  introspected in 46). The maths is `src/shared/logic/geometry.ts`: halves,
+  quarters, Fill and Center, with `tiling-margins` an 8 px gap from the work
+  area's edges and between tiles. Wayland clients resize in their own time,
+  and one with a minimum size bigger than its tile is moved back against the
+  tile's outer edges once it settles, so it does not spill off the screen.
+- Arrange (Left & Right and the others) tiles the focused window and the most
+  recently used other window that shows, one on the same monitor first
+  (`src/shared/logic/arrange.ts`).
+- What Macr did to each window (its size before tiling, the tile it got) is in
+  `src/shared/tiling-store.ts`, keyed by window id and dropped on
+  `unmanaged`. It lives outside the module, so locking the screen does not
+  lose it, and `Macr.disable()` clears it. A window counts as tiled only while
+  its frame still equals its tile; Return to Previous Size goes back to the
+  size it had before it was first tiled. A maximized window has no size of
+  its own to go back to (Mutter's saved rect is not introspected).
+- The Window menu reaches the module's tiler (with margins) through
+  `src/shared/tiling-link.ts`, and places windows without margins when the
+  module is off.
+- Keyboard: one `as` setting per shortcut, bound with `Main.wm.addKeybinding`;
+  Super+Ctrl stands in for the Mac's Fn+Control. Quarters have no default.
+- GNOME's own edge tiling (`org.gnome.mutter edge-tiling`, on in Zorin) would
+  show its preview and tile on drop too, so it is off while the module runs.
+  Zorin also binds Super+Ctrl+Left/Right to `toggle-tiled-left/right`: those
+  lists lose only the accelerators Macr's shortcuts use (`logic/keys.ts`), so
+  Super+Left/Right keep GNOME's half tiling. Both are saved in Macr's
+  settings (`tiling-saved-edge-tiling`, `tiling-saved-toggle-tiled`) and put
+  back on disable unless the user changed them since.
+- Not done: the green traffic light's hover menu (the app draws the button,
+  so the shell never sees the hover), size animations, and tile targets in
+  the middle of the screen.
+
 ## Lock screen
 
 - GNOME builds a new `UnlockDialog` every time the screen locks, so the
