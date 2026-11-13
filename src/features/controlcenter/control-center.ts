@@ -1,10 +1,12 @@
 import type Clutter from 'gi://Clutter';
+import type Gio from 'gi://Gio';
 import Shell from 'gi://Shell';
 import St from 'gi://St';
 import type * as PopupMenu from 'resource:///org/gnome/shell/ui/popupMenu.js';
 
 import { isLight } from '../../shared/scheme.js';
 import { Focus } from './focus.js';
+import { StageManagerToggle } from './stage-manager.js';
 
 type Items = { quickSettingsItems: Clutter.Actor[] };
 type Signals = { connect(signal: string, callback: (...args: never[]) => void): number; disconnect(id: number): void };
@@ -37,9 +39,9 @@ type Titled = { item: St.Bin; box: Clutter.Actor; wrapper: St.BoxLayout };
 
 /**
  * GNOME's quick settings as the macOS Control Center: toggles first, then
- * titled slider cards, a Focus toggle, and Macr's look (stylesheet, under
- * `macr-cc`). GNOME's own items and backends do the work; everything is put
- * back on destroy.
+ * titled slider cards, Focus and Stage Manager toggles, and Macr's look
+ * (stylesheet, under `macr-cc`). GNOME's own items and backends do the work;
+ * everything is put back on destroy.
  */
 export class ControlCenter {
     private readonly menu: QuickSettingsButton['menu'];
@@ -47,10 +49,16 @@ export class ControlCenter {
     private readonly blur = new Shell.BlurEffect({ mode: Shell.BlurMode.BACKGROUND, radius: 40, brightness: 1 });
     private readonly titled: Titled[] = [];
     private readonly focus = new Focus();
+    private readonly stageManager: StageManagerToggle;
     private readonly openId: number;
 
-    constructor(private readonly qs: QuickSettingsButton) {
+    constructor(
+        private readonly qs: QuickSettingsButton,
+        settings: Gio.Settings,
+        extensionPath: string,
+    ) {
         this.menu = qs.menu;
+        this.stageManager = new StageManagerToggle(settings, extensionPath);
         this.grid = qs.menu._grid;
 
         this.menu.actor.add_style_class_name('macr-cc');
@@ -64,6 +72,8 @@ export class ControlCenter {
         // Right after the connectivity toggles, like macOS.
         const after = qs._bluetooth?.quickSettingsItems.at(-1) ?? qs._network?.quickSettingsItems.at(-1) ?? qs._system.quickSettingsItems.at(-1);
         if (after) this.grid.set_child_above_sibling(this.focus.toggle, after);
+        qs.addExternalIndicator(this.stageManager.indicator);
+        this.grid.set_child_above_sibling(this.stageManager.toggle, this.focus.toggle);
 
         // The slider cards after GNOME's own toggles, before other extensions'.
         let previous = this.lastToggle();
@@ -92,6 +102,7 @@ export class ControlCenter {
             wrapper.destroy();
         }
         this.titled.length = 0;
+        this.stageManager.destroy();
         this.focus.destroy();
         this.menu.box.remove_effect(this.blur);
         this.menu.actor.remove_style_class_name('macr-cc');

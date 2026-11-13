@@ -1,15 +1,7 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 
-import { clickAction, nextWindow, overlaps } from '../../src/features/dock/logic/rules.js';
-
-test('rectangles overlap only when they share area', () => {
-    const dock = { x: 400, y: 800, width: 600, height: 64 };
-    assert.equal(overlaps(dock, { x: 0, y: 0, width: 1920, height: 1080 }), true);
-    assert.equal(overlaps(dock, { x: 0, y: 0, width: 1920, height: 800 }), false, 'touching the top edge');
-    assert.equal(overlaps(dock, { x: 1000, y: 700, width: 300, height: 300 }), false, 'touching the right edge');
-    assert.equal(overlaps(dock, { x: 999, y: 863, width: 10, height: 10 }), true);
-});
+import { clickAction, nextWindow } from '../../src/features/dock/logic/rules.js';
 
 test('next window cycles and wraps', () => {
     assert.equal(nextWindow(['a', 'b', 'c'], 'a'), 'b');

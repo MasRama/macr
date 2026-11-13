@@ -14,18 +14,22 @@ import { MenuBar } from './features/menubar/index.js';
 import { MissionControlModule } from './features/missioncontrol/index.js';
 import { NotificationsModule } from './features/notifications/index.js';
 import { OsdModule } from './features/osd/index.js';
+import { ScreenshotModule } from './features/screenshot/index.js';
 import { SpotlightModule } from './features/spotlight/index.js';
+import { StageManagerModule } from './features/stagemanager/index.js';
 import { SwitcherModule } from './features/switcher/index.js';
+import { TilingModule } from './features/tiling/index.js';
 import { TrafficLightsModule } from './features/trafficlights/index.js';
 import { runsOn, screenOf } from './shared/logic/screen.js';
 import type { Module, ModuleEntry } from './shared/module.js';
+import { resetTiling } from './shared/tiling-link.js';
 
 const MODULES: ModuleEntry[] = [
     { key: 'menubar-enabled', create: (context) => new MenuBar(context) },
     { key: 'dock-enabled', create: (context) => new DockModule(context) },
     { key: 'launchpad-enabled', create: (context) => new LaunchpadModule(context) },
     { key: 'spotlight-enabled', create: (context) => new SpotlightModule(context) },
-    { key: 'control-center-enabled', create: () => new ControlCenterModule() },
+    { key: 'control-center-enabled', create: (context) => new ControlCenterModule(context) },
     { key: 'app-icon-tiles', create: () => new AppIconsModule() },
     { key: 'osd-enabled', create: () => new OsdModule() },
     { key: 'switcher-enabled', create: () => new SwitcherModule() },
@@ -34,6 +38,10 @@ const MODULES: ModuleEntry[] = [
     { key: 'hot-corners-enabled', create: (context) => new HotCornersModule(context.settings) },
     { key: 'window-corners-enabled', create: (context) => new WindowCornersModule(context.settings) },
     { key: 'traffic-lights-enabled', create: (context) => new TrafficLightsModule(context.settings) },
+    { key: 'tiling-enabled', create: (context) => new TilingModule(context.settings) },
+    { key: 'screenshot-enabled', create: (context) => new ScreenshotModule(context) },
+    // Paused, not turned off, while locked: turning off would bring every window back.
+    { key: 'stage-manager-enabled', screens: ['desktop', 'lock'], create: () => new StageManagerModule() },
     { key: 'lock-screen-enabled', screens: ['desktop', 'lock'], create: () => new LockScreenModule() },
     { key: 'login-screen-enabled', screens: ['login'], create: () => new LoginScreenModule() },
 ];
@@ -67,6 +75,7 @@ export default class Macr extends Extension {
         this.changedIds = [];
         for (const module of [...this.running.values()].reverse()) module.disable();
         this.running.clear();
+        resetTiling();
         this.settings = null;
     }
 

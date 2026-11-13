@@ -1705,3 +1705,264 @@
   padding: 0 !important;
   color: rgba(255, 255, 255, 0.75);
 }
+
+/* Window tiling: where a dragged window goes, frosted as on macOS */
+.macr-tile-preview {
+  background-color: rgba(255, 255, 255, 0.16);
+  border: 1px solid rgba(255, 255, 255, 0.42);
+  border-radius: 10px;
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.22);
+}
+
+.macr-tile-preview.macr-light {
+  background-color: rgba(255, 255, 255, 0.38);
+  border-color: rgba(255, 255, 255, 0.85);
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.16);
+}
+
+/* ---------- Screenshots ---------- */
+/* GNOME's screenshot UI (#screenshot-ui). !important where shell themes
+   (MacTahoe) style it. */
+
+/* Super+Shift+4: a bare crosshair over the screen, the selection a light
+   veil with a thin border, no shade and no handles. */
+#screenshot-ui.macr-screenshot-quick .screenshot-ui-area-indicator-shade {
+  background-color: transparent !important;
+}
+
+#screenshot-ui.macr-screenshot-quick .screenshot-ui-area-indicator-selection {
+  border: 1px solid rgba(255, 255, 255, 0.9) !important;
+  background-color: rgba(255, 255, 255, 0.14) !important;
+}
+
+#screenshot-ui.macr-screenshot-quick .screenshot-ui-area-selector-handle {
+  background-color: transparent !important;
+  box-shadow: none !important;
+}
+
+/* Super+Shift+5 and Print: the macOS toolbar, one frosted row. */
+#screenshot-ui.macr-screenshot .screenshot-ui-panel {
+  margin-bottom: 104px !important;
+  padding: 6px !important;
+  spacing: 0 !important;
+  border: 1px solid rgba(255, 255, 255, 0.13) !important;
+  border-radius: 14px !important;
+  background-color: rgba(36, 36, 40, 0.76) !important;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.35) !important;
+  color: #ffffff !important;
+}
+
+.macr-screenshot-bar {
+  spacing: 2px;
+  font-family: "SF Pro Text", "SF Pro", system-ui, sans-serif;
+  font-size: 13px;
+}
+
+.macr-screenshot-separator {
+  width: 1px;
+  height: 22px;
+  margin: 0 6px;
+  background-color: rgba(255, 255, 255, 0.16);
+}
+
+.macr-screenshot-close,
+.macr-screenshot-choice,
+.macr-screenshot-options,
+.macr-screenshot-capture {
+  min-height: 30px;
+  border-radius: 7px;
+  color: #ffffff;
+  background-color: transparent;
+  transition-duration: 120ms;
+}
+
+.macr-screenshot-close {
+  min-width: 30px;
+  margin-left: 2px;
+}
+
+.macr-screenshot-close StIcon {
+  icon-size: 14px;
+  padding: 3px;
+  border-radius: 99px;
+  background-color: rgba(255, 255, 255, 0.14);
+}
+
+.macr-screenshot-choice {
+  min-width: 38px;
+  padding: 0 4px;
+}
+
+.macr-screenshot-choice-icon {
+  icon-size: 20px;
+}
+
+.macr-screenshot-record-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 99px;
+  border: 1.5px solid rgba(36, 36, 40, 1);
+  background-color: #ff453a;
+}
+
+.macr-screenshot-options {
+  padding: 0 8px 0 10px;
+}
+
+.macr-screenshot-options-arrow {
+  icon-size: 12px;
+}
+
+.macr-screenshot-capture {
+  margin-left: 4px;
+  padding: 0 14px;
+  font-weight: 500;
+  background-color: rgba(255, 255, 255, 0.14);
+}
+
+.macr-screenshot-close:hover StIcon,
+.macr-screenshot-choice:hover,
+.macr-screenshot-options:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+.macr-screenshot-choice:checked {
+  background-color: rgba(255, 255, 255, 0.2);
+}
+
+.macr-screenshot-capture:hover {
+  background-color: rgba(255, 255, 255, 0.22);
+}
+
+.macr-screenshot-choice:active,
+.macr-screenshot-options:active,
+.macr-screenshot-capture:active {
+  background-color: rgba(255, 255, 255, 0.28);
+}
+
+.macr-screenshot-choice:insensitive {
+  color: rgba(255, 255, 255, 0.35);
+}
+
+.macr-screenshot-choice:focus,
+.macr-screenshot-options:focus,
+.macr-screenshot-capture:focus {
+  box-shadow: inset 0 0 0 2px rgba(10, 132, 255, 0.8);
+}
+
+/* The selection: a thin white frame with small round handles. */
+#screenshot-ui.macr-screenshot .screenshot-ui-area-selector .screenshot-ui-area-indicator-shade {
+  background-color: rgba(0, 0, 0, 0.35) !important;
+}
+
+#screenshot-ui.macr-screenshot .screenshot-ui-area-selector .screenshot-ui-area-indicator-selection {
+  border: 1px solid rgba(255, 255, 255, 0.95) !important;
+}
+
+#screenshot-ui.macr-screenshot .screenshot-ui-area-selector-handle {
+  width: 11px !important;
+  height: 11px !important;
+  border: 1px solid rgba(0, 0, 0, 0.25) !important;
+  border-radius: 99px !important;
+  background-color: #ffffff !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.35) !important;
+}
+
+#screenshot-ui.macr-screenshot .screenshot-ui-tooltip {
+  padding: 4px 8px !important;
+  border-radius: 6px !important;
+  background-color: rgba(36, 36, 40, 0.92) !important;
+  color: #ffffff !important;
+  font-size: 12px !important;
+}
+
+#screenshot-ui.macr-screenshot.macr-light .screenshot-ui-panel {
+  border-color: rgba(0, 0, 0, 0.08) !important;
+  background-color: rgba(246, 246, 248, 0.82) !important;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.18) !important;
+  color: #1d1d1f !important;
+}
+
+.macr-light .macr-screenshot-separator {
+  background-color: rgba(0, 0, 0, 0.12);
+}
+
+.macr-light .macr-screenshot-close,
+.macr-light .macr-screenshot-choice,
+.macr-light .macr-screenshot-options,
+.macr-light .macr-screenshot-capture {
+  color: #1d1d1f;
+}
+
+.macr-light .macr-screenshot-close StIcon,
+.macr-light .macr-screenshot-capture {
+  background-color: rgba(0, 0, 0, 0.07);
+}
+
+.macr-light .macr-screenshot-close:hover StIcon,
+.macr-light .macr-screenshot-choice:hover,
+.macr-light .macr-screenshot-options:hover {
+  background-color: rgba(0, 0, 0, 0.06);
+}
+
+.macr-light .macr-screenshot-choice:checked {
+  background-color: rgba(0, 0, 0, 0.11);
+}
+
+.macr-light .macr-screenshot-capture:hover {
+  background-color: rgba(0, 0, 0, 0.12);
+}
+
+.macr-light .macr-screenshot-choice:active,
+.macr-light .macr-screenshot-options:active,
+.macr-light .macr-screenshot-capture:active {
+  background-color: rgba(0, 0, 0, 0.16);
+}
+
+.macr-light .macr-screenshot-choice:insensitive {
+  color: rgba(0, 0, 0, 0.3);
+}
+
+.macr-light .macr-screenshot-record-dot {
+  border-color: rgba(246, 246, 248, 1);
+}
+
+#screenshot-ui.macr-screenshot.macr-light .screenshot-ui-tooltip {
+  background-color: rgba(246, 246, 248, 0.96) !important;
+  color: #1d1d1f !important;
+}
+
+/* The floating thumbnail at the bottom right after each screenshot. */
+.macr-screenshot-thumb {
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  border-radius: 8px;
+  background-color: rgba(36, 36, 40, 0.9);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+}
+
+.macr-screenshot-thumb.macr-light {
+  border-color: rgba(0, 0, 0, 0.16);
+  background-color: rgba(255, 255, 255, 0.9);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.22);
+}
+
+/* ---------- Stage Manager ---------- */
+/* The strip of stages on the left; each thumbnail is tilted in code. */
+.macr-stage-shadow {
+  border-radius: 10px;
+  background-color: rgba(0, 0, 0, 0.2);
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.42);
+}
+
+.macr-stage-strip.macr-light .macr-stage-shadow {
+  background-color: rgba(0, 0, 0, 0.08);
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.24);
+}
+
+.macr-stage-icon StIcon {
+  icon-shadow: 0 2px 6px rgba(0, 0, 0, 0.45);
+}
+
+.macr-stage-strip.macr-light .macr-stage-icon StIcon {
+  icon-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
+}

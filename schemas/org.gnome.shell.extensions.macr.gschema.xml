@@ -97,6 +97,11 @@
       <summary>Show the overview as macOS Mission Control</summary>
       <description>Windows spread over the dimmed wallpaper, with the Spaces bar always at the top.</description>
     </key>
+    <key name="stage-manager-enabled" type="b">
+      <default>false</default>
+      <summary>Use macOS Stage Manager</summary>
+      <description>The focused app stays in the middle of the primary monitor and the other apps' windows wait as stages in a strip on the left; clicking a stage swaps it in.</description>
+    </key>
     <key name="hot-corners-enabled" type="b">
       <default>true</default>
       <summary>Use macOS hot corners</summary>
@@ -184,6 +189,109 @@
       <default>16</default>
       <summary>Window corner radius</summary>
       <description>In pixels.</description>
+    </key>
+    <key name="tiling-enabled" type="b">
+      <default>true</default>
+      <summary>Tile windows the macOS way</summary>
+      <description>Drag a window to the left or right edge of the screen for a half, to a corner for a quarter or to the top to fill the screen, or use Super+Ctrl with the arrow keys. Turns off GNOME's own edge tiling while it is on. Turn off Tiling Shell and Tiling Assistant while it is on.</description>
+    </key>
+    <key name="tiling-margins" type="b">
+      <default>true</default>
+      <summary>Tiled windows have margins</summary>
+      <description>A small gap around tiled windows and between them.</description>
+    </key>
+    <key name="tiling-saved-edge-tiling" type="b">
+      <default>false</default>
+      <summary>GNOME's edge tiling was on before Macr's tiling</summary>
+      <description>Turned back on when Macr's tiling is turned off.</description>
+    </key>
+    <key name="tiling-saved-toggle-tiled" type="a{sas}">
+      <default>{}</default>
+      <summary>GNOME's half-tiling shortcuts before Macr's tiling</summary>
+      <description>Macr takes its own shortcuts out of org.gnome.mutter.keybindings toggle-tiled-left and toggle-tiled-right while tiling is on, and puts these lists back when it is turned off.</description>
+    </key>
+    <key name="tiling-left" type="as">
+      <default><![CDATA[['<Super><Control>Left']]]></default>
+      <summary>Keyboard shortcut that tiles the focused window to the left half</summary>
+    </key>
+    <key name="tiling-right" type="as">
+      <default><![CDATA[['<Super><Control>Right']]]></default>
+      <summary>Keyboard shortcut that tiles the focused window to the right half</summary>
+    </key>
+    <key name="tiling-top" type="as">
+      <default><![CDATA[['<Super><Control>Up']]]></default>
+      <summary>Keyboard shortcut that tiles the focused window to the top half</summary>
+    </key>
+    <key name="tiling-bottom" type="as">
+      <default><![CDATA[['<Super><Control>Down']]]></default>
+      <summary>Keyboard shortcut that tiles the focused window to the bottom half</summary>
+    </key>
+    <key name="tiling-top-left" type="as">
+      <default><![CDATA[[]]]></default>
+      <summary>Keyboard shortcut that tiles the focused window to the top left quarter</summary>
+    </key>
+    <key name="tiling-top-right" type="as">
+      <default><![CDATA[[]]]></default>
+      <summary>Keyboard shortcut that tiles the focused window to the top right quarter</summary>
+    </key>
+    <key name="tiling-bottom-left" type="as">
+      <default><![CDATA[[]]]></default>
+      <summary>Keyboard shortcut that tiles the focused window to the bottom left quarter</summary>
+    </key>
+    <key name="tiling-bottom-right" type="as">
+      <default><![CDATA[[]]]></default>
+      <summary>Keyboard shortcut that tiles the focused window to the bottom right quarter</summary>
+    </key>
+    <key name="tiling-fill" type="as">
+      <default><![CDATA[['<Super><Control>f']]]></default>
+      <summary>Keyboard shortcut that makes the focused window fill the screen</summary>
+    </key>
+    <key name="tiling-center" type="as">
+      <default><![CDATA[['<Super><Control>c']]]></default>
+      <summary>Keyboard shortcut that centres the focused window</summary>
+    </key>
+    <key name="tiling-return" type="as">
+      <default><![CDATA[['<Super><Control>r']]]></default>
+      <summary>Keyboard shortcut that gives the focused window back the size it had before it was tiled</summary>
+    </key>
+    <key name="tiling-arrange-left-right" type="as">
+      <default><![CDATA[['<Super><Control><Shift>Left']]]></default>
+      <summary>Keyboard shortcut that tiles the focused window left and the previous window right</summary>
+    </key>
+    <key name="tiling-arrange-right-left" type="as">
+      <default><![CDATA[['<Super><Control><Shift>Right']]]></default>
+      <summary>Keyboard shortcut that tiles the focused window right and the previous window left</summary>
+    </key>
+    <key name="tiling-arrange-top-bottom" type="as">
+      <default><![CDATA[['<Super><Control><Shift>Up']]]></default>
+      <summary>Keyboard shortcut that tiles the focused window at the top and the previous window at the bottom</summary>
+    </key>
+    <key name="tiling-arrange-bottom-top" type="as">
+      <default><![CDATA[['<Super><Control><Shift>Down']]]></default>
+      <summary>Keyboard shortcut that tiles the focused window at the bottom and the previous window at the top</summary>
+    </key>
+    <key name="screenshot-enabled" type="b">
+      <default>true</default>
+      <summary>Take screenshots the macOS way</summary>
+      <description>Super+Shift+3 takes the whole screen at once, Super+Shift+4 a dragged area or a window, and Super+Shift+5 shows the screenshot toolbar, which Print shows too. GNOME saves and copies each screenshot as usual, and Print, Shift+Print and Alt+Print keep working.</description>
+    </key>
+    <key name="screenshot-screen-shortcut" type="as">
+      <default><![CDATA[['<Super><Shift>3']]]></default>
+      <summary>Keyboard shortcut that takes a screenshot of the whole screen</summary>
+    </key>
+    <key name="screenshot-area-shortcut" type="as">
+      <default><![CDATA[['<Super><Shift>4']]]></default>
+      <summary>Keyboard shortcut that takes a screenshot of a dragged area</summary>
+      <description>Drag over the screen with the crosshair; Space switches to picking a window and back.</description>
+    </key>
+    <key name="screenshot-toolbar-shortcut" type="as">
+      <default><![CDATA[['<Super><Shift>5']]]></default>
+      <summary>Keyboard shortcut that shows the screenshot toolbar</summary>
+    </key>
+    <key name="screenshot-thumbnail" type="b">
+      <default>true</default>
+      <summary>Show a floating thumbnail after each screenshot</summary>
+      <description>A small copy of the screenshot at the bottom right for a few seconds, instead of GNOME's notification banner. Click it to open the picture, swipe it right to put it away, or right-click it to copy, show or delete the file.</description>
     </key>
   </schema>
 </schemalist>

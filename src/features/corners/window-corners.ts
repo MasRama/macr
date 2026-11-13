@@ -4,7 +4,7 @@ import type Gio from 'gi://Gio';
 import Meta from 'gi://Meta';
 import St from 'gi://St';
 
-import { CornerEffect } from './effect.js';
+import { CornerEffect } from '../../shared/corner-effect.js';
 import { cornerPlan, type WindowShape } from './logic/plan.js';
 
 const EFFECT = 'macr-corners';

@@ -13,15 +13,18 @@ stack of tweak extensions that each fix one corner. It ships module by module.
 | **Dock**: frosted glass, magnification, running dots, Trash, hides when a window covers it, genie minimize, on every monitor | Dash to Dock, Magic Lamp | done |
 | **Launchpad**: every app in a full-screen grid with pages and search, on Super and the dock's Apps icon | the distribution's app menu | done |
 | **Spotlight**: Ctrl+Space search over apps, files, settings and the calculator, using GNOME's search providers | Ulauncher | done |
-| **Control Center**: GNOME's quick settings as macOS tiles, toggles first, titled Display and Sound sliders, a Focus (Do Not Disturb) toggle with a moon in the bar | GNOME quick settings styling | done |
+| **Control Center**: GNOME's quick settings as macOS tiles, toggles first, titled Display and Sound sliders, a Focus (Do Not Disturb) toggle with a moon in the bar and a Stage Manager toggle | GNOME quick settings styling | done |
 | **App icon tiles**: apps your icon theme does not cover get their icon on a macOS squircle tile, in the dock, Launchpad, Spotlight and the app switcher | mixed icon styles | done |
 | **Volume and brightness**: a small frosted pill under the menu bar at the top right, like macOS, on every monitor | GNOME's on-screen display at the bottom | done |
 | **App switcher**: Alt+Tab as a frosted macOS panel with big icons, a soft highlight and only the chosen app's name; Alt+\` and the other switchers match | GNOME's switcher styling | done |
 | **Notifications**: banners as frosted cards at the top right, and the clock opens a macOS Notification Center with notification cards and calendar, world clock and weather widgets | GNOME's centred banners and calendar popover | done |
 | **Mission Control**: the overview's windows spread over the dimmed wallpaper with the Spaces bar always at the top | GNOME's overview look | done |
+| **Stage Manager** (opt in): the app you use stays in the middle and your other apps wait as tilted thumbnails on the left; click one to swap it in, or reach it from the dock, Alt+Tab or Mission Control. Turn it on in the Control Center | nothing in GNOME | done |
 | **Hot corners**: each screen corner can open Mission Control, Launchpad, the desktop or the Notification Center, or lock the screen | GNOME's top-left hot corner | done |
 | **Window corners**: rounded macOS corners on windows that do not round their own, such as frameless (Electron) and older X11 apps, with a soft shadow on frameless ones; square when maximized | Rounded Window Corners | done |
 | **Traffic lights**: red, yellow and green window buttons first on the left of app windows, grey in windows in the background, with their symbols on hover; in GTK and libadwaita apps, Chrome and X11 apps (Qt 6 apps on Wayland and Electron apps with their own title bar draw their own buttons) | a macOS GTK theme's window buttons | done |
+| **Window tiling**: drag a window to the left or right edge of the screen for a half, to a corner for a quarter or to the top to fill it, with a frosted preview of where it goes; drag it away to get its size back. Super+Ctrl with the arrow keys, F, C and R, Super+Ctrl+Shift with the arrows to arrange two windows, and Move & Resize in the Window menu, with margins between tiles | Tiling Shell / Zorin Tiling Shell, Tiling Assistant | done |
+| **Screenshots**: Super+Shift+3 takes the whole screen, Super+Shift+4 a dragged area with a crosshair (Space for a window), and Super+Shift+5 or Print shows the macOS toolbar; a floating thumbnail at the bottom right opens, copies, shows or deletes the picture, or swipes away | GNOME's screenshot panel and banner | done |
 | **Lock screen**: the date and a big time at the top over the unblurred wallpaper, your picture and name low in the middle, and the password field fading in under them on a key press or click | GNOME's centred clock and blurred lock screen | done |
 | **Login screen** (opt in): the lock screen's look on GDM's login screen, with your users side by side low in the middle, installed with `scripts/login-screen.sh` | GDM's centred user list | done |
 
@@ -55,12 +58,18 @@ npm run pack
 gnome-extensions install --force build/macr@masrama.github.io.shell-extension.zip
 ```
 
-Log out and back in, then turn Macr on in Extensions. Turn off the
-extensions Macr replaces, or the two will fight over the same UI: Just
-Perfection and Blur my Shell's top bar blur for the menu bar, Dash to Dock and
-Magic Lamp for the dock, and any launcher bound to Ctrl+Space (Ulauncher) for
-Spotlight. Launchpad takes the Super key from Zorin Menu while it runs and
-gives it back when turned off. Each module can be turned off in Macr's settings.
+Log out and back in, then turn Macr on in Extensions. Turn off the extensions
+Macr replaces, or the two will fight over the same UI: Just Perfection and
+Blur my Shell's top bar blur for the menu bar, Dash to Dock and Magic Lamp for
+the dock, any launcher bound to Ctrl+Space (Ulauncher) for Spotlight, and
+Tiling Shell (Zorin Tiling Shell) or Tiling Assistant for window tiling. Dash
+to Dock and Zorin Taskbar can bind Super+Shift with the number keys to open
+dock apps, which takes Super+Shift+3, 4 and 5 from screenshots: turn those app
+hotkeys off in their settings. Launchpad takes the Super key from Zorin Menu
+while it runs and gives it back when turned off. Each module can be turned off
+in Macr's settings, laid out like macOS System Settings, and its About Macr
+page lists the enabled extensions that clash with Macr, with a button to turn
+them off.
 
 ### Login screen
 
