@@ -108,7 +108,7 @@ export function pages(): PageInfo[] {
         {
             id: 'missioncontrol', section: 1, icon: 'preferences-desktop-multitasking-symbolic', color: 'purple',
             title: _('Mission Control'),
-            description: _('All your windows and Spaces at a glance, and the screen corners that open them.'),
+            description: _('All your windows and Spaces at a glance, one app at a time with Stage Manager, and the screen corners that open Mission Control and more.'),
             build: ({ settings }) => {
                 const actions: [string, string][] = [
                     ['none', _('Nothing')],
@@ -128,6 +128,9 @@ export function pages(): PageInfo[] {
                 dependsOn(settings, 'hot-corners-enabled', ...cornerRows);
                 return [
                     group('', [switchRow(settings, 'mission-control-enabled', _('macOS Mission Control'), _('Windows over the dimmed wallpaper, Spaces always at the top'))]),
+                    group(_('Stage Manager'), [
+                        switchRow(settings, 'stage-manager-enabled', _('Stage Manager'), _('The app you use stays in the middle; your other apps wait on the left, a click away')),
+                    ]),
                     group(_('Hot corners'), [
                         switchRow(settings, 'hot-corners-enabled', _('Hot corners'), _('Push the pointer into a screen corner')),
                         ...cornerRows,
