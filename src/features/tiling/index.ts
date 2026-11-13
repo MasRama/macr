@@ -1,16 +1,15 @@
 import Gio from 'gi://Gio';
-import GLib from 'gi://GLib';
 import Meta from 'gi://Meta';
 import Shell from 'gi://Shell';
 import * as Main from 'resource:///org/gnome/shell/ui/main.js';
 
 import type { Arrangement } from '../../shared/logic/arrange.js';
 import type { Placement } from '../../shared/logic/geometry.js';
+import { BorrowedKeys } from '../../shared/borrowed-keys.js';
 import type { Module } from '../../shared/module.js';
 import { Tiler } from '../../shared/tiler.js';
 import { setTiler } from '../../shared/tiling-link.js';
 import { DragSnap } from './drag.js';
-import { sameList, withoutClashes } from './logic/keys.js';
 
 /** The margin tiles keep with `tiling-margins` on, in pixels. */
 const GAP = 8;
@@ -49,17 +48,18 @@ const SHORTCUT_KEYS = [...PLACEMENT_KEYS.map(([key]) => key), ...ARRANGE_KEYS.ma
  */
 export class TilingModule implements Module {
     private readonly mutter = new Gio.Settings({ schema_id: 'org.gnome.mutter' });
-    private readonly mutterKeys = new Gio.Settings({ schema_id: 'org.gnome.mutter.keybindings' });
+    private readonly toggleTiled: BorrowedKeys;
     private tiler: Tiler | null = null;
     private drag: DragSnap | null = null;
-    /** Macr's accelerators when the GNOME keys were changed. */
-    private ours: string[] = [];
 
-    constructor(private readonly settings: Gio.Settings) {}
+    constructor(private readonly settings: Gio.Settings) {
+        this.toggleTiled = new BorrowedKeys(settings, SAVED_TOGGLE_TILED, 'org.gnome.mutter.keybindings', TOGGLE_TILED);
+    }
 
     enable(): void {
         this.takeEdgeTiling();
-        this.takeToggleTiled();
+        // Only the accelerators Macr uses: Super+Left/Right keep working.
+        this.toggleTiled.take(SHORTCUT_KEYS.flatMap((key) => this.settings.get_strv(key)));
         const tiler = new Tiler(() => (this.settings.get_boolean('tiling-margins') ? GAP : 0));
         this.tiler = tiler;
         setTiler(tiler);
@@ -83,7 +83,7 @@ export class TilingModule implements Module {
         setTiler(null);
         this.tiler?.destroy();
         this.tiler = null;
-        this.giveBackToggleTiled();
+        this.toggleTiled.giveBack();
         this.giveBackEdgeTiling();
     }
 
@@ -98,43 +98,5 @@ export class TilingModule implements Module {
         if (!this.settings.get_boolean(SAVED_EDGE_TILING)) return;
         if (!this.mutter.get_boolean('edge-tiling')) this.mutter.set_boolean('edge-tiling', true);
         this.settings.set_boolean(SAVED_EDGE_TILING, false);
-    }
-
-    /**
-     * Takes Macr's accelerators out of GNOME's half-tiling keys (only those:
-     * Super+Left/Right keep working), saving the user's lists. A list saved
-     * before, by a session that ended without disable, is the one kept.
-     */
-    private takeToggleTiled(): void {
-        this.ours = SHORTCUT_KEYS.flatMap((key) => this.settings.get_strv(key));
-        const saved = this.saved();
-        for (const key of TOGGLE_TILED) {
-            const original = saved[key] ?? this.mutterKeys.get_strv(key);
-            const wanted = withoutClashes(original, this.ours);
-            if (sameList(wanted, original)) {
-                delete saved[key];
-                continue;
-            }
-            saved[key] = original;
-            if (!sameList(this.mutterKeys.get_strv(key), wanted)) this.mutterKeys.set_strv(key, wanted);
-        }
-        this.save(saved);
-    }
-
-    private giveBackToggleTiled(): void {
-        for (const [key, original] of Object.entries(this.saved())) {
-            if (!TOGGLE_TILED.includes(key)) continue;
-            // Only if it is still what Macr made it.
-            if (sameList(this.mutterKeys.get_strv(key), withoutClashes(original, this.ours))) this.mutterKeys.set_strv(key, original);
-        }
-        this.save({});
-    }
-
-    private saved(): Record<string, string[]> {
-        return this.settings.get_value(SAVED_TOGGLE_TILED).deepUnpack() as Record<string, string[]>;
-    }
-
-    private save(saved: Record<string, string[]>): void {
-        this.settings.set_value(SAVED_TOGGLE_TILED, new GLib.Variant('a{sas}', saved));
     }
 }

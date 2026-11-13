@@ -33,3 +33,11 @@ export function withoutClashes(bindings: readonly string[], ours: readonly strin
 export function sameList(a: readonly string[], b: readonly string[]): boolean {
     return a.length === b.length && a.every((value, i) => value === b[i]);
 }
+
+/**
+ * Whether a borrowed GNOME list can go back to `original`: only while it is
+ * still what Macr made it, so a list the user changed meanwhile stays theirs.
+ */
+export function canGiveBack(current: readonly string[], original: readonly string[], ours: readonly string[]): boolean {
+    return sameList(current, withoutClashes(original, ours));
+}
