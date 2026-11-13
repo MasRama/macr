@@ -26,6 +26,7 @@ import { TrafficLightsModule } from './features/trafficlights/index.js';
 import { runsOn, screenOf } from './shared/logic/screen.js';
 import type { Module, ModuleEntry } from './shared/module.js';
 import { resetHider } from './shared/hider.js';
+import { resetQuickLook } from './shared/quick-look.js';
 import { resetTiling } from './shared/tiling-link.js';
 
 const MODULES: ModuleEntry[] = [
@@ -85,6 +86,7 @@ export default class Macr extends Extension {
         this.running.clear();
         resetTiling();
         resetHider();
+        resetQuickLook();
         this.settings = null;
     }
 

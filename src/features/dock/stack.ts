@@ -12,6 +12,7 @@ import * as Main from 'resource:///org/gnome/shell/ui/main.js';
 import * as PopupMenu from 'resource:///org/gnome/shell/ui/popupMenu.js';
 
 import { styleMenu, syncMenuScheme } from '../../shared/menu-style.js';
+import { quickLook } from '../../shared/quick-look.js';
 import { isLight } from '../../shared/scheme.js';
 import { chooseView, FAN_MAX, fanSlot, gridShape, type StackEntry, type StackMode, visibleEntries } from './logic/stack.js';
 
@@ -115,6 +116,10 @@ export const StackItem = GObject.registerClass(
         private closing!: boolean;
         /** Places what needs measuring once the stack is on the stage. */
         private placeLater!: (() => void) | null;
+        /** The items on show, and the one under the pointer (Space previews it). */
+        private shown!: Item[];
+        private pointed!: number;
+        private fanned!: boolean;
         icon!: IconGrid.BaseIcon;
 
         constructor(settings: Gio.Settings) {
@@ -125,6 +130,9 @@ export const StackItem = GObject.registerClass(
             this.grab = null;
             this.closing = false;
             this.placeLater = null;
+            this.shown = [];
+            this.pointed = -1;
+            this.fanned = false;
             this.button = new St.Button({
                 style_class: 'show-apps macr-dock-stack',
                 track_hover: true,
@@ -228,15 +236,23 @@ export const StackItem = GObject.registerClass(
             }
             const anchor = { x: (bx ?? 0) - monitor.x + this.button.width / 2, y: (by ?? 0) - monitor.y - 6 * scale };
             const view = chooseView(items.length, this.mode());
-            if (view === 'fan') this.buildFan(root, folder, items.slice(0, FAN_MAX), anchor, scale);
-            else this.buildGrid(root, folder, items.slice(0, GRID_MAX), anchor, monitor.width, scale);
+            this.shown = items.slice(0, view === 'fan' ? FAN_MAX : GRID_MAX);
+            this.pointed = -1;
+            this.fanned = view === 'fan';
+            if (view === 'fan') this.buildFan(root, folder, this.shown, anchor, scale);
+            else this.buildGrid(root, folder, this.shown, anchor, monitor.width, scale);
 
             root.connect('button-press-event', () => {
                 this.close();
                 return Clutter.EVENT_STOP;
             });
             root.connect('key-press-event', (_actor: Clutter.Actor, event: Clutter.Event) => {
-                if (event.get_key_symbol() !== Clutter.KEY_Escape) return Clutter.EVENT_PROPAGATE;
+                const key = event.get_key_symbol();
+                if (key === Clutter.KEY_space) {
+                    this.lookAt(this.pointed);
+                    return Clutter.EVENT_STOP;
+                }
+                if (key !== Clutter.KEY_Escape) return Clutter.EVENT_PROPAGATE;
                 this.close();
                 return Clutter.EVENT_STOP;
             });
@@ -281,7 +297,31 @@ export const StackItem = GObject.registerClass(
             this.root?.destroy();
             this.root = null;
             this.closing = false;
+            this.shown = [];
+            this.pointed = -1;
             if (was) this.emit('open-changed');
+        }
+
+        /**
+         * Quick Look on an item. The stack closes first: the previewer is a
+         * window, under the stack's overlay while it stays.
+         */
+        private lookAt(index: number): void {
+            if (index < 0 || index >= this.shown.length) return;
+            const uris = this.shown.map((item) => item.file.get_uri());
+            this.close();
+            // The fan rises from the dock, newest at the bottom: Down in the
+            // previewer goes down the fan, towards the dock.
+            if (this.fanned) quickLook(uris.reverse(), uris.length - 1 - index);
+            else quickLook(uris, index);
+        }
+
+        /** Remembers the item under the pointer. */
+        private trackPointer(button: St.Button, index: number): void {
+            button.connect('notify::hover', () => {
+                if (button.hover) this.pointed = index;
+                else if (this.pointed === index) this.pointed = -1;
+            });
         }
 
         private activateItem(file: Gio.File): void {
@@ -308,7 +348,11 @@ export const StackItem = GObject.registerClass(
             if (items.length === 0) {
                 add(this.fanRow(_('No items'), null, null, icon), 0);
             } else {
-                items.forEach((item, index) => add(this.fanRow(item.label, item.gicon, () => this.activateItem(item.file), icon), index));
+                items.forEach((item, index) => {
+                    const row = this.fanRow(item.label, item.gicon, () => this.activateItem(item.file), icon);
+                    this.trackPointer(row, index);
+                    add(row, index);
+                });
             }
             const openRow = this.fanRow(_('Open in Files'), new Gio.ThemedIcon({ name: 'go-next-symbolic' }), () => this.activateItem(folder), icon, true);
             add(openRow, Math.max(1, items.length));
@@ -328,7 +372,7 @@ export const StackItem = GObject.registerClass(
         }
 
         /** One fan row: the name in a pill, then the icon, right-aligned. */
-        private fanRow(text: string, gicon: Gio.Icon | null, onClick: (() => void) | null, size: number, round = false): St.Widget {
+        private fanRow(text: string, gicon: Gio.Icon | null, onClick: (() => void) | null, size: number, round = false): St.Button {
             const box = new St.BoxLayout({ style_class: 'macr-stack-fan-row', x_align: Clutter.ActorAlign.END, x_expand: true });
             const label = new St.Label({ text, style_class: 'macr-stack-name', y_align: Clutter.ActorAlign.CENTER });
             label.clutter_text.ellipsize = Pango.EllipsizeMode.MIDDLE;
@@ -374,6 +418,7 @@ export const StackItem = GObject.registerClass(
                 cellBox.add_child(label);
                 const button = new St.Button({ style_class: 'macr-stack-grid-item', can_focus: true, track_hover: true, child: cellBox, width: cell, height: cell });
                 button.connect('clicked', () => this.activateItem(item.file));
+                this.trackPointer(button, index);
                 layout.attach(button, index % shape.columns, Math.floor(index / shape.columns), 1, 1);
             });
             const scroll = new St.ScrollView({ style_class: 'macr-stack-grid-scroll', hscrollbar_policy: St.PolicyType.NEVER, vscrollbar_policy: St.PolicyType.AUTOMATIC, overlay_scrollbars: true });
