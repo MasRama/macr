@@ -216,8 +216,12 @@ export function pages(): PageInfo[] {
         {
             id: 'appearance', section: 2, icon: 'preferences-desktop-appearance-symbolic', color: 'orange',
             title: _('Appearance'),
-            description: _('App icons and the app switcher.'),
+            description: _('The accent colour, the desktop picture, app icons and the app switcher.'),
             build: ({ settings }) => [
+                group('', [accentRow(settings)]),
+                group(_('Desktop'), [
+                    switchRow(settings, 'dynamic-desktop-enabled', _('Dynamic desktop'), _('Your desktop picture follows the time of day: warm at sunrise and sunset, dimmer and cooler at night')),
+                ]),
                 group(_('App icons'), [switchRow(settings, 'app-icon-tiles', _('macOS tiles for other icons'), _('Apps your icon theme does not cover get their icon on a macOS tile'))]),
                 group(_('App switcher'), [switchRow(settings, 'switcher-enabled', _('macOS app switcher'), _('Alt+Tab as a frosted panel with big icons'))]),
             ],
@@ -252,6 +256,47 @@ export function pages(): PageInfo[] {
             ],
         },
     ];
+}
+
+/** The accent colours as round swatches, as in macOS: the chosen one's name under the title. */
+function accentRow(settings: Gio.Settings): Gtk.Widget {
+    const choices: [string, string][] = [
+        ['wallpaper', _('Wallpaper')],
+        ['blue', _('Blue')],
+        ['purple', _('Purple')],
+        ['pink', _('Pink')],
+        ['red', _('Red')],
+        ['orange', _('Orange')],
+        ['yellow', _('Yellow')],
+        ['green', _('Green')],
+        ['graphite', _('Graphite')],
+    ];
+    const row = new Adw.ActionRow({ title: _('Accent colour'), tooltip_text: _('Highlighted menu items, default buttons and active toggles in Macr') });
+    const box = new Gtk.Box({ spacing: 10, valign: Gtk.Align.CENTER, css_classes: ['macr-swatches'] });
+    const buttons = new Map<string, Gtk.ToggleButton>();
+    let group: Gtk.ToggleButton | null = null;
+    for (const [value, label] of choices) {
+        const button = new Gtk.ToggleButton({ tooltip_text: label, valign: Gtk.Align.CENTER, css_classes: ['macr-swatch', value] });
+        button.update_property([Gtk.AccessibleProperty.LABEL], [label]);
+        if (group) button.set_group(group);
+        else group = button;
+        button.connect('toggled', () => {
+            if (button.active && settings.get_string('accent-color') !== value) settings.set_string('accent-color', value);
+        });
+        buttons.set(value, button);
+        box.append(button);
+    }
+    const sync = () => {
+        const value = settings.get_string('accent-color');
+        const button = buttons.get(value);
+        if (button && !button.active) button.active = true;
+        row.subtitle = choices.find(([choice]) => choice === value)?.[1] ?? '';
+    };
+    sync();
+    const id = settings.connect('changed::accent-color', sync);
+    row.connect('destroy', () => settings.disconnect(id));
+    row.add_suffix(box);
+    return row;
 }
 
 /** The page's header: its big tile, title and description, as in System Settings. */

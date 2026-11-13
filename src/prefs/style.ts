@@ -1,6 +1,8 @@
 import Gdk from 'gi://Gdk';
 import Gtk from 'gi://Gtk';
 
+import { ACCENTS, type Accent } from '../features/accent/logic/accent.js';
+
 /** The colours of the sidebar tiles, as in macOS System Settings. */
 export type TileColor = 'graphite' | 'gray' | 'red' | 'orange' | 'blue' | 'purple' | 'green';
 
@@ -26,6 +28,22 @@ const CSS = `
 .macr-sidebar row label { font-weight: 500; }
 .macr-page-header { margin: 6px 4px 6px 4px; }
 .macr-page-header .title { font-size: 1.45em; font-weight: 700; }
+.macr-swatches { margin: 6px 0; }
+.macr-swatch {
+  min-width: 20px;
+  min-height: 20px;
+  padding: 0;
+  border-radius: 999px;
+  background-image: none;
+  box-shadow: inset 0 0 0 1px alpha(black, 0.15);
+}
+.macr-swatch:checked {
+  box-shadow: inset 0 0 0 1px alpha(black, 0.15), 0 0 0 2px @window_bg_color, 0 0 0 4px alpha(@window_fg_color, 0.45);
+}
+.macr-swatch.wallpaper {
+  background-image: conic-gradient(#ff453a, #ff9f0a, #ffd60a, #30d158, #0a84ff, #bf5af2, #ff375f, #ff453a);
+}
+${(Object.keys(ACCENTS) as Accent[]).map((name) => `.macr-swatch.${name} { background-color: ${ACCENTS[name].color}; }`).join('\n')}
 `;
 
 /** Adds Macr's settings styles to the display; returns a function that takes them off again. */
