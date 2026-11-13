@@ -1966,3 +1966,31 @@
 .macr-stage-strip.macr-light .macr-stage-icon StIcon {
   icon-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
 }
+
+/* App Exposé */
+.macr-expose-backdrop {
+  background-color: rgba(0, 0, 0, 0.3);
+}
+
+.macr-expose.macr-light .macr-expose-backdrop {
+  background-color: rgba(255, 255, 255, 0.12);
+}
+
+.macr-expose-highlight {
+  border: 3px solid rgba(10, 132, 255, 0.85);
+  border-radius: 12px;
+}
+
+.macr-expose-title {
+  padding: 4px 10px;
+  border-radius: 8px;
+  font-size: 10.5pt;
+  font-weight: 500;
+  color: #fff;
+  background-color: rgba(30, 30, 32, 0.72);
+}
+
+.macr-expose.macr-light .macr-expose-title {
+  color: #1d1d1f;
+  background-color: rgba(246, 246, 246, 0.85);
+}

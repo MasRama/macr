@@ -3,6 +3,7 @@ import { Extension } from 'resource:///org/gnome/shell/extensions/extension.js';
 import * as Main from 'resource:///org/gnome/shell/ui/main.js';
 
 import { AppIconsModule } from './features/appicons/index.js';
+import { AppExposeModule } from './features/expose/index.js';
 import { ControlCenterModule } from './features/controlcenter/index.js';
 import { WindowCornersModule } from './features/corners/index.js';
 import { DockModule } from './features/dock/index.js';
@@ -43,6 +44,7 @@ const MODULES: ModuleEntry[] = [
     { key: 'tiling-enabled', create: (context) => new TilingModule(context.settings) },
     { key: 'screenshot-enabled', create: (context) => new ScreenshotModule(context) },
     { key: 'keyboard-enabled', create: (context) => new KeyboardModule(context.settings) },
+    { key: 'app-expose-enabled', create: (context) => new AppExposeModule(context.settings) },
     // Paused, not turned off, while locked: turning off would bring every window back.
     { key: 'stage-manager-enabled', screens: ['desktop', 'lock'], create: () => new StageManagerModule() },
     { key: 'lock-screen-enabled', screens: ['desktop', 'lock'], create: () => new LockScreenModule() },

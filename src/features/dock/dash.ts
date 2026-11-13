@@ -4,11 +4,13 @@ import GObject from 'gi://GObject';
 import type Meta from 'gi://Meta';
 import Shell from 'gi://Shell';
 import St from 'gi://St';
+import { gettext as _ } from 'resource:///org/gnome/shell/extensions/extension.js';
 import * as AppFavorites from 'resource:///org/gnome/shell/ui/appFavorites.js';
 import * as Dash from 'resource:///org/gnome/shell/ui/dash.js';
 import * as Main from 'resource:///org/gnome/shell/ui/main.js';
-import type * as PopupMenu from 'resource:///org/gnome/shell/ui/popupMenu.js';
+import * as PopupMenu from 'resource:///org/gnome/shell/ui/popupMenu.js';
 
+import { expose } from '../../shared/expose-link.js';
 import { styleMenu, syncMenuScheme } from '../../shared/menu-style.js';
 import { clickAction, nextWindow } from './logic/rules.js';
 
@@ -114,6 +116,22 @@ export const MacrDashIcon = GObject.registerClass(
             if (!menu) return;
             styleMenu(menu);
             syncMenuScheme(menu);
+            this.syncShowAll(menu);
+        }
+
+        /** Show All Windows (App Exposé), after the app's window list, while App Exposé runs. */
+        private syncShowAll(menu: PopupMenu.PopupMenu): void {
+            const self = this as unknown as { _macrShowAll?: PopupMenu.PopupMenuItem };
+            if (!self._macrShowAll) {
+                const item = new PopupMenu.PopupMenuItem(_('Show All Windows'));
+                item.connect('activate', () => expose()?.show(this.app));
+                const section = (menu as unknown as { _windowSection?: PopupMenu.PopupMenuSection })._windowSection;
+                const items = (menu as unknown as { _getMenuItems(): unknown[] })._getMenuItems();
+                const index = section ? items.indexOf(section) : -1;
+                menu.addMenuItem(item, index >= 0 ? index + 1 : undefined);
+                self._macrShowAll = item;
+            }
+            self._macrShowAll.visible = expose() !== null && windowsHere(this.app).length > 0;
         }
 
         // GNOME 46 leaves the menu in the stage when the icon goes, and the

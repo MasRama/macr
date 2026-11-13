@@ -324,5 +324,19 @@
       <summary>GNOME's shell shortcuts before Macr's keyboard shortcuts</summary>
       <description>Macr takes its own shortcuts out of org.gnome.shell.keybindings toggle-message-tray while its keyboard shortcuts are on, and puts this list back when they are turned off.</description>
     </key>
+    <key name="app-expose-enabled" type="b">
+      <default>true</default>
+      <summary>App Exposé</summary>
+      <description>All of one app's windows on the current workspace at a glance, from Show All Windows in the dock icon's menu or the keyboard shortcut.</description>
+    </key>
+    <key name="app-expose-shortcut" type="as">
+      <default><![CDATA[['<Super>Down']]]></default>
+      <summary>Keyboard shortcut that shows all windows of the focused app</summary>
+    </key>
+    <key name="app-expose-saved-wm" type="a{sas}">
+      <default>{}</default>
+      <summary>GNOME's unmaximize shortcut before App Exposé</summary>
+      <description>Macr takes its App Exposé shortcut out of org.gnome.desktop.wm.keybindings unmaximize while App Exposé is on, and puts this list back when it is turned off.</description>
+    </key>
   </schema>
 </schemalist>
