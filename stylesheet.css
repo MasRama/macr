@@ -1994,3 +1994,121 @@
   color: #1d1d1f;
   background-color: rgba(246, 246, 246, 0.85);
 }
+
+/* Downloads stack */
+.macr-stack-fan-item {
+  padding: 0;
+  border-radius: 12px;
+}
+
+.macr-stack-fan-row {
+  spacing: 10px;
+}
+
+.macr-stack-name {
+  max-width: 280px;
+  padding: 3px 10px;
+  border-radius: 8px;
+  font-size: 10.5pt;
+  font-weight: 500;
+  color: #fff;
+  background-color: rgba(30, 30, 32, 0.78);
+}
+
+.macr-stack.macr-light .macr-stack-name {
+  color: #1d1d1f;
+  background-color: rgba(246, 246, 246, 0.9);
+}
+
+.macr-stack-fan-item:hover .macr-stack-name {
+  background-color: rgba(10, 132, 255, 0.92);
+  color: #fff;
+}
+
+.macr-stack-icon StIcon {
+  icon-shadow: 0 2px 6px rgba(0, 0, 0, 0.35);
+}
+
+.macr-stack-open {
+  border-radius: 999px;
+  color: #fff;
+  background-color: rgba(60, 60, 64, 0.8);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.macr-stack.macr-light .macr-stack-open {
+  color: #1d1d1f;
+  background-color: rgba(246, 246, 246, 0.9);
+  border-color: rgba(0, 0, 0, 0.08);
+}
+
+.macr-stack-grid {
+  padding: 12px 10px 10px;
+  border-radius: 18px;
+  background-color: rgba(36, 36, 40, 0.62);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  box-shadow: 0 12px 34px rgba(0, 0, 0, 0.35);
+}
+
+.macr-stack.macr-light .macr-stack-grid {
+  background-color: rgba(246, 246, 248, 0.72);
+  border-color: rgba(255, 255, 255, 0.6);
+  box-shadow: 0 12px 34px rgba(0, 0, 0, 0.18);
+}
+
+.macr-stack-grid-header {
+  padding: 0 6px 8px;
+}
+
+.macr-stack-grid-title {
+  font-size: 12pt;
+  font-weight: 700;
+  color: #f5f5f7;
+}
+
+.macr-stack.macr-light .macr-stack-grid-title,
+.macr-stack.macr-light .macr-stack-grid-name,
+.macr-stack.macr-light .macr-stack-empty {
+  color: #1d1d1f;
+}
+
+.macr-stack-grid-open {
+  padding: 3px 10px;
+  border-radius: 7px;
+  font-size: 10pt;
+  color: #f5f5f7;
+  background-color: rgba(255, 255, 255, 0.14);
+}
+
+.macr-stack-grid-open:hover {
+  background-color: rgba(255, 255, 255, 0.24);
+}
+
+.macr-stack.macr-light .macr-stack-grid-open {
+  color: #1d1d1f;
+  background-color: rgba(0, 0, 0, 0.06);
+}
+
+.macr-stack-grid-item {
+  padding: 6px 4px;
+  border-radius: 10px;
+}
+
+.macr-stack-grid-item:hover {
+  background-color: rgba(255, 255, 255, 0.12);
+}
+
+.macr-stack.macr-light .macr-stack-grid-item:hover {
+  background-color: rgba(0, 0, 0, 0.06);
+}
+
+.macr-stack-grid-name {
+  margin-top: 4px;
+  font-size: 9.5pt;
+  color: #f5f5f7;
+}
+
+.macr-stack-empty {
+  padding: 16px;
+  color: #f5f5f7;
+}

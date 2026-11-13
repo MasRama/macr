@@ -343,5 +343,20 @@
       <summary>Full-screen apps get their own Space</summary>
       <description>A window that goes full screen moves to a new workspace next to its own, and goes back when it leaves full screen. Only with dynamic workspaces.</description>
     </key>
+    <key name="dock-downloads" type="b">
+      <default>true</default>
+      <summary>Downloads stack in the dock</summary>
+      <description>The Downloads folder before the Trash; click it to see the newest downloads.</description>
+    </key>
+    <key name="dock-downloads-view" type="s">
+      <choices>
+        <choice value="automatic"/>
+        <choice value="fan"/>
+        <choice value="grid"/>
+      </choices>
+      <default>'automatic'</default>
+      <summary>How the Downloads stack opens</summary>
+      <description>Automatic fans out a few items and shows more as a grid.</description>
+    </key>
   </schema>
 </schemalist>

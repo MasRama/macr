@@ -79,6 +79,7 @@ export class DockModule implements Module {
         const settings = this.context.settings;
         return {
             extensionPath: this.context.path,
+            settings,
             iconSize: settings.get_int('dock-icon-size'),
             autohide: settings.get_boolean('dock-autohide'),
             magnification: settings.get_boolean('dock-magnification'),
