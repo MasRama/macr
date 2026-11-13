@@ -158,6 +158,7 @@ export class DockModule implements Module {
             magnification: settings.get_boolean('dock-magnification'),
             edge: parseEdge(settings.get_string('dock-position')),
             recentApps: () => this.recent?.apps() ?? [],
+            forgetRecent: (id) => this.recent?.forget(id),
         };
     }
 

@@ -161,7 +161,9 @@ schemas/                GSettings schema
   `dock-recent-apps-list` (`logic/recent.ts`, three at most). `MacrDash`
   overrides `_redisplay` and, for that one pass, hands GNOME's code an app
   system whose running apps are followed by the recent ones that are not
-  running, so they get the same icons, separator and drag handling.
+  running, so they get the same icons, separator and drag handling. A
+  recent app's menu ends with Remove from Dock and Clear Recent Apps, which
+  take it, or all of them, out of the list (`withoutRecent`).
 - Badges (`launcher.ts`): apps send a count and a progress over the Unity
   launcher API (`com.canonical.Unity.LauncherEntry` `Update` signals on the
   session bus). Telegram and others send them only while a dock owns

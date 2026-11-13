@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 
-import { RECENT_MAX, recentShown, withRecent } from '../../src/features/dock/logic/recent.js';
+import { RECENT_MAX, recentShown, withRecent, withoutRecent } from '../../src/features/dock/logic/recent.js';
 
 test('a closed app goes first in the recent list', () => {
     assert.deepEqual(withRecent(['a.desktop', 'b.desktop'], 'c.desktop', []), ['c.desktop', 'a.desktop', 'b.desktop']);
@@ -31,4 +31,11 @@ test('the dock shows recent apps that are neither running nor in the dock nor go
 
 test('the dock shows at most three recent apps', () => {
     assert.deepEqual(recentShown(['a', 'b', 'c', 'd'], { running: [], favorites: [], installed: () => true }), ['a', 'b', 'c']);
+});
+
+test('a recent app can be taken out of the dock, or all of them cleared', () => {
+    const recent = ['org.gnome.Calculator.desktop', 'libreoffice-startcenter.desktop', 'org.gnome.Maps.desktop'];
+    assert.deepEqual(withoutRecent(recent, 'libreoffice-startcenter.desktop'), ['org.gnome.Calculator.desktop', 'org.gnome.Maps.desktop']);
+    assert.deepEqual(withoutRecent(recent, 'org.gnome.Weather.desktop'), recent);
+    assert.deepEqual(withoutRecent(recent), []);
 });

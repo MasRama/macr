@@ -9,6 +9,11 @@ export function withRecent(recent: readonly string[], closed: string, favorites:
     return [closed, ...recent.filter((id) => id !== closed)].filter((id) => !favorites.includes(id)).slice(0, RECENT_MAX);
 }
 
+/** The recent apps with `removed` taken out, or none when no app is given (Clear). */
+export function withoutRecent(recent: readonly string[], removed?: string): string[] {
+    return removed === undefined ? [] : recent.filter((id) => id !== removed);
+}
+
 export interface RecentState {
     running: readonly string[];
     favorites: readonly string[];

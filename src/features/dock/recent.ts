@@ -2,7 +2,7 @@ import type Gio from 'gi://Gio';
 import Shell from 'gi://Shell';
 import * as AppFavorites from 'resource:///org/gnome/shell/ui/appFavorites.js';
 
-import { recentShown, withRecent } from './logic/recent.js';
+import { recentShown, withRecent, withoutRecent } from './logic/recent.js';
 
 const ENABLED = 'dock-recent-apps';
 const LIST = 'dock-recent-apps-list';
@@ -39,6 +39,11 @@ export class RecentApps {
             installed: (id) => this.appSystem.lookup_app(id) !== null,
         });
         return ids.map((id) => this.appSystem.lookup_app(id)).filter((app): app is Shell.App => app !== null);
+    }
+
+    /** Takes `id` out of the recent apps, or every one with no id. */
+    forget(id?: string): void {
+        this.settings.set_strv(LIST, withoutRecent(this.settings.get_strv(LIST), id));
     }
 
     destroy(): void {

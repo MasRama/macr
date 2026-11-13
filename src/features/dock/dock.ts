@@ -36,6 +36,8 @@ export interface DockOptions {
     edge: DockEdge;
     /** The recent apps to show after the running ones. */
     recentApps: () => Shell.App[];
+    /** Takes one recent app out of the dock, or all of them with no id. */
+    forgetRecent: (id?: string) => void;
 }
 
 /**
@@ -90,6 +92,7 @@ export class Dock {
 
         this.dash = new MacrDash(options.iconSize, options.extensionPath, this.edge, this.iconDetail(options));
         this.dash.recentApps = options.recentApps;
+        this.dash.forgetRecent = options.forgetRecent;
         this.actor.add_child(this.dash);
         const container = this.dash._dashContainer;
         // Show Apps first, like Launchpad next to Finder.

@@ -172,6 +172,8 @@ export const MacrDashIcon = GObject.registerClass(
         private launcherId = 0;
         private stateId = 0;
         private bouncing: { timeline: Clutter.Timeline; kind: BounceKind; done: number; started: number } | null = null;
+        /** Set by the dash: whether the app shows as a recent app, and taking recent apps out. */
+        recent: { shows(): boolean; forget(id?: string): void } | null = null;
 
         constructor(app: Shell.App) {
             super(app);
@@ -322,6 +324,21 @@ export const MacrDashIcon = GObject.registerClass(
             styleMenu(menu);
             syncMenuScheme(menu);
             this.syncShowAll(menu);
+            this.syncRecent(menu);
+        }
+
+        /** Remove from Dock and Clear Recent Apps, on a recent app's menu (macOS's Options > Remove from Dock). */
+        private syncRecent(menu: PopupMenu.PopupMenu): void {
+            const self = this as unknown as { _macrRecent?: PopupMenu.PopupMenuSection };
+            if (!self._macrRecent) {
+                const section = new PopupMenu.PopupMenuSection();
+                section.addMenuItem(new PopupMenu.PopupSeparatorMenuItem());
+                section.addAction(_('Remove from Dock'), () => this.recent?.forget(this.app.get_id()));
+                section.addAction(_('Clear Recent Apps'), () => this.recent?.forget());
+                menu.addMenuItem(section);
+                self._macrRecent = section;
+            }
+            self._macrRecent.actor.visible = this.recent?.shows() ?? false;
         }
 
         /** Show All Windows (App Exposé), after the app's window list, while App Exposé runs. */
@@ -375,6 +392,8 @@ export const MacrDash = GObject.registerClass(
         extraItems!: Dash.DashItemContainer[];
         /** Recent apps shown after the running ones (see RecentApps). */
         recentApps!: () => Shell.App[];
+        /** Takes one recent app out, or all of them with no id. */
+        forgetRecent!: (id?: string) => void;
 
         constructor(iconSize: number, extensionPath: string, edge: DockEdge, detail: number) {
             currentEdge = edge;
@@ -396,6 +415,7 @@ export const MacrDash = GObject.registerClass(
             currentIconSize = iconSize;
             this.extraItems = [];
             this.recentApps = () => [];
+            this.forgetRecent = () => {};
             // Not #dash: the shell theme's overview dash styles stay off the dock.
             this.name = 'macrDash';
             this.useAppsIcon(extensionPath);
@@ -463,6 +483,10 @@ export const MacrDash = GObject.registerClass(
         override _createAppItem(app: Shell.App): Dash.DashItemContainer {
             const item = new Dash.DashItemContainer();
             const appIcon = new MacrDashIcon(app);
+            appIcon.recent = {
+                shows: () => this.recentApps().some((recent) => recent.get_id() === app.get_id()),
+                forget: (id) => this.forgetRecent(id),
+            };
             appIcon.connect('menu-state-changed', (_icon: unknown, opened: boolean) => this._itemMenuStateChanged(item, opened));
             item.setChild(appIcon);
             appIcon.label_actor = null as unknown as Clutter.Actor;
