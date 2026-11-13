@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 
-import { placeWindow } from '../../src/features/menubar/logic/geometry.js';
+import { placeWindow } from '../../src/shared/logic/geometry.js';
 
 const area = { x: 0, y: 28, width: 1535, height: 836 };
 const current = { x: 100, y: 100, width: 800, height: 500 };

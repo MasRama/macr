@@ -7,7 +7,7 @@ export interface Rect {
 
 export type Placement = 'left' | 'right' | 'fill' | 'center';
 
-/** Where Window ▸ Move & Resize puts a window inside its monitor's work area. */
+/** Where a window goes inside its monitor's work area. */
 export function placeWindow(placement: Placement, area: Rect, current: Rect): Rect {
     const half = Math.floor(area.width / 2);
     switch (placement) {

@@ -6,8 +6,8 @@ import * as Main from 'resource:///org/gnome/shell/ui/main.js';
 import type * as PanelMenu from 'resource:///org/gnome/shell/ui/panelMenu.js';
 import * as PopupMenu from 'resource:///org/gnome/shell/ui/popupMenu.js';
 
+import { placeWindow, type Placement } from '../../shared/logic/geometry.js';
 import { appWindows, type FocusTracker } from './focus.js';
-import { placeWindow, type Placement } from './logic/geometry.js';
 import { shortTitle } from './logic/labels.js';
 import { item, menuButton, separator, submenu } from './menu-kit.js';
 
