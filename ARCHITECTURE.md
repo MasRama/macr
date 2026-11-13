@@ -244,25 +244,45 @@ schemas/                GSettings schema
   right of the primary monitor's work area. A drag (a stage grab after 6 px)
   snaps to an 8 px grid inside the work area and is saved in
   `desktop-widget-positions` as fractions, so it survives a new resolution.
+- Sizes (`logic/widgets.ts` `sizesOf()`): every widget but the clock is
+  small (164 logical px square) or medium (two smalls and the gap wide),
+  saved per widget in `desktop-widget-sizes`. The column right-aligns
+  mixed sizes; a size change rebuilds the widgets. `registry.ts` maps ids
+  to classes.
 - A click opens Clocks, Calendar, Weather, the Power settings or the
-  photo; the right-click menu has Edit Widgets… (the settings window) and
+  photo; the right-click menu has Small and Medium, Edit Widgets… and
   Remove Widget. While an app window has the focus they are desaturated
   and faded, full colour on the desktop.
 - Weather reuses the shell's own `WeatherClient` from the date menu (a new
   one never disconnects its signals), so it shows the place picked in GNOME
-  Weather. The clock is drawn with Cairo and ticks only while it shows.
+  Weather; medium adds the next six forecast hours (`hourlyForecast()`).
+  The clock is drawn with Cairo and ticks only while it shows.
 - Batteries reads UPower with `UPowerGlib.Client` (`get_devices()`: in GJS
   `get_devices2()` hands back devices that are already freed).
   `logic/batteries.ts` keeps the computer's battery first and up to three
   other devices; one device gets a big ring and its charge, more get a 2x2
   grid of Cairo rings, red at 20% or less, with a bolt while plugged in.
+  Medium shows four smaller rings in a row.
   The devshell's system bus has no UPower: check it with a fake service.
 - Photos walks the XDG Pictures folder off the main loop (three folders
   deep, 2000 photos at most) and shows one per three hours
   (`logic/photos.ts`). GdkPixbuf loads it at the size that covers the
-  widget, turned upright and cropped square, into a PNG in
+  widget, turned upright and cropped to it, into a PNG in
   `~/.cache/macr` with a new name each time (St keeps images by name),
-  shown as the widget's `background-image` so St rounds its corners.
+  shown as the widget's `background-image` so St rounds its corners. The
+  module clears old PNGs once as it starts, not each widget, so gallery
+  previews leave the desktop's picture alone.
+- The medium calendar lists the next 7 days' events (`upcomingEvents()`:
+  by day, all-day first) from the date menu's `_eventSource`. The calendar
+  server keeps one time range for all its clients, and a new range clears
+  its events, so the widget asks for one only when the last request does
+  not already cover it.
+- Edit Widgets… opens `WidgetGallery` (`gallery.ts`): a modal scrim in
+  `Main.uiGroup`, a `Clutter.Clone` of the widgets layer on it, and a panel
+  of live previews (real widgets made non-reactive and scaled, at most half
+  size, `fitScale()`). A click adds the widget in its column; a drag
+  dropped outside the panel (`droppedOnDesktop()`) adds it at that point.
+  Esc, Done or a click on the scrim closes it; `disable()` destroys it.
 
 ## Control Center
 
