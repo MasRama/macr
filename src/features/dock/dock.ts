@@ -11,6 +11,7 @@ import { windowCovers } from '../../shared/covered.js';
 import { launchpad, onLaunchpadChanged } from '../../shared/launchpad-link.js';
 import type { Rect } from '../../shared/logic/geometry.js';
 import { growAway, liftLabel, MacrDash } from './dash.js';
+import type { BounceKind } from './logic/bounce.js';
 import { type DockEdge, type DockLayout, dockLayout, isSide } from './logic/edge.js';
 import { magnify } from './logic/magnify.js';
 import { MinimizedItem } from './minimized.js';
@@ -226,6 +227,11 @@ export class Dock {
     }
 
     /** The dock icon of `app`, where the genie effect pours its windows. */
+    /** Bounces `app`'s icon, when the dock has one. */
+    bounceApp(app: Shell.App, kind: BounceKind): void {
+        this.dash.bounceApp(app, kind);
+    }
+
     iconOf(app: Shell.App): Clutter.Actor | null {
         return this.dash.iconOf(app);
     }

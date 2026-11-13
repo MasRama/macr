@@ -64,6 +64,11 @@
       <summary>Minimize windows into their app's icon</summary>
       <description>Off shows each minimized window as a thumbnail before the Trash, as macOS does by default.</description>
     </key>
+    <key name="dock-bounce" type="b">
+      <default>true</default>
+      <summary>Bounce dock icons</summary>
+      <description>An app's icon bounces while it opens and when it asks for attention.</description>
+    </key>
     <key name="dock-genie" type="b">
       <default>true</default>
       <summary>Minimize windows into the dock with the genie effect</summary>

@@ -1,11 +1,12 @@
 import Gio from 'gi://Gio';
 import type Clutter from 'gi://Clutter';
 import type Meta from 'gi://Meta';
-import type Shell from 'gi://Shell';
+import Shell from 'gi://Shell';
 import * as Main from 'resource:///org/gnome/shell/ui/main.js';
 
 import { isLight } from '../../shared/scheme.js';
 import type { Module, ModuleContext } from '../../shared/module.js';
+import { setBounce } from './dash.js';
 import { Dock, type DockOptions } from './dock.js';
 import { Genie } from './genie.js';
 import { LauncherEntries, setLauncherEntries } from './launcher.js';
@@ -52,6 +53,11 @@ export class DockModule implements Module {
         this.ids.push([settings, settings.connect('changed::dock-position', () => this.build())]);
         this.ids.push([settings, settings.connect('changed::dock-genie', () => this.syncGenie())]);
         this.ids.push([settings, settings.connect('changed::dock-minimize-to-app', () => this.syncMinimized())]);
+        setBounce(settings.get_boolean('dock-bounce'));
+        this.ids.push([settings, settings.connect('changed::dock-bounce', () => setBounce(settings.get_boolean('dock-bounce')))]);
+        const display = global.display as unknown as { connect(signal: string, callback: (display: unknown, window: Meta.Window) => void): number } & Disconnectable;
+        for (const signal of ['window-demands-attention', 'window-marked-urgent'])
+            this.ids.push([display, display.connect(signal, (_display, window) => this.onAttention(window))]);
         this.ids.push([this.interface, this.interface.connect('changed::color-scheme', () => this.syncScheme())]);
         const layout = Main.layoutManager as unknown as { connect(signal: string, callback: () => void): number } & Disconnectable;
         this.ids.push([layout, layout.connect('monitors-changed', () => this.build())]);
@@ -76,6 +82,14 @@ export class DockModule implements Module {
         const overviewDash = Main.overview.dash;
         overviewDash.set_height(-1);
         overviewDash.show();
+    }
+
+    /** An app asking for attention (a new message, a finished job) bounces its icon, unless it is in front. */
+    private onAttention(window: Meta.Window): void {
+        if (window.has_focus()) return;
+        const app = Shell.WindowTracker.get_default().get_window_app(window);
+        if (!app || Shell.WindowTracker.get_default().focus_app === app) return;
+        for (const dock of this.docks) dock.bounceApp(app, 'attention');
     }
 
     /** One dock per monitor, or only on the primary; again when monitors change. */

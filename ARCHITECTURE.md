@@ -122,6 +122,13 @@ schemas/                GSettings schema
   fullscreen, and a 1 px strip along its screen edge brings it back.
 - Clicking the focused app minimizes its window, or cycles its windows on the
   workspace (`logic/rules.ts`). Everything else is GNOME's default.
+- Bounce (`dock-bounce`, on by default; `logic/bounce.ts`): an icon bounces
+  away from its edge while its app is `Shell.AppState.STARTING` (opened from
+  the shell: dock, Launchpad, Spotlight), finishing the bounce in flight and
+  giving up after 12 s, and three times when one of its windows emits
+  `window-demands-attention` or `window-marked-urgent` while the app is not in
+  front. Each bounce is one `Clutter.Timeline` moving the icon, its badge and
+  progress bar; the running dot stays on the shelf.
 - Downloads stack (`stack.ts`, `dock-downloads`): a `DashItemContainer`
   between the divider and the Trash for the XDG Downloads folder (none when
   it is not set up). A click reads the folder (`enumerate_children_async`,

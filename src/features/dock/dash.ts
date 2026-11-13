@@ -1,10 +1,12 @@
 import Clutter from 'gi://Clutter';
 import Gio from 'gi://Gio';
+import GLib from 'gi://GLib';
 import GObject from 'gi://GObject';
 import type Meta from 'gi://Meta';
 import Shell from 'gi://Shell';
 import St from 'gi://St';
 import { gettext as _ } from 'resource:///org/gnome/shell/extensions/extension.js';
+import { adjustAnimationTime } from 'resource:///org/gnome/shell/misc/animationUtils.js';
 import * as AppDisplay from 'resource:///org/gnome/shell/ui/appDisplay.js';
 import * as AppFavorites from 'resource:///org/gnome/shell/ui/appFavorites.js';
 import * as Dash from 'resource:///org/gnome/shell/ui/dash.js';
@@ -14,6 +16,7 @@ import * as PopupMenu from 'resource:///org/gnome/shell/ui/popupMenu.js';
 import { expose } from '../../shared/expose-link.js';
 import { styleMenu, syncMenuScheme } from '../../shared/menu-style.js';
 import { launcherEntries } from './launcher.js';
+import { BOUNCE_HEIGHT, BOUNCE_TIME, type BounceKind, bounceOffset, bounceShift, keepBouncing } from './logic/bounce.js';
 import { type DockEdge, growPivot, isSide, labelPlace } from './logic/edge.js';
 import { badgeText, progressOf } from './logic/launcher.js';
 import { clickAction, nextWindow } from './logic/rules.js';
@@ -66,6 +69,13 @@ let currentIconSize = 48;
 /** The screen edge the docks sit on; they are built again when it changes. */
 let currentEdge: DockEdge = 'bottom';
 
+/** Whether icons bounce while their app opens and when it asks for attention. */
+let bounceOn = true;
+
+export function setBounce(on: boolean): void {
+    bounceOn = on;
+}
+
 export function dockEdge(): DockEdge {
     return currentEdge;
 }
@@ -117,6 +127,8 @@ export const MacrDashIcon = GObject.registerClass(
         private progress!: St.Widget;
         private progressFill!: St.Widget;
         private launcherId = 0;
+        private stateId = 0;
+        private bouncing: { timeline: Clutter.Timeline; kind: BounceKind; done: number; started: number } | null = null;
 
         constructor(app: Shell.App) {
             super(app);
@@ -163,6 +175,60 @@ export const MacrDashIcon = GObject.registerClass(
                 });
             }
             this.syncLauncher();
+            // An app opened from anywhere bounces until its first window shows.
+            this.stateId = this.app.connect('notify::state', () => {
+                if (this.app.state === Shell.AppState.STARTING) this.bounce('launch');
+            });
+            if (this.app.state === Shell.AppState.STARTING) this.bounce('launch');
+        }
+
+        /** Bounces the icon away from the screen edge: while its app opens, or a few times for attention. */
+        bounce(kind: BounceKind): void {
+            if (!bounceOn) return;
+            if (this.bouncing) {
+                // Attention after an open, or again: count the bounces from now.
+                if (kind === 'attention') Object.assign(this.bouncing, { kind, done: 0 });
+                return;
+            }
+            const timeline = new Clutter.Timeline({ actor: this, duration: adjustAnimationTime(BOUNCE_TIME) });
+            const bouncing = { timeline, kind, done: 0, started: GLib.get_monotonic_time() };
+            this.bouncing = bouncing;
+            timeline.connect('new-frame', () => this.lift(bounceOffset(timeline.get_progress(), currentIconSize * BOUNCE_HEIGHT * this.scale)));
+            timeline.connect('completed', () => {
+                bouncing.done++;
+                const go = keepBouncing({
+                    kind: bouncing.kind,
+                    done: bouncing.done,
+                    elapsed: (GLib.get_monotonic_time() - bouncing.started) / 1000,
+                    starting: this.app.state === Shell.AppState.STARTING,
+                });
+                if (go && bounceOn) timeline.start();
+                else this.stopBounce();
+            });
+            timeline.start();
+        }
+
+        private stopBounce(): void {
+            if (!this.bouncing) return;
+            this.bouncing.timeline.stop();
+            this.bouncing = null;
+            this.lift(0);
+        }
+
+        private get scale(): number {
+            return St.ThemeContext.get_for_stage(global.stage as Clutter.Stage).scale_factor;
+        }
+
+        /** The icon, its badge and progress leave the shelf; the running dot stays. */
+        private lift(offset: number): void {
+            const [x, y] = bounceShift(currentEdge, offset);
+            for (const actor of [this.icon as unknown as Clutter.Actor, this.badge, this.progress]) {
+                actor.translation_x = x;
+                actor.translation_y = y;
+            }
+            // The badge sits past the icon's corner.
+            this.badge.translation_x += 5 * this.scale;
+            this.badge.translation_y += -3 * this.scale;
         }
 
         private syncLauncher(): void {
@@ -235,6 +301,11 @@ export const MacrDashIcon = GObject.registerClass(
         protected override _onDestroy(): void {
             if (this.launcherId) launcherEntries()?.disconnect(this.launcherId);
             this.launcherId = 0;
+            if (this.stateId) this.app.disconnect(this.stateId);
+            this.stateId = 0;
+            // Its actors are going: no need to put them back.
+            this.bouncing?.timeline.stop();
+            this.bouncing = null;
             super._onDestroy();
             this.menu?.destroy();
         }
@@ -388,6 +459,14 @@ export const MacrDash = GObject.registerClass(
         rowItems(): Clutter.Actor[] {
             const box = this._box.get_children();
             return [this._showAppsIcon, ...box];
+        }
+
+        /** Bounces `app`'s icon, when it has one in this dock. */
+        bounceApp(app: Shell.App, kind: BounceKind): void {
+            for (const actor of this._box.get_children()) {
+                const child = (actor as Dash.DashItemContainer).child;
+                if (child instanceof MacrDashIcon && child.app === app) child.bounce(kind);
+            }
         }
 
         /** The icon actor of `app` in the dock, for the genie target. */
