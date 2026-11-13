@@ -399,6 +399,16 @@
       <summary>Folder stacks in the dock</summary>
       <description>Paths of folders shown as stacks before the Downloads stack.</description>
     </key>
+    <key name="dock-recent-apps" type="b">
+      <default>true</default>
+      <summary>Recent apps in the dock</summary>
+      <description>The last three apps you quit that are not kept in the dock stay after the running apps.</description>
+    </key>
+    <key name="dock-recent-apps-list" type="as">
+      <default>[]</default>
+      <summary>The recent apps</summary>
+      <description>Kept by Macr: desktop file ids of the apps last quit, newest first.</description>
+    </key>
     <key name="desktop-widgets-enabled" type="b">
       <default>false</default>
       <summary>Widgets on the desktop</summary>

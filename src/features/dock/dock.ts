@@ -28,6 +28,8 @@ export interface DockOptions {
     iconSize: number;
     autohide: boolean;
     magnification: boolean;
+    /** The recent apps to show after the running ones. */
+    recentApps: () => Shell.App[];
 }
 
 /**
@@ -69,6 +71,7 @@ export class Dock {
         this.actor.add_child(this.background);
 
         this.dash = new MacrDash(options.iconSize, options.extensionPath);
+        this.dash.recentApps = options.recentApps;
         this.actor.add_child(this.dash);
         const container = this.dash._dashContainer;
         // Show Apps first, like Launchpad next to Finder.
@@ -147,6 +150,11 @@ export class Dock {
             this.dash._adjustIconSize();
             this.queuePlace();
         }
+    }
+
+    /** The recent apps changed: list the apps again. */
+    refreshApps(): void {
+        this.dash._queueRedisplay();
     }
 
     setOptions(options: DockOptions): void {

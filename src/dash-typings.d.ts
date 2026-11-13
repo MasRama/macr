@@ -38,6 +38,8 @@ declare module 'resource:///org/gnome/shell/ui/dash.js' {
         _hookUpLabel(item: DashItemContainer, appIcon?: AppIcon): void;
         _itemMenuStateChanged(item: DashItemContainer, opened: boolean): void;
         _queueRedisplay(): void;
+        _redisplay(): void;
+        _appSystem: Shell.AppSystem;
         setMaxSize(maxWidth: number, maxHeight: number): void;
     }
 }

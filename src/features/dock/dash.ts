@@ -159,6 +159,8 @@ export const MacrDash = GObject.registerClass(
         private pixels!: number;
         /** Extra items (the Trash) that follow the icon size too. */
         extraItems!: Dash.DashItemContainer[];
+        /** Recent apps shown after the running ones (see RecentApps). */
+        recentApps!: () => Shell.App[];
 
         constructor(iconSize: number, extensionPath: string) {
             const targets = [
@@ -177,6 +179,7 @@ export const MacrDash = GObject.registerClass(
             this.pixels = iconSize;
             currentIconSize = iconSize;
             this.extraItems = [];
+            this.recentApps = () => [];
             // Not #dash: the shell theme's overview dash styles stay off the dock.
             this.name = 'macrDash';
             this.useAppsIcon(extensionPath);
@@ -224,6 +227,25 @@ export const MacrDash = GObject.registerClass(
             this._hookUpLabel(item, appIcon);
             liftLabel(item);
             return item;
+        }
+
+        // GNOME lists the favourites, then the running apps; the recent apps
+        // join the running ones for that one pass, so they get the same
+        // icons, separator and drag handling.
+        override _redisplay(): void {
+            // Dash._init may redisplay before the constructor below sets it.
+            const recent = this.recentApps?.() ?? [];
+            if (recent.length === 0) {
+                super._redisplay();
+                return;
+            }
+            const system = this._appSystem;
+            this._appSystem = { get_running: () => [...system.get_running(), ...recent] } as unknown as Shell.AppSystem;
+            try {
+                super._redisplay();
+            } finally {
+                this._appSystem = system;
+            }
         }
 
         override _adjustIconSize(): void {

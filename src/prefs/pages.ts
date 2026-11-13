@@ -84,6 +84,7 @@ export function pages(): PageInfo[] {
                     switchRow(settings, 'dock-magnification', _('Magnification'), _('Icons grow under the pointer')),
                     switchRow(settings, 'dock-autohide', _('Hide when a window covers it'), _('Push the pointer to the bottom edge to show it again')),
                     switchRow(settings, 'dock-genie', _('Genie minimize'), _('Windows pour into their dock icon')),
+                    switchRow(settings, 'dock-recent-apps', _('Show recent apps'), _('The last three apps you quit stay in the dock after the running apps')),
                 ];
                 const stacks = stacksGroup(context);
                 dependsOn(settings, 'dock-enabled', ...rows, stacks);

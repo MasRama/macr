@@ -8,6 +8,7 @@ import { isLight } from '../../shared/scheme.js';
 import type { Module, ModuleContext } from '../../shared/module.js';
 import { Dock, type DockOptions } from './dock.js';
 import { Genie } from './genie.js';
+import { RecentApps } from './recent.js';
 
 const OPTION_KEYS = ['dock-icon-size', 'dock-autohide', 'dock-magnification'];
 
@@ -21,6 +22,7 @@ type Disconnectable = { disconnect(id: number): void };
 export class DockModule implements Module {
     private docks: Dock[] = [];
     private genie: Genie | null = null;
+    private recent: RecentApps | null = null;
     private readonly interface = new Gio.Settings({ schema_id: 'org.gnome.desktop.interface' });
     private ids: [Disconnectable, number][] = [];
 
@@ -32,6 +34,9 @@ export class DockModule implements Module {
         const overviewDash = Main.overview.dash;
         overviewDash.hide();
         overviewDash.set_height(0);
+        this.recent = new RecentApps(settings, () => {
+            for (const dock of this.docks) dock.refreshApps();
+        });
 
         for (const key of OPTION_KEYS) this.ids.push([settings, settings.connect(`changed::${key}`, () => this.applyOptions())]);
         this.ids.push([settings, settings.connect('changed::dock-all-monitors', () => this.build())]);
@@ -49,6 +54,8 @@ export class DockModule implements Module {
         this.genie?.destroy();
         this.genie = null;
         this.destroyDocks();
+        this.recent?.destroy();
+        this.recent = null;
         const overviewDash = Main.overview.dash;
         overviewDash.set_height(-1);
         overviewDash.show();
@@ -83,6 +90,7 @@ export class DockModule implements Module {
             iconSize: settings.get_int('dock-icon-size'),
             autohide: settings.get_boolean('dock-autohide'),
             magnification: settings.get_boolean('dock-magnification'),
+            recentApps: () => this.recent?.apps() ?? [],
         };
     }
 
