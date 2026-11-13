@@ -7,6 +7,8 @@ import St from 'gi://St';
 import { ensureActorVisibleInScrollView } from 'resource:///org/gnome/shell/misc/animationUtils.js';
 import * as Main from 'resource:///org/gnome/shell/ui/main.js';
 
+import { previewUri } from '../../shared/logic/quick-look.js';
+import { quickLook } from '../../shared/quick-look.js';
 import { isLight } from '../../shared/scheme.js';
 import { APPS_PROVIDER, type Layout, layoutResults, type ProviderResults, wrapIndex } from './logic/results.js';
 
@@ -328,8 +330,31 @@ export class Spotlight {
         row.hit.provider.activateResult(row.hit.meta.id, terms);
     }
 
+    /**
+     * Quick Look on the selected result when it is a file; the arrow keys in
+     * the previewer go through the other files listed. Spotlight closes
+     * first: the previewer is a window, under Spotlight while it stays.
+     */
+    private lookAtSelected(): void {
+        const files = this.rows.map((row, at) => ({ at, uri: previewUri(row.hit.meta.id) })).filter((file): file is { at: number; uri: string } => file.uri !== null);
+        const index = files.findIndex((file) => file.at === this.selected);
+        if (index < 0) return;
+        this.close();
+        quickLook(
+            files.map((file) => file.uri),
+            index,
+        );
+    }
+
     private onKey(event: Clutter.Event): boolean {
+        const command = (event.get_state() & (Clutter.ModifierType.MOD4_MASK | Clutter.ModifierType.SUPER_MASK | Clutter.ModifierType.CONTROL_MASK)) !== 0;
         switch (event.get_key_symbol()) {
+            // Cmd+Y on a Mac.
+            case Clutter.KEY_y:
+            case Clutter.KEY_Y:
+                if (!command) return Clutter.EVENT_PROPAGATE;
+                this.lookAtSelected();
+                return Clutter.EVENT_STOP;
             case Clutter.KEY_Escape:
                 if (this.entry?.get_text()) this.entry.set_text('');
                 else this.close();
