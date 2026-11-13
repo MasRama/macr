@@ -62,10 +62,23 @@ test('GTK 4 styles the windowcontrols group, GTK 3 the loose titlebuttons, above
     assert.ok(three.includes('button.titlebutton.maximize:not(#macr):hover'));
     assert.ok(!three.includes('windowcontrols'));
     const names = new Set(lightFiles().map((file) => `${ASSETS}/${file.name}`));
-    assert.equal(names.size, 12);
+    assert.equal(names.size, 24);
     for (const css of [four, three]) {
         const used = [...css.matchAll(/url\("([^"]+)"\)/g)].map((match) => match[1]);
-        assert.equal(used.length, 15);
+        assert.equal(used.length, 30);
         for (const url of used) assert.ok(names.has(url), url);
+    }
+});
+
+test('Chrome keeps the lights 12px: no light image is bigger than the button it draws', () => {
+    // Chrome stretches a background image larger than its 16px-icon button
+    // to fill the button, so the images carry their drawn size.
+    for (const { name, svg } of lightFiles()) {
+        const size = name.endsWith('@2.svg') ? 24 : 12;
+        assert.ok(svg.includes(`width="${size}" height="${size}"`), name);
+    }
+    for (const css of [trafficLightsCss(4), trafficLightsCss(3)]) {
+        const images = [...css.matchAll(/background-image: ([^;]+);/g)].map((match) => match[1]);
+        for (const image of images) assert.match(image, /^-gtk-scaled\(url\("[^"]+\.svg"\), url\("[^"]+@2\.svg"\)\)$/);
     }
 });

@@ -64,14 +64,18 @@ const SYMBOLS: Record<Light, (colour: string) => string> = {
 
 type State = 'rest' | 'hover' | 'pressed' | 'backdrop';
 
-/** One light as an SVG, drawn big so it stays sharp at any scale. */
-export function lightSvg(light: Light, state: State): string {
+/**
+ * One light as an SVG of the given size in pixels. Chrome stretches a
+ * background image bigger than its title bar button to fill the button, so
+ * the light is drawn at 12px, and at 24px for screens scaled up.
+ */
+export function lightSvg(light: Light, state: State, size = 12): string {
     const [face, rim, pressed, symbol] = COLOURS[light];
     const circle = state === 'backdrop'
         ? '<circle cx="6" cy="6" r="5.75" fill="#808080" fill-opacity=".38" stroke="#000" stroke-opacity=".08" stroke-width=".5"/>'
         : `<circle cx="6" cy="6" r="5.75" fill="${state === 'pressed' ? pressed : face}" stroke="${rim}" stroke-width=".5"/>`;
     const mark = state === 'hover' || state === 'pressed' ? SYMBOLS[light](symbol) : '';
-    return `<svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 12 12">${circle}${mark}</svg>`;
+    return `<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 12 12">${circle}${mark}</svg>`;
 }
 
 /** The folder next to the stylesheet holding the lights' SVGs. */
@@ -80,16 +84,20 @@ export const ASSETS = 'macr-traffic-lights';
 const STATES: State[] = ['rest', 'hover', 'pressed', 'backdrop'];
 
 /**
- * Every light in every state, as files for the ASSETS folder. GTK 3 cannot
- * draw an SVG from a data: URL, so the lights are files for both versions.
+ * Every light in every state at both sizes, as files for the ASSETS folder.
+ * GTK 3 cannot draw an SVG from a data: URL, so the lights are files for
+ * both versions.
  */
 export function lightFiles(): { name: string; svg: string }[] {
-    return (['close', 'minimize', 'maximize'] as Light[]).flatMap((light) =>
-        STATES.map((state) => ({ name: `${light}-${state}.svg`, svg: lightSvg(light, state) })));
+    return (['close', 'minimize', 'maximize'] as Light[]).flatMap((light) => STATES.flatMap((state) => [
+        { name: `${light}-${state}.svg`, svg: lightSvg(light, state) },
+        { name: `${light}-${state}@2.svg`, svg: lightSvg(light, state, 24) },
+    ]));
 }
 
 function image(light: Light, state: State): string {
-    return `url("${ASSETS}/${light}-${state}.svg")`;
+    const file = `${ASSETS}/${light}-${state}`;
+    return `-gtk-scaled(url("${file}.svg"), url("${file}@2.svg"))`;
 }
 
 const LIGHTS: Light[] = ['close', 'minimize', 'maximize'];

@@ -745,8 +745,12 @@ schemas/                GSettings schema
   SVG lights (each light at rest, hovered, pressed and in the background)
   into `~/.config/gtk-3.0` and `gtk-4.0`, and imports the stylesheet from the
   first line of `gtk.css` (`logic/stylesheet.ts`). The SVGs are files because
-  GTK 3 cannot draw an SVG from a `data:` URL, and are drawn large so they
-  stay sharp at fractional scales. Every rule carries `:not(#macr)`, whose id
+  GTK 3 cannot draw an SVG from a `data:` URL. Each light is drawn at 12px
+  and, as `@2`, at 24px, picked by `-gtk-scaled()` so it stays sharp on
+  scaled screens. The size matters: Chrome sizes its buttons from a 16px
+  icon and stretches any background image bigger than the button to fill it
+  (`background-size: contain`), so a large SVG makes huge lights in Chrome.
+  Every rule carries `:not(#macr)`, whose id
   specificity beats any theme's window-button rules.
 - GTK 4 rules style `windowcontrols > button`, which covers libadwaita and
   the frames Mutter draws around X11 windows; the whole group shows its
