@@ -4,6 +4,7 @@ import GLib from 'gi://GLib';
 import Gtk from 'gi://Gtk';
 import { gettext as _ } from 'resource:///org/gnome/Shell/Extensions/js/extensions/prefs.js';
 
+import { setAppearance } from '../shared/appearance.js';
 import { clashes, type Clash } from './logic/conflicts.js';
 import { comboRow, dependsOn, group, spinRow, switchRow } from './rows.js';
 import { tile, type TileColor } from './style.js';
@@ -216,9 +217,9 @@ export function pages(): PageInfo[] {
         {
             id: 'appearance', section: 2, icon: 'preferences-desktop-appearance-symbolic', color: 'orange',
             title: _('Appearance'),
-            description: _('The accent colour, the desktop picture, app icons and the app switcher.'),
+            description: _('Light, dark or auto, the accent colour, the desktop, app icons and the app switcher.'),
             build: ({ settings }) => [
-                group('', [accentRow(settings)]),
+                group('', [appearanceRow(settings), accentRow(settings)]),
                 group(_('Desktop'), [
                     switchRow(settings, 'dynamic-desktop-enabled', _('Dynamic desktop'), _('Your desktop picture follows the time of day: warm at sunrise and sunset, dimmer and cooler at night')),
                 ]),
@@ -256,6 +257,63 @@ export function pages(): PageInfo[] {
             ],
         },
     ];
+}
+
+/**
+ * Light, Dark or Auto, as in macOS. Light and Dark set GNOME's style (and the
+ * light or dark variant of the GTK and shell themes); Auto leaves it to Macr.
+ */
+function appearanceRow(settings: Gio.Settings): Gtk.Widget {
+    const desktop = new Gio.Settings({ schema_id: 'org.gnome.desktop.interface' });
+    const zorinSchema = Gio.SettingsSchemaSource.get_default()?.lookup('com.zorin.desktop.auto-theme', true);
+    const zorin = zorinSchema ? new Gio.Settings({ settings_schema: zorinSchema }) : null;
+    const row = new Adw.ActionRow({ title: _('Appearance') });
+    const box = new Gtk.Box({ valign: Gtk.Align.CENTER, css_classes: ['linked'] });
+    const choices: [string, string][] = [
+        ['light', _('Light')],
+        ['dark', _('Dark')],
+        ['auto', _('Auto')],
+    ];
+    const current = () => (settings.get_boolean('appearance-auto') ? 'auto' : desktop.get_string('color-scheme') === 'prefer-dark' ? 'dark' : 'light');
+    const buttons = new Map<string, Gtk.ToggleButton>();
+    let first: Gtk.ToggleButton | null = null;
+    for (const [value, label] of choices) {
+        const button = new Gtk.ToggleButton({ label, valign: Gtk.Align.CENTER });
+        if (first) button.set_group(first);
+        else first = button;
+        button.connect('toggled', () => {
+            if (!button.active || current() === value) return;
+            if (value === 'auto') {
+                // Applied now, whatever was last applied.
+                settings.set_string('appearance-auto-phase', '');
+                settings.set_boolean('appearance-auto', true);
+            } else {
+                settings.set_boolean('appearance-auto', false);
+                setAppearance(value === 'dark');
+            }
+        });
+        buttons.set(value, button);
+        box.append(button);
+    }
+    const sync = () => {
+        const value = current();
+        const button = buttons.get(value);
+        if (button && !button.active) button.active = true;
+        if (value === 'auto' && zorin?.get_boolean('enabled')) row.subtitle = _('Zorin’s own automatic theme is on too: turn one of them off');
+        else if (value === 'auto') row.subtitle = _('Light during the day, dark at night');
+        else row.subtitle = '';
+    };
+    sync();
+    const ids: [Gio.Settings, number][] = [
+        [settings, settings.connect('changed::appearance-auto', sync)],
+        [desktop, desktop.connect('changed::color-scheme', sync)],
+    ];
+    if (zorin) ids.push([zorin, zorin.connect('changed::enabled', sync)]);
+    row.connect('destroy', () => {
+        for (const [target, id] of ids) target.disconnect(id);
+    });
+    row.add_suffix(box);
+    return row;
 }
 
 /** The accent colours as round swatches, as in macOS: the chosen one's name under the title. */

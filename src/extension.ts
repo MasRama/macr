@@ -4,6 +4,7 @@ import * as Main from 'resource:///org/gnome/shell/ui/main.js';
 
 import { AccentModule } from './features/accent/index.js';
 import { AppIconsModule } from './features/appicons/index.js';
+import { AutoAppearanceModule } from './features/appearance/index.js';
 import { AppExposeModule } from './features/expose/index.js';
 import { ControlCenterModule } from './features/controlcenter/index.js';
 import { WindowCornersModule } from './features/corners/index.js';
@@ -50,6 +51,8 @@ const MODULES: ModuleEntry[] = [
     { key: 'screenshot-enabled', create: (context) => new ScreenshotModule(context) },
     { key: 'keyboard-enabled', create: (context) => new KeyboardModule(context.settings) },
     { key: 'app-expose-enabled', create: (context) => new AppExposeModule(context.settings) },
+    // Day and night come round while the screen is locked too.
+    { key: 'appearance-auto', screens: ['desktop', 'lock'], create: (context) => new AutoAppearanceModule(context.settings) },
     // The lock screen's picture follows the time of day too.
     { key: 'dynamic-desktop-enabled', screens: ['desktop', 'lock'], create: () => new DynamicDesktopModule() },
     // Kept on while locked: turning off would move full-screen windows back.

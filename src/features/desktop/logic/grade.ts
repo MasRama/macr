@@ -11,11 +11,7 @@ const DAWN: Grade = { brightness: 0.86, warmth: 0.12, saturation: 0.95 };
 const GOLDEN: Grade = { brightness: 0.96, warmth: 0.16, saturation: 1.08 };
 const DUSK: Grade = { brightness: 0.74, warmth: 0.02, saturation: 0.9 };
 
-/** Sunrise and sunset in hours; without a location (gsd says -1) the day runs 6:00 to 18:00. */
-export function sunTimes(sunrise: number, sunset: number): { sunrise: number; sunset: number } {
-    const known = sunrise >= 0 && sunset >= 0 && sunrise < 24 && sunset <= 24 && sunrise < sunset;
-    return known ? { sunrise, sunset } : { sunrise: 6, sunset: 18 };
-}
+export { sunTimes } from '../../../shared/logic/sun.js';
 
 /** The keyframes of a day, in hours: night, dawn at sunrise, day, golden hour, dusk, night. */
 function keyframes(sunrise: number, sunset: number): [number, Grade][] {

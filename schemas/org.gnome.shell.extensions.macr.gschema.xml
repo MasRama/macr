@@ -384,5 +384,15 @@
       <summary>Dynamic desktop</summary>
       <description>The desktop picture follows the time of day: warm at sunrise and sunset, dimmer and cooler at night.</description>
     </key>
+    <key name="appearance-auto" type="b">
+      <default>false</default>
+      <summary>Auto appearance</summary>
+      <description>Light from sunrise to sunset and dark at night, as macOS's Auto appearance; the GTK and shell themes follow when they have a light and a dark variant.</description>
+    </key>
+    <key name="appearance-auto-phase" type="s">
+      <default>''</default>
+      <summary>Last day or night Auto appearance applied</summary>
+      <description>Kept by Macr, so a change made by hand holds until the next sunrise or sunset.</description>
+    </key>
   </schema>
 </schemalist>

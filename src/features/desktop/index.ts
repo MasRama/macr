@@ -1,12 +1,12 @@
 import Clutter from 'gi://Clutter';
-import Gio from 'gi://Gio';
 import GLib from 'gi://GLib';
 import Meta from 'gi://Meta';
 import * as Background from 'resource:///org/gnome/shell/ui/background.js';
 
 import type { Module } from '../../shared/module.js';
+import { SunWatcher } from '../../shared/sun.js';
 import { GradeEffect } from './grade-effect.js';
-import { type Grade, gradeAt, sunTimes } from './logic/grade.js';
+import { type Grade, gradeAt } from './logic/grade.js';
 
 const EFFECT = 'macr-dynamic-desktop';
 /** The grade moves slowly: once a minute is smooth. */
@@ -26,9 +26,7 @@ export class DynamicDesktopModule implements Module {
     private readonly actors = new Map<Meta.BackgroundActor, number>();
     private original: CreateActor | null = null;
     private timerId = 0;
-    private sun: Gio.DBusProxy | null = null;
-    private sunId = 0;
-    private cancellable: Gio.Cancellable | null = null;
+    private sun: SunWatcher | null = null;
     private grade: Grade | null = null;
     /** For trying it out (devshell): the hour to show instead of the clock. */
     hourOverride: number | null = null;
@@ -45,12 +43,12 @@ export class DynamicDesktopModule implements Module {
             return actor;
         };
         this.walk(global.stage as Clutter.Actor);
+        this.sun = new SunWatcher(() => this.update());
         this.update();
         this.timerId = GLib.timeout_add_seconds(GLib.PRIORITY_LOW, TICK_SECONDS, () => {
             this.update();
             return GLib.SOURCE_CONTINUE;
         });
-        this.watchSun();
     }
 
     disable(): void {
@@ -58,11 +56,8 @@ export class DynamicDesktopModule implements Module {
         this.original = null;
         if (this.timerId) GLib.source_remove(this.timerId);
         this.timerId = 0;
-        this.cancellable?.cancel();
-        this.cancellable = null;
-        if (this.sun && this.sunId) this.sun.disconnect(this.sunId);
+        this.sun?.destroy();
         this.sun = null;
-        this.sunId = 0;
         for (const [actor, id] of this.actors) {
             actor.disconnect(id);
             actor.remove_effect_by_name(EFFECT);
@@ -75,7 +70,7 @@ export class DynamicDesktopModule implements Module {
     update(): void {
         const now = GLib.DateTime.new_now_local();
         const hour = this.hourOverride ?? now.get_hour() + now.get_minute() / 60 + now.get_second() / 3600;
-        const { sunrise, sunset } = sunTimes(this.sunValue('Sunrise'), this.sunValue('Sunset'));
+        const { sunrise, sunset } = this.sun?.times ?? { sunrise: 6, sunset: 18 };
         this.grade = gradeAt(hour, sunrise, sunset);
         for (const actor of this.actors.keys()) (actor.get_effect(EFFECT) as GradeEffect | null)?.setGrade(this.grade);
     }
@@ -98,39 +93,5 @@ export class DynamicDesktopModule implements Module {
             return;
         }
         for (const child of actor.get_children()) this.walk(child);
-    }
-
-    /** gsd's Night Light knows sunrise and sunset when location is on; -1 otherwise. */
-    private sunValue(name: string): number {
-        const value = this.sun?.get_cached_property(name)?.deepUnpack();
-        return typeof value === 'number' ? value : -1;
-    }
-
-    private watchSun(): void {
-        const cancellable = new Gio.Cancellable();
-        this.cancellable = cancellable;
-        Gio.DBusProxy.new_for_bus(
-            Gio.BusType.SESSION,
-            Gio.DBusProxyFlags.DO_NOT_AUTO_START,
-            null,
-            'org.gnome.SettingsDaemon.Color',
-            '/org/gnome/SettingsDaemon/Color',
-            'org.gnome.SettingsDaemon.Color',
-            cancellable,
-            (_source, result) => {
-                let proxy: Gio.DBusProxy;
-                try {
-                    proxy = Gio.DBusProxy.new_for_bus_finish(result);
-                } catch {
-                    // Cancelled, or no settings daemon (the devshell): 6:00 to 18:00.
-                    return;
-                }
-                if (this.cancellable !== cancellable) return;
-                this.cancellable = null;
-                this.sun = proxy;
-                this.sunId = proxy.connect('g-properties-changed', () => this.update());
-                this.update();
-            },
-        );
     }
 }
