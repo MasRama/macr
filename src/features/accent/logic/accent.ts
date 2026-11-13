@@ -45,6 +45,17 @@ export const ACCENT_RULES: AccentRule[] = [
     { selectors: ['.macr-force-quit-row:checked'], property: 'background-color', text: true },
     { selectors: ['.macr-spotlight-entry'], property: 'selection-background-color', alpha: 0.6 },
     { selectors: ['.macr-emoji-search'], property: 'selection-background-color', alpha: 0.6 },
+    {
+        selectors: ['.macr-menu .macr-help-search-entry', '.macr-menu .macr-help-search-entry:hover', '.macr-menu .macr-help-search-entry:focus'],
+        property: 'selection-background-color',
+        alpha: 0.6,
+    },
+    {
+        selectors: ['.macr-menu .macr-help-search-entry:focus', '.macr-menu.macr-light .macr-help-search-entry:focus'],
+        property: 'border',
+        value: (color) => `2px solid ${color}`,
+        alpha: 0.85,
+    },
     { selectors: ['.macr-spotlight-row:selected'], property: 'background-color', alpha: 0.9, text: true },
     {
         selectors: ['.macr-cc .quick-toggle:checked .quick-toggle-icon', '.macr-cc .quick-toggle-menu .header .icon.active', '.macr-cc.macr-light .quick-toggle:checked .quick-toggle-icon'],

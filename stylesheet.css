@@ -2105,7 +2105,7 @@
 }
 
 .macr-menu.macr-light .macr-help-search-entry:focus {
-  border-color: rgba(10, 132, 255, 0.85);
+  border: 2px solid rgba(10, 132, 255, 0.85);
 }
 
 /* ---------- Lock and login screens ---------- */
