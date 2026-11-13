@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 
-import { chooseView, FAN_MAX, fanSlot, gridShape, visibleEntries } from '../../src/features/dock/logic/stack.js';
+import { chooseView, FAN_MAX, fanSlot, folderIcon, gridShape, visibleEntries, withStack } from '../../src/features/dock/logic/stack.js';
 
 const entry = (name: string, created: number | null, modified: number, hidden = false) => ({ name, created, modified, hidden });
 
@@ -47,4 +47,21 @@ test('the grid is at most five wide and four rows tall before it scrolls', () =>
     assert.deepEqual(gridShape(12), { columns: 5, rows: 3 });
     assert.deepEqual(gridShape(60), { columns: 5, rows: 4 });
     assert.deepEqual(gridShape(0), { columns: 1, rows: 1 });
+});
+
+test('a folder stack gets its XDG folder’s icon', () => {
+    const special = { documents: '/home/u/Documents', pictures: '/home/u/Pictures', desktop: '/home/u' };
+    assert.equal(folderIcon('/home/u/Documents', special, '/home/u'), 'folder-documents');
+    assert.equal(folderIcon('/home/u/Pictures/', special, '/home/u'), 'folder-pictures');
+    assert.equal(folderIcon('/home/u/Projects', special, '/home/u'), 'folder');
+    // Without a Desktop folder XDG points it at home: that is still the desktop's.
+    assert.equal(folderIcon('/home/u', special, '/home/u'), 'user-desktop');
+    assert.equal(folderIcon('/home/u', {}, '/home/u'), 'user-home');
+});
+
+test('a folder is added to the stacks once', () => {
+    assert.deepEqual(withStack([], '/home/u/Documents/'), ['/home/u/Documents']);
+    assert.deepEqual(withStack(['/a'], '/a'), ['/a']);
+    assert.deepEqual(withStack(['/a'], '/b'), ['/a', '/b']);
+    assert.deepEqual(withStack([], '/'), ['/']);
 });

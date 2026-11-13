@@ -4,6 +4,7 @@ import GLib from 'gi://GLib';
 import Gtk from 'gi://Gtk';
 import { gettext as _ } from 'resource:///org/gnome/Shell/Extensions/js/extensions/prefs.js';
 
+import { withStack } from '../features/dock/logic/stack.js';
 import { setAppearance } from '../shared/appearance.js';
 import { clashes, type Clash } from './logic/conflicts.js';
 import { comboRow, dependsOn, group, spinRow, switchRow } from './rows.js';
@@ -75,24 +76,21 @@ export function pages(): PageInfo[] {
             id: 'dock', section: 1, icon: 'user-desktop-symbolic', color: 'graphite',
             title: _('Dock'),
             description: _('Your favourite and running apps at the bottom of the screen.'),
-            build: ({ settings }) => {
+            build: (context) => {
+                const { settings } = context;
                 const rows = [
                     switchRow(settings, 'dock-all-monitors', _('On every monitor'), _('Off shows it on the primary monitor only')),
                     spinRow(settings, 'dock-icon-size', _('Icon size'), _('In pixels, before magnification'), 32, 96, 4),
                     switchRow(settings, 'dock-magnification', _('Magnification'), _('Icons grow under the pointer')),
                     switchRow(settings, 'dock-autohide', _('Hide when a window covers it'), _('Push the pointer to the bottom edge to show it again')),
                     switchRow(settings, 'dock-genie', _('Genie minimize'), _('Windows pour into their dock icon')),
-                    switchRow(settings, 'dock-downloads', _('Downloads stack'), _('Your newest downloads, a click away next to the Trash')),
-                    comboRow(settings, 'dock-downloads-view', _('Show the stack as'), [
-                        ['automatic', _('Automatic')],
-                        ['fan', _('Fan')],
-                        ['grid', _('Grid')],
-                    ]),
                 ];
-                dependsOn(settings, 'dock-enabled', ...rows);
+                const stacks = stacksGroup(context);
+                dependsOn(settings, 'dock-enabled', ...rows, stacks);
                 return [
                     group('', [switchRow(settings, 'dock-enabled', _('macOS dock'), _('Replaces Dash to Dock and the overview’s dash'))]),
                     group(_('Dock'), rows),
+                    stacks,
                 ];
             },
         },
@@ -257,6 +255,59 @@ export function pages(): PageInfo[] {
             ],
         },
     ];
+}
+
+/**
+ * The dock's stacks: Downloads, the folders added (each with a remove
+ * button), Add Folder… and how stacks open.
+ */
+function stacksGroup({ settings, window, onClose }: PageContext): Adw.PreferencesGroup {
+    const box = new Adw.PreferencesGroup({ title: _('Stacks'), description: _('Folders next to the Trash; click one to see its newest items') });
+    box.add(switchRow(settings, 'dock-downloads', _('Downloads'), _('Your newest downloads, a click away')));
+    let folderRows: Gtk.Widget[] = [];
+    const addRow = new Adw.ActionRow({ title: _('Add Folder…'), activatable: true });
+    addRow.add_prefix(new Gtk.Image({ icon_name: 'list-add-symbolic' }));
+    addRow.connect('activated', () => {
+        const dialog = new Gtk.FileDialog({ title: _('Add a Stack to the Dock'), modal: true });
+        // The callback form: GJS has not promisified it here.
+        const select = dialog.select_folder.bind(dialog) as unknown as (parent: Gtk.Window, cancellable: null, done: (source: unknown, result: Gio.AsyncResult) => void) => void;
+        select(window, null, (_source, result) => {
+            try {
+                const path = dialog.select_folder_finish(result)?.get_path();
+                if (path) settings.set_strv('dock-stacks', withStack(settings.get_strv('dock-stacks'), path));
+            } catch {
+                // Cancelled.
+            }
+        });
+    });
+    const view = comboRow(settings, 'dock-downloads-view', _('Show stacks as'), [
+        ['automatic', _('Automatic')],
+        ['fan', _('Fan')],
+        ['grid', _('Grid')],
+    ]);
+    const refresh = () => {
+        for (const row of [...folderRows, addRow, view]) if (row.get_parent()) box.remove(row);
+        folderRows = settings.get_strv('dock-stacks').map((path) => {
+            const row = new Adw.ActionRow({ title: GLib.filename_display_basename(path), subtitle: homeRelative(path) });
+            row.add_prefix(new Gtk.Image({ icon_name: 'folder-symbolic' }));
+            const remove = new Gtk.Button({ icon_name: 'user-trash-symbolic', valign: Gtk.Align.CENTER, tooltip_text: _('Remove from Dock'), css_classes: ['flat'] });
+            remove.connect('clicked', () => settings.set_strv('dock-stacks', settings.get_strv('dock-stacks').filter((p) => p !== path)));
+            row.add_suffix(remove);
+            return row;
+        });
+        for (const row of [...folderRows, addRow, view]) box.add(row);
+    };
+    refresh();
+    const id = settings.connect('changed::dock-stacks', refresh);
+    onClose(() => settings.disconnect(id));
+    return box;
+}
+
+/** A path for reading: ~ for the home folder. */
+function homeRelative(path: string): string {
+    const home = GLib.get_home_dir();
+    const shown = path === home || path.startsWith(`${home}/`) ? `~${path.slice(home.length)}` : path;
+    return GLib.filename_display_name(shown);
 }
 
 /**

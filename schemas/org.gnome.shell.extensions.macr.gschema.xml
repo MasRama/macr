@@ -394,5 +394,10 @@
       <summary>Last day or night Auto appearance applied</summary>
       <description>Kept by Macr, so a change made by hand holds until the next sunrise or sunset.</description>
     </key>
+    <key name="dock-stacks" type="as">
+      <default>[]</default>
+      <summary>Folder stacks in the dock</summary>
+      <description>Paths of folders shown as stacks before the Downloads stack.</description>
+    </key>
   </schema>
 </schemalist>

@@ -14,7 +14,7 @@ import * as PopupMenu from 'resource:///org/gnome/shell/ui/popupMenu.js';
 import { styleMenu, syncMenuScheme } from '../../shared/menu-style.js';
 import { quickLook } from '../../shared/quick-look.js';
 import { isLight } from '../../shared/scheme.js';
-import { chooseView, FAN_MAX, fanSlot, gridShape, type StackEntry, type StackMode, visibleEntries } from './logic/stack.js';
+import { chooseView, FAN_MAX, fanSlot, folderIcon, gridShape, type SpecialFolder, type StackEntry, type StackMode, visibleEntries } from './logic/stack.js';
 
 const ATTRIBUTES = 'standard::name,standard::display-name,standard::is-hidden,standard::icon,standard::type,time::created,time::modified,thumbnail::path';
 /** The grid never lists more than this. */
@@ -46,11 +46,51 @@ export function downloadsFolder(): Gio.File | null {
     return file.query_exists(null) ? file : null;
 }
 
+/** A folder the dock shows as a stack. */
+export interface StackSource {
+    folder: Gio.File | null;
+    name: string;
+    icon: string;
+    /** The folder's path in `dock-stacks`; null for the Downloads stack (`dock-downloads`). */
+    path: string | null;
+}
+
+const SPECIAL_DIRS: [SpecialFolder, GLib.UserDirectory][] = [
+    ['desktop', GLib.UserDirectory.DIRECTORY_DESKTOP],
+    ['documents', GLib.UserDirectory.DIRECTORY_DOCUMENTS],
+    ['music', GLib.UserDirectory.DIRECTORY_MUSIC],
+    ['pictures', GLib.UserDirectory.DIRECTORY_PICTURES],
+    ['videos', GLib.UserDirectory.DIRECTORY_VIDEOS],
+    ['templates', GLib.UserDirectory.DIRECTORY_TEMPLATES],
+    ['public', GLib.UserDirectory.DIRECTORY_PUBLIC_SHARE],
+    ['downloads', GLib.UserDirectory.DIRECTORY_DOWNLOAD],
+];
+
+/** The stacks in dock order: the folders added in settings, then Downloads. */
+export function stackSources(settings: Gio.Settings): StackSource[] {
+    const special: Partial<Record<SpecialFolder, string>> = {};
+    for (const [kind, dir] of SPECIAL_DIRS) {
+        const path = GLib.get_user_special_dir(dir);
+        if (path) special[kind] = path;
+    }
+    const sources: StackSource[] = settings.get_strv('dock-stacks').map((path) => {
+        const file = Gio.File.new_for_path(path);
+        return {
+            folder: file.query_file_type(Gio.FileQueryInfoFlags.NONE, null) === Gio.FileType.DIRECTORY ? file : null,
+            name: GLib.filename_display_basename(path),
+            icon: folderIcon(path, special, GLib.get_home_dir()),
+            path,
+        };
+    });
+    sources.push({ folder: downloadsFolder(), name: _('Downloads'), icon: 'folder-download', path: null });
+    return sources;
+}
+
 function launch(file: Gio.File): void {
     try {
         Gio.AppInfo.launch_default_for_uri(file.get_uri(), global.create_app_launch_context(0, -1));
     } catch (error) {
-        logError(error as object, 'Macr: could not open a Downloads item');
+        logError(error as object, 'Macr: could not open a stack item');
     }
 }
 
@@ -61,7 +101,7 @@ function readItems(folder: Gio.File, done: (items: Item[]) => void): void {
         try {
             enumerator = folder.enumerate_children_finish(result);
         } catch (error) {
-            logError(error as object, 'Macr: could not read the Downloads folder');
+            logError(error as object, 'Macr: could not read a stack’s folder');
             done([]);
             return;
         }
@@ -97,8 +137,9 @@ function readItems(folder: Gio.File, done: (items: Item[]) => void): void {
 }
 
 /**
- * The Downloads stack after the dock's divider: a click fans the newest
- * downloads up out of the dock, or shows them all in a grid, as on macOS.
+ * A folder stack after the dock's divider (Downloads, and any folder added
+ * in settings): a click fans the newest items up out of the dock, or shows
+ * them all in a grid, as on macOS.
  */
 export const StackItem = GObject.registerClass(
     {
@@ -106,6 +147,7 @@ export const StackItem = GObject.registerClass(
     },
     class StackItem extends Dash.DashItemContainer {
         private folder!: Gio.File | null;
+        private source!: StackSource;
         private button!: St.Button;
         private menu!: PopupMenu.PopupMenu;
         private menuManager!: PopupMenu.PopupMenuManager;
@@ -122,10 +164,11 @@ export const StackItem = GObject.registerClass(
         private fanned!: boolean;
         icon!: IconGrid.BaseIcon;
 
-        constructor(settings: Gio.Settings) {
+        constructor(settings: Gio.Settings, source: StackSource) {
             super();
             this.settings = settings;
-            this.folder = downloadsFolder();
+            this.source = source;
+            this.folder = source.folder;
             this.root = null;
             this.grab = null;
             this.closing = false;
@@ -139,17 +182,17 @@ export const StackItem = GObject.registerClass(
                 can_focus: true,
                 button_mask: St.ButtonMask.ONE | St.ButtonMask.THREE,
             });
-            this.icon = new IconGrid.BaseIcon(_('Downloads'), {
+            this.icon = new IconGrid.BaseIcon(source.name, {
                 setSizeManually: true,
                 showLabel: false,
-                createIcon: (size: number) => new St.Icon({ icon_name: 'folder-download', icon_size: size }),
+                createIcon: (size: number) => new St.Icon({ icon_name: source.icon, fallback_icon_name: 'folder', icon_size: size }),
             });
             this.icon.y_align = Clutter.ActorAlign.CENTER;
             this.button.set_child(this.icon);
             (this.button as unknown as { _delegate: unknown })._delegate = this;
             this.button.set_pivot_point(0.5, 1);
             this.setChild(this.button);
-            this.setLabelText(_('Downloads'));
+            this.setLabelText(source.name);
 
             this.menu = new PopupMenu.PopupMenu(this.button, 0.5, St.Side.BOTTOM);
             styleMenu(this.menu);
@@ -178,7 +221,7 @@ export const StackItem = GObject.registerClass(
         }
 
         private syncShown(): void {
-            this.visible = this.folder !== null && this.settings.get_boolean('dock-downloads');
+            this.visible = this.folder !== null && (this.source.path !== null || this.settings.get_boolean('dock-downloads'));
             if (!this.visible) this.close();
         }
 
@@ -191,9 +234,15 @@ export const StackItem = GObject.registerClass(
             this.close();
             syncMenuScheme(this.menu);
             this.menu.removeAll();
-            const open = new PopupMenu.PopupMenuItem(_('Open “Downloads”'));
+            const open = new PopupMenu.PopupMenuItem(_('Open “%s”').format(this.source.name));
             open.connect('activate', () => this.folder && launch(this.folder));
             this.menu.addMenuItem(open);
+            const path = this.source.path;
+            if (path !== null) {
+                const remove = new PopupMenu.PopupMenuItem(_('Remove from Dock'));
+                remove.connect('activate', () => this.settings.set_strv('dock-stacks', this.settings.get_strv('dock-stacks').filter((p) => p !== path)));
+                this.menu.addMenuItem(remove);
+            }
             this.menu.addMenuItem(new PopupMenu.PopupSeparatorMenuItem(_('View as')));
             const views: [StackMode, string][] = [
                 ['automatic', _('Automatic')],
@@ -399,7 +448,7 @@ export const StackItem = GObject.registerClass(
             panel.connect('button-press-event', () => Clutter.EVENT_STOP);
 
             const header = new St.BoxLayout({ style_class: 'macr-stack-grid-header' });
-            header.add_child(new St.Label({ text: folder.get_basename() ?? _('Downloads'), style_class: 'macr-stack-grid-title', x_expand: true, y_align: Clutter.ActorAlign.CENTER }));
+            header.add_child(new St.Label({ text: this.source.name, style_class: 'macr-stack-grid-title', x_expand: true, y_align: Clutter.ActorAlign.CENTER }));
             const openButton = new St.Button({ style_class: 'macr-stack-grid-open', label: _('Open in Files'), can_focus: true });
             openButton.connect('clicked', () => this.activateItem(folder));
             header.add_child(openButton);

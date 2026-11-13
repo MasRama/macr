@@ -11,7 +11,7 @@ import { launchpad, onLaunchpadChanged } from '../../shared/launchpad-link.js';
 import type { Rect } from '../../shared/logic/geometry.js';
 import { MacrDash } from './dash.js';
 import { magnify } from './logic/magnify.js';
-import { StackItem } from './stack.js';
+import { StackItem, stackSources } from './stack.js';
 import { TrashItem } from './trash.js';
 
 /** Gap between the dock and the bottom of the screen. */
@@ -43,7 +43,7 @@ export class Dock {
     /** Invisible, reaches the screen edge so the pointer stays "on" the dock below it. */
     private readonly hitArea: St.Widget;
     private readonly trash: TrashItem;
-    private readonly stack: StackItem;
+    private stacks: StackItem[] = [];
     private readonly divider: St.Widget;
     private readonly edge: St.Widget;
     private readonly ids: [Disconnectable, number][] = [];
@@ -75,16 +75,12 @@ export class Dock {
         container.set_child_at_index(this.dash._showAppsIcon, 0);
         this.divider = new St.Widget({ style_class: 'macr-dock-divider', y_align: Clutter.ActorAlign.CENTER });
         container.add_child(this.divider);
-        this.stack = new StackItem(options.settings);
-        container.add_child(this.stack);
-        this.stack.show(false);
-        this.dash._hookUpLabel(this.stack);
-        this.dash.extraItems.push(this.stack);
         this.trash = new TrashItem();
         container.add_child(this.trash);
         this.trash.show(false);
         this.dash._hookUpLabel(this.trash);
         this.dash.extraItems.push(this.trash);
+        this.buildStacks();
 
         this.edge = new St.Widget({ name: 'macrDockEdge', reactive: true, track_hover: true, height: 1 });
 
@@ -96,8 +92,7 @@ export class Dock {
 
         this.listen(this.dash, 'notify::allocation', () => this.queuePlace());
         this.listen(this.actor, 'notify::hover', () => this.onHover());
-        // The dock stays while its stack is open.
-        this.listen(this.stack, 'open-changed', () => this.updateVisibility());
+        this.listen(options.settings, 'changed::dock-stacks', () => this.buildStacks());
         this.listen(this.actor, 'motion-event', (_actor: unknown, event: Clutter.Event) => this.onMotion(event));
         this.listen(this.actor, 'scroll-event', (_actor: unknown, event: Clutter.Event) => Main.wm.handleWorkspaceScroll(event));
         this.listen(this.edge, 'notify::hover', () => {
@@ -129,6 +124,29 @@ export class Dock {
         this.listen(global.workspace_manager, 'active-workspace-changed', () => this.updateVisibility());
         this.trackFocusWindow();
         this.queuePlace();
+    }
+
+    /** The folder stacks between the divider and the Trash, again when the list changes. */
+    private buildStacks(): void {
+        for (const stack of this.stacks) {
+            this.dash.extraItems.splice(this.dash.extraItems.indexOf(stack), 1);
+            stack.destroy();
+        }
+        this.stacks = stackSources(this.options.settings).map((source) => {
+            const stack = new StackItem(this.options.settings, source);
+            this.dash._dashContainer.insert_child_below(stack, this.trash);
+            stack.show(false);
+            this.dash._hookUpLabel(stack);
+            this.dash.extraItems.push(stack);
+            // The dock stays while a stack is open.
+            stack.connect('open-changed', () => this.updateVisibility());
+            return stack;
+        });
+        // Sizing reads theme nodes: only once the dock is on the stage.
+        if (this.actor.get_stage()) {
+            this.dash._adjustIconSize();
+            this.queuePlace();
+        }
     }
 
     setOptions(options: DockOptions): void {
@@ -221,7 +239,7 @@ export class Dock {
     }
 
     private updateVisibility(): void {
-        if (Main.overview.visible || !this.options.autohide || this.pointerOnDock() || this.dragging || this.stack.isOpen) {
+        if (Main.overview.visible || !this.options.autohide || this.pointerOnDock() || this.dragging || this.stacks.some((stack) => stack.isOpen)) {
             this.cancelHide();
             this.setHidden(false);
             return;
@@ -335,7 +353,7 @@ export class Dock {
     }
 
     private rowItems(): Clutter.Actor[] {
-        return [...this.dash.rowItems(), this.divider, this.stack, this.trash].filter((item) => item.visible);
+        return [...this.dash.rowItems(), this.divider, ...this.stacks, this.trash].filter((item) => item.visible);
     }
 
     /** Centre of `item` without its magnification shift, in stage x. */

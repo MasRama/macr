@@ -47,3 +47,30 @@ export function gridShape(count: number): { columns: number; rows: number } {
     const rows = Math.max(1, Math.min(4, Math.ceil(count / columns)));
     return { columns, rows };
 }
+
+/** XDG folders with an icon of their own. */
+export type SpecialFolder = 'desktop' | 'documents' | 'music' | 'pictures' | 'videos' | 'templates' | 'public' | 'downloads';
+
+const SPECIAL_ICONS: Record<SpecialFolder, string> = {
+    desktop: 'user-desktop',
+    documents: 'folder-documents',
+    music: 'folder-music',
+    pictures: 'folder-pictures',
+    videos: 'folder-videos',
+    templates: 'folder-templates',
+    public: 'folder-publicshare',
+    downloads: 'folder-download',
+};
+
+/** The icon of a folder stack: its XDG folder's own, home's, or a plain folder. */
+export function folderIcon(path: string, special: Partial<Record<SpecialFolder, string>>, home: string): string {
+    const clean = (p: string) => p.replace(/\/+$/, '');
+    for (const [kind, dir] of Object.entries(special) as [SpecialFolder, string][]) if (dir && clean(dir) === clean(path)) return SPECIAL_ICONS[kind];
+    return clean(path) === clean(home) ? 'user-home' : 'folder';
+}
+
+/** The stack list with `path` added at the end, once. */
+export function withStack(stacks: readonly string[], path: string): string[] {
+    const clean = path.replace(/(.)\/+$/, '$1');
+    return stacks.includes(clean) ? [...stacks] : [...stacks, clean];
+}
