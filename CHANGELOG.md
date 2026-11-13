@@ -1,5 +1,24 @@
 # Changelog
 
+## [0.5.0](https://github.com/MasRama/macr/compare/v0.4.0...v0.5.0) (2026-11-13)
+
+
+### Features
+
+* **dock:** keep the apps you quit last in the dock ([0c40daa](https://github.com/MasRama/macr/commit/0c40daa243c0f25b9e37c627b9c292a9ae238e63))
+* **dock:** show app badges and progress on dock icons ([3410e51](https://github.com/MasRama/macr/commit/3410e51169ab2e42e4c2859b09a15c2488d47338))
+* **emoji:** add an Emoji & Symbols picker on Ctrl+Super+Space ([f57f1ad](https://github.com/MasRama/macr/commit/f57f1adb2e5ed4b799549e05d11ad7460e30e185))
+* **menubar:** give Wi-Fi, Bluetooth and battery menu bar icons of their own ([df527ff](https://github.com/MasRama/macr/commit/df527ffd0cfcb160848092fd44b3dd24dcf385fe))
+* **notifications:** stack each app's notifications in the Notification Center ([cbfa60a](https://github.com/MasRama/macr/commit/cbfa60a4528207c9d0e924aa9d39ce8510e19a74))
+* **spotlight:** convert units and currencies, define words and search the web ([8191c13](https://github.com/MasRama/macr/commit/8191c1347f596718853d72f0b7def3efd6cdb36d))
+* **trafficlights:** show the macOS menu on the green light ([4fe5877](https://github.com/MasRama/macr/commit/4fe5877e1a29aab73f483336d214cf0d1e714e2e))
+* **widgets:** add a Now Playing widget ([1cb44b1](https://github.com/MasRama/macr/commit/1cb44b196c6402c43c6bfa623ebee75296e13761))
+* **widgets:** add Batteries and Photos widgets ([6be7cba](https://github.com/MasRama/macr/commit/6be7cba6ee2ac415dc82f64713a054fa658620e4))
+* **widgets:** add large Calendar, Weather and Photos widgets ([d394510](https://github.com/MasRama/macr/commit/d394510d2a25e6202e7aa2f18711516a87e4f7f6))
+* **widgets:** add medium Calendar, Weather, Batteries and Photos widgets ([2a52acd](https://github.com/MasRama/macr/commit/2a52acdddb5912351c9f9e3456f4443a1763e7ee))
+* **widgets:** add the Edit Widgets gallery ([7c29d75](https://github.com/MasRama/macr/commit/7c29d75349dde9a77eebb1ae1fe00cdded871e05))
+* **widgets:** show world clocks in the medium Clock widget ([f40ee5a](https://github.com/MasRama/macr/commit/f40ee5adbfeada581c09daf5e9ee71915b0411a7))
+
 ## [0.4.0](https://github.com/MasRama/macr/compare/v0.3.0...v0.4.0) (2026-11-13)
 
 
