@@ -1,5 +1,27 @@
 # Changelog
 
+## [0.4.0](https://github.com/MasRama/macr/compare/v0.3.0...v0.4.0) (2026-11-13)
+
+
+### Features
+
+* **accent:** colour Macr with a macOS accent or one from the wallpaper ([e86bdc6](https://github.com/MasRama/macr/commit/e86bdc635397a6b716f1a93dfae9661a7b85843b))
+* **appearance:** add a macOS Auto appearance that turns dark at night ([ef4870a](https://github.com/MasRama/macr/commit/ef4870a30505f4bcb27ef445f597eb7123e268a8))
+* **desktop:** let the wallpaper follow the time of day ([d397510](https://github.com/MasRama/macr/commit/d39751024bba12641818bb66dd8279249ac9b69b))
+* **dock:** add a Downloads stack next to the Trash ([d3158d5](https://github.com/MasRama/macr/commit/d3158d58f00d2f236e2d315187b839c29589f8f3))
+* **dock:** add any folder to the dock as a stack ([8b41fb6](https://github.com/MasRama/macr/commit/8b41fb6b9b9e12c930a3645e7cba0dda0e3cc8d3))
+* **dock:** preview Downloads stack items with Quick Look ([2ea0cba](https://github.com/MasRama/macr/commit/2ea0cba7961a45ca88b2dd27fa45488fd42bf678))
+* **expose:** show all of an app's windows with App Exposé ([b7b7e53](https://github.com/MasRama/macr/commit/b7b7e531d7c8a7780e55d35121763c63d9e03385))
+* **keyboard:** quit, minimize and hide apps with the Mac's Command shortcuts on Super ([f2fea87](https://github.com/MasRama/macr/commit/f2fea878751934de4140f19cf4a8c1a16e246147))
+* **prefs:** add a full-screen Spaces switch to the Mission Control page ([d586bcc](https://github.com/MasRama/macr/commit/d586bccee15173fcd5181b3b2f7f1d34d58f10af))
+* **prefs:** add a Keyboard page with the Mac shortcuts ([18feed5](https://github.com/MasRama/macr/commit/18feed55c667a69128a59e473fb92a734541febb))
+* **prefs:** add App Exposé to the Mission Control page ([0532413](https://github.com/MasRama/macr/commit/05324132d4c86134413554667585e7078bfa5635))
+* **prefs:** add the accent colour and dynamic desktop to the Appearance page ([018b919](https://github.com/MasRama/macr/commit/018b91943578d86f31813c41567b6de2b47ddd9b))
+* **prefs:** add the Downloads stack to the Dock page ([fb0c2a5](https://github.com/MasRama/macr/commit/fb0c2a5fbd2dcac55f1d3ebf4aca582c6045daec))
+* **spaces:** give full-screen apps their own Space ([de4c100](https://github.com/MasRama/macr/commit/de4c100fc20bc6b503b42d254eaf4a138baf7b07))
+* **spotlight:** preview the selected file with Super+Y ([70cc5f9](https://github.com/MasRama/macr/commit/70cc5f97b8d0dfc8896880dc89f5b0c035ba2c71))
+* **widgets:** add clock, calendar and weather widgets to the desktop ([f26262e](https://github.com/MasRama/macr/commit/f26262e018890514cbf6be46a7c0eb97a2765eca))
+
 ## [0.3.0](https://github.com/MasRama/macr/compare/v0.2.0...v0.3.0) (2026-11-13)
 
 
