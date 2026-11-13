@@ -268,7 +268,7 @@
     <key name="screenshot-enabled" type="b">
       <default>true</default>
       <summary>Take screenshots the macOS way</summary>
-      <description>Super+Shift+3 takes the whole screen at once and Super+Shift+4 a dragged area or a window. GNOME saves and copies each screenshot as usual, and Print, Shift+Print and Alt+Print keep working.</description>
+      <description>Super+Shift+3 takes the whole screen at once, Super+Shift+4 a dragged area or a window, and Super+Shift+5 shows the screenshot toolbar, which Print shows too. GNOME saves and copies each screenshot as usual, and Print, Shift+Print and Alt+Print keep working.</description>
     </key>
     <key name="screenshot-screen-shortcut" type="as">
       <default><![CDATA[['<Super><Shift>3']]]></default>
@@ -278,6 +278,10 @@
       <default><![CDATA[['<Super><Shift>4']]]></default>
       <summary>Keyboard shortcut that takes a screenshot of a dragged area</summary>
       <description>Drag over the screen with the crosshair; Space switches to picking a window and back.</description>
+    </key>
+    <key name="screenshot-toolbar-shortcut" type="as">
+      <default><![CDATA[['<Super><Shift>5']]]></default>
+      <summary>Keyboard shortcut that shows the screenshot toolbar</summary>
     </key>
   </schema>
 </schemalist>

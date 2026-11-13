@@ -13,7 +13,7 @@ const ENTER = [Clutter.KEY_Return, Clutter.KEY_KP_Enter, Clutter.KEY_ISO_Enter];
 const ARROWS = [Clutter.KEY_Left, Clutter.KEY_Right, Clutter.KEY_Up, Clutter.KEY_Down];
 
 /** What the quick capture changed in GNOME's UI, to put back when it closes. */
-type Saved = { type: St.Button; area: [number, number, number, number] };
+type Saved = { type: St.Button; area: [number, number, number, number]; panel: boolean; close: boolean };
 
 /**
  * Super+Shift+4: GNOME's screenshot UI with no panel and no shade, straight
@@ -54,7 +54,7 @@ export class QuickCapture {
         if (ui.visible || this.active) return;
         const area = ui._areaSelector;
         const type = [ui._selectionButton, ui._screenButton, ui._windowButton].find((button) => button.checked) ?? ui._selectionButton;
-        this.saved = { type, area: [area._startX, area._startY, area._lastX, area._lastY] };
+        this.saved = { type, area: [area._startX, area._startY, area._lastX, area._lastY], panel: ui._panel.visible, close: ui._closeButton.visible };
         this.active = true;
         ui.add_style_class_name(QUICK);
         ui._panel.hide();
@@ -88,11 +88,11 @@ export class QuickCapture {
         this.dragStart = null;
         const ui = this.ui;
         ui.remove_style_class_name(QUICK);
-        ui._panel.show();
-        ui._closeButton.show();
         const saved = this.saved;
         this.saved = null;
         if (!saved) return;
+        ui._panel.visible = saved.panel;
+        ui._closeButton.visible = saved.close;
         saved.type.checked = true;
         const area = ui._areaSelector;
         [area._startX, area._startY, area._lastX, area._lastY] = saved.area;

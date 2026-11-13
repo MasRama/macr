@@ -31,6 +31,13 @@ declare module 'resource:///org/gnome/shell/ui/screenshot.js' {
         windows(): St.Button[];
     }
 
+    /** GNOME's tooltip for the screenshot UI's buttons; it shows on hover. */
+    export class Tooltip extends St.Label {
+        constructor(widget: St.Widget, params?: Partial<St.Label.ConstructorProps>);
+        open(): void;
+        close(): void;
+    }
+
     /** `Main.screenshotUI`: built once at startup and never destroyed. */
     export class ScreenshotUI extends St.Widget {
         readonly screencast_in_progress: boolean;
