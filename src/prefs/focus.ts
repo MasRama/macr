@@ -79,6 +79,7 @@ function modeRow(settings: Gio.Settings, mode: FocusMode, path: string, all: Gio
 
     // The allowed apps, then a drop-down to allow one more.
     let appRows: Adw.ActionRow[] = [];
+    let choicesAdded = false;
     const choices = new Adw.ComboRow({ title: _('Allow notifications from'), model: Gtk.StringList.new([_('Choose an App…'), ...all.map((app) => app.get_display_name())]) });
     choices.connect('notify::selected', () => {
         const app = all[choices.selected - 1];
@@ -87,7 +88,7 @@ function modeRow(settings: Gio.Settings, mode: FocusMode, path: string, all: Gio
     });
     const syncApps = () => {
         for (const old of appRows) row.remove(old);
-        row.remove(choices);
+        if (choicesAdded) row.remove(choices);
         appRows = allowedApps(settings.get_strv('focus-allowed-apps'), mode).map((id) => {
             const app = all.find((one) => one.get_id() === id);
             const appRow = new Adw.ActionRow({ title: app?.get_display_name() ?? id, subtitle: _('Allowed') });
@@ -100,6 +101,7 @@ function modeRow(settings: Gio.Settings, mode: FocusMode, path: string, all: Gio
             return appRow;
         });
         row.add_row(choices);
+        choicesAdded = true;
         syncing = true;
         choices.selected = 0;
         syncing = false;
