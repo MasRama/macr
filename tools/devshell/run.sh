@@ -52,9 +52,13 @@ if [ -z "${MACR_DEVSHELL_INNER:-}" ]; then
     done
     # A few recent files so Recent Items has something to show.
     mkdir -p "$STATE/home"
-    # Screenshots taken in here are saved in here, not in your Pictures.
-    mkdir -p "$STATE/home/Pictures"
-    printf 'XDG_PICTURES_DIR="%s"\n' "$STATE/home/Pictures" > "$STATE/config/user-dirs.dirs"
+    # Screenshots taken in here are saved in here, not in your Pictures, and
+    # the dock's Downloads stack shows a Downloads folder of its own.
+    mkdir -p "$STATE/home/Pictures" "$STATE/home/Downloads"
+    printf 'XDG_PICTURES_DIR="%s"\nXDG_DOWNLOAD_DIR="%s"\n' "$STATE/home/Pictures" "$STATE/home/Downloads" > "$STATE/config/user-dirs.dirs"
+    for name in "Invoice March.pdf" "holiday.png" "notes.txt" "setup.deb" "song.mp3" "movie.mkv.part" ".hidden"; do
+        printf 'demo\n' > "$STATE/home/Downloads/$name"
+    done
     for name in "Budget 2026.ods" "Trip notes.md" "Logo draft.svg"; do
         printf 'demo\n' > "$STATE/home/$name"
     done
