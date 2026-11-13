@@ -34,7 +34,7 @@ export class DesktopWidgetsModule implements Module, WidgetHost {
     private gallery: WidgetGallery | null = null;
     private readonly desktop = new Gio.Settings({ schema_id: 'org.gnome.desktop.interface' });
 
-    constructor(private readonly settings: Gio.Settings) {}
+    constructor(readonly settings: Gio.Settings) {}
 
     get scale(): number {
         return St.ThemeContext.get_for_stage(global.stage as Clutter.Stage).scale_factor;

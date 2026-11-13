@@ -306,6 +306,8 @@ function widgetName(id: WidgetId): string {
         batteries: _('Batteries'),
         photos: _('Photos'),
         media: _('Now Playing'),
+        stickies: _('Stickies'),
+        reminders: _('Reminders'),
     };
     return names[id];
 }

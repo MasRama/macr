@@ -404,8 +404,8 @@ schemas/                GSettings schema
 ## Desktop widgets
 
 - `desktop-widgets-enabled`: clock, calendar, weather,
-  batteries, photos and Now Playing widgets (`desktop-widgets`, in that
-  order) in one actor in
+  batteries, photos, Now Playing, Stickies and Reminders widgets
+  (`desktop-widgets`, in that order) in one actor in
   `global.window_group`, above the wallpaper and the desktop icons' window
   (type DESKTOP on X11; on Wayland DING's window is a normal one kept low
   and found by its title, `logic/widgets.ts`) and under every other window.
@@ -418,7 +418,7 @@ schemas/                GSettings schema
   `desktop-widget-positions` as fractions, so it survives a new resolution.
 - Sizes (`logic/widgets.ts` `sizesOf()`, `WIDGET_UNIT`): small (164
   logical px square), medium (two smalls and the gap wide) and, for
-  calendar, weather and photos, large (two by two), saved per widget in
+  calendar, weather, photos, Stickies and Reminders, large (two by two), saved per widget in
   `desktop-widget-sizes`. The column right-aligns
   mixed sizes; a size change rebuilds the widgets. `registry.ts` maps ids
   to classes.
@@ -464,6 +464,22 @@ schemas/                GSettings schema
   child-added/removed; the section has no signal of its own).
   `pickPlayer()` (`shared/logic/now-playing.ts`) takes the one playing,
   else the one changed last.
+- Stickies (`stickies.ts`) shows one of the notes in `widget-notes` (a
+  JSON string, newest first; `shared/logic/notes.ts`, read and written
+  through `shared/notes.ts`). A click starts typing: an editable
+  `ClutterText` (not reactive until then, so clicks reach the widget) and
+  `Editing` (`shared/editing.ts`), which wraps GNOME's `GrabHelper` so keys
+  go to the shell and Esc or a click outside ends it. Text is saved 400 ms
+  after typing stops and when editing ends; a note left empty is removed
+  (`dropEmpty()`). Its menu adds New Note, the five colours
+  (`macr-note-<colour>`) and Delete Note above the sizes; with more than one
+  note, arrows page through them.
+- Reminders (`reminders.ts`) keeps `widget-reminders` (a JSON string,
+  oldest first; `logic/reminders.ts`). A click types into the "New
+  Reminder" entry, Enter adds it, and a click on a circle ticks one off: it
+  fades and is removed after 1.2 s (at once if the widget goes first).
+- Both are typed into, not opened: `opensApp` is false, so the
+  Notification Center stays open when one is clicked there.
 - Edit Widgets… opens `WidgetGallery` (`gallery.ts`): a modal scrim in
   `Main.uiGroup`, a `Clutter.Clone` of the widgets layer on it, and a panel
   of live previews (real widgets made non-reactive and scaled, at most half

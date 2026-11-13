@@ -1,4 +1,5 @@
 import Clutter from 'gi://Clutter';
+import type Gio from 'gi://Gio';
 import Shell from 'gi://Shell';
 import St from 'gi://St';
 import { gettext as _ } from 'resource:///org/gnome/shell/extensions/extension.js';
@@ -24,6 +25,8 @@ export interface WidgetHost {
     opened?(): void;
     /** Device pixels per logical pixel. */
     readonly scale: number;
+    /** Macr's settings, where notes and reminders are kept. */
+    readonly settings: Gio.Settings;
 }
 
 type Easeable = {
@@ -38,7 +41,8 @@ type Easeable = {
  */
 export abstract class DesktopWidget {
     readonly actor: St.Widget;
-    private readonly menu: PopupMenu.PopupMenu;
+    /** The right-click menu: sizes, Edit Widgets… and Remove Widget; a widget may add its own items first. */
+    protected readonly menu: PopupMenu.PopupMenu;
     private readonly menuManager: PopupMenu.PopupMenuManager;
     private grab: Clutter.Grab | null = null;
     private pressAt: Point | null = null;
@@ -125,6 +129,11 @@ export abstract class DesktopWidget {
     /** Opens the widget's app. */
     protected abstract activate(): void;
 
+    /** Whether a click opens an app (so the Notification Center makes way); false for widgets typed into. */
+    protected get opensApp(): boolean {
+        return true;
+    }
+
     /** Opens the desktop app `appId` when it is installed. */
     protected openApp(appId: string): void {
         Shell.AppSystem.get_default().lookup_app(appId)?.activate();
@@ -168,7 +177,7 @@ export abstract class DesktopWidget {
             this.host.moved(this.id, { x: this.actor.x, y: this.actor.y });
         } else {
             this.activate();
-            this.host.opened?.();
+            if (this.opensApp) this.host.opened?.();
         }
         return Clutter.EVENT_STOP;
     }

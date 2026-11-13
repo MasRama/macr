@@ -3188,6 +3188,163 @@
   background-color: rgba(0, 0, 0, 0.07);
 }
 
+/* Stickies: coloured paper, the same in light and dark. */
+.macr-note.macr-note-yellow { background-color: #fdeb8f; color: #3d3200; }
+.macr-note.macr-note-blue { background-color: #bfdcfc; color: #0d2a4a; }
+.macr-note.macr-note-green { background-color: #c3f0c8; color: #103d19; }
+.macr-note.macr-note-pink { background-color: #fbc9e1; color: #4d0f2f; }
+.macr-note.macr-note-purple { background-color: #dcd2fb; color: #2b1466; }
+
+.macr-note {
+  border: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+.macr-note.macr-editing {
+  border: 2px solid rgba(0, 0, 0, 0.22);
+}
+
+.macr-quick-note {
+  border-radius: 14px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+  font-family: "SF Pro Text", "SF Pro", system-ui, sans-serif;
+}
+
+.macr-quick-note-page {
+  padding: 16px;
+}
+
+.macr-widget-stickies-box {
+  padding: 14px 14px 8px;
+}
+
+.macr-widget-stickies-text,
+.macr-widget-stickies-hint {
+  font-size: 10.5pt;
+  font-weight: 500;
+  color: inherit;
+}
+
+.macr-widget-stickies-hint {
+  color: rgba(0, 0, 0, 0.35);
+}
+
+.macr-widget-stickies-pager {
+  spacing: 2px;
+}
+
+.macr-widget-stickies-page {
+  font-size: 8pt;
+  font-weight: 600;
+  color: rgba(0, 0, 0, 0.45);
+}
+
+.macr-widget-stickies-arrow {
+  padding: 3px;
+  border-radius: 999px;
+  color: rgba(0, 0, 0, 0.55);
+}
+
+.macr-widget-stickies-arrow:hover {
+  background-color: rgba(0, 0, 0, 0.08);
+}
+
+.macr-widget-stickies-arrow StIcon {
+  icon-size: 12px;
+}
+
+/* Reminders */
+.macr-widget-reminders-box {
+  padding: 12px 14px;
+  spacing: 2px;
+}
+
+.macr-widget-reminders-badge {
+  icon-size: 13px;
+  padding: 4px;
+  border-radius: 999px;
+  background-color: #ff9f0a;
+  color: #ffffff;
+}
+
+.macr-widget-reminders-count {
+  font-size: 16pt;
+  font-weight: 700;
+}
+
+.macr-widget-reminders-title {
+  font-size: 10pt;
+  font-weight: 700;
+  color: #ff9f0a;
+  margin-bottom: 2px;
+}
+
+.macr-widget-reminders-list {
+  spacing: 2px;
+}
+
+.macr-widget-reminders-row {
+  spacing: 8px;
+  min-height: 20px;
+}
+
+.macr-widget-reminders-circle {
+  width: 14px;
+  height: 14px;
+  padding: 0;
+  border-radius: 999px;
+  border: 1.5px solid rgba(245, 245, 247, 0.4);
+  color: transparent;
+}
+
+.macr-widget-reminders-circle StIcon {
+  icon-size: 10px;
+}
+
+.macr-widget-reminders-circle:hover {
+  border-color: #ff9f0a;
+}
+
+.macr-widget-reminders-circle:checked {
+  border-color: #ff9f0a;
+  background-color: #ff9f0a;
+  color: #ffffff;
+}
+
+.macr-widget-reminders-text {
+  font-size: 9.5pt;
+}
+
+.macr-widget-reminders-add {
+  icon-size: 14px;
+  color: rgba(245, 245, 247, 0.4);
+}
+
+.macr-widget-reminders-entry {
+  padding: 0;
+  border: none;
+  border-radius: 0;
+  box-shadow: none;
+  background-color: transparent;
+  font-size: 9.5pt;
+  color: inherit;
+  caret-color: #ff9f0a;
+  selected-color: #ffffff;
+  selection-background-color: #ff9f0a;
+}
+
+.macr-widget-reminders-entry StLabel.hint-text {
+  color: rgba(245, 245, 247, 0.4);
+}
+
+.macr-widget.macr-light .macr-widget-reminders-circle {
+  border-color: rgba(29, 29, 31, 0.3);
+}
+
+.macr-widget.macr-light .macr-widget-reminders-add,
+.macr-widget.macr-light .macr-widget-reminders-entry StLabel.hint-text {
+  color: rgba(29, 29, 31, 0.35);
+}
+
 /* Edit Widgets gallery */
 .macr-gallery-scrim {
   background-color: rgba(0, 0, 0, 0.42);

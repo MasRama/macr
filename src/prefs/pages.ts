@@ -390,6 +390,8 @@ function widgetChoices(settings: Gio.Settings, list: string, title: string, subt
         ['batteries', _('Batteries')],
         ['photos', _('Photos')],
         ['media', _('Now Playing')],
+        ['stickies', _('Stickies')],
+        ['reminders', _('Reminders')],
     ];
     const rows = choices.map(([id, title]) => {
         const row = new Adw.SwitchRow({ title });

@@ -49,6 +49,8 @@ test('each widget comes in the sizes macOS has for it', () => {
     assert.deepEqual(sizesOf('batteries'), ['small', 'medium']);
     assert.deepEqual(sizesOf('photos'), ['small', 'medium', 'large']);
     assert.deepEqual(sizesOf('media'), ['small', 'medium']);
+    assert.deepEqual(sizesOf('stickies'), ['small', 'medium', 'large']);
+    assert.deepEqual(sizesOf('reminders'), ['small', 'medium', 'large']);
     assert.equal(widgetSize('calendar', 'medium'), 'medium');
     assert.equal(widgetSize('clock', 'medium'), 'medium');
     assert.equal(widgetSize('clock', 'large'), 'small');
@@ -165,6 +167,12 @@ test('the gallery shows every widget at each of its sizes, in order', () => {
         { id: 'photos', size: 'large' },
         { id: 'media', size: 'small' },
         { id: 'media', size: 'medium' },
+        { id: 'stickies', size: 'small' },
+        { id: 'stickies', size: 'medium' },
+        { id: 'stickies', size: 'large' },
+        { id: 'reminders', size: 'small' },
+        { id: 'reminders', size: 'medium' },
+        { id: 'reminders', size: 'large' },
     ]);
 });
 

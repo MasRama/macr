@@ -572,17 +572,27 @@
     <key name="notification-center-widgets" type="as">
       <default>['batteries', 'photos']</default>
       <summary>The widgets in the Notification Center</summary>
-      <description>Which widgets show under the notifications, in order: clock, calendar, weather, batteries, photos, media.</description>
+      <description>Which widgets show under the notifications, in order: clock, calendar, weather, batteries, photos, media, stickies, reminders.</description>
     </key>
     <key name="notification-center-widget-sizes" type="a{ss}">
       <default>{}</default>
       <summary>The Notification Center widgets' sizes</summary>
       <description>small, medium or large for each widget that has that size; small when left out.</description>
     </key>
+    <key name="widget-notes" type="s">
+      <default>'[]'</default>
+      <summary>The sticky notes</summary>
+      <description>A JSON list of notes, newest first: each with an id, its text and its colour (yellow, blue, green, pink or purple). The Stickies widget and the Quick Note corner write it.</description>
+    </key>
+    <key name="widget-reminders" type="s">
+      <default>'[]'</default>
+      <summary>The reminders</summary>
+      <description>A JSON list of reminders, oldest first: each with an id and its text. The Reminders widget writes it; a ticked-off reminder is removed.</description>
+    </key>
     <key name="desktop-widgets" type="as">
       <default>['clock', 'calendar', 'weather']</default>
       <summary>The widgets on the desktop</summary>
-      <description>Which widgets show, in order: clock, calendar, weather, batteries, photos.</description>
+      <description>Which widgets show, in order: clock, calendar, weather, batteries, photos, media, stickies, reminders.</description>
     </key>
     <key name="desktop-widget-sizes" type="a{ss}">
       <default>{}</default>

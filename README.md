@@ -145,6 +145,10 @@ are laid out like macOS System Settings.
   clocks, upcoming events, a five-day forecast, play and skip buttons). Add
   them from a macOS-style widget gallery, drag them anywhere and click one to
   open its app.
+- **Stickies and Reminders**: a sticky note you click and type in, saved
+  as you type, in yellow, blue, green, pink or purple; and a to-do list
+  where you type a new reminder and tick it off. Both work on the desktop
+  and in the Notification Center.
 - **Accent colour**: the macOS accent colours, or one picked from your
   wallpaper, for Macr's menus, buttons and toggles.
 - **Dynamic desktop**: the wallpaper follows the time of day, warm at

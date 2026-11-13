@@ -39,6 +39,10 @@ export class NotificationCenterWidgetsModule implements Module, WidgetHost {
 
     constructor(private readonly context: ModuleContext) {}
 
+    get settings(): Gio.Settings {
+        return this.context.settings;
+    }
+
     get scale(): number {
         return St.ThemeContext.get_for_stage(global.stage as Clutter.Stage).scale_factor;
     }
