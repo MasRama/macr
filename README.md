@@ -113,7 +113,8 @@ are laid out like macOS System Settings.
   such as frameless (Electron) and older X11 apps, with a soft shadow on
   frameless ones; square when maximized.
 - **App switcher**: Alt+Tab as a frosted macOS panel with big icons and only
-  the chosen app's name.
+  the chosen app's name. Press H to hide the chosen app or Q to quit it
+  without letting go.
 
 ![Mission Control with four windows laid out above the Dock](docs/screenshots/mission-control.webp)
 

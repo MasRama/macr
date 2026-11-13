@@ -115,7 +115,7 @@
     <key name="switcher-enabled" type="b">
       <default>true</default>
       <summary>Show Alt+Tab as the macOS app switcher</summary>
-      <description>A frosted panel with big icons, a soft highlight and the chosen app's name. Alt+Tab keeps working as before.</description>
+      <description>A frosted panel with big icons, a soft highlight and the chosen app's name. Alt+Tab keeps working as before; H hides the chosen app and Q quits it.</description>
     </key>
     <key name="notifications-enabled" type="b">
       <default>true</default>

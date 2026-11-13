@@ -456,7 +456,16 @@ schemas/                GSettings schema
 - Every item's text is transparent except the selected one, so only the
   chosen app's name shows, as on macOS. The input source symbol keeps its
   colour.
-- Disable takes the classes and blur off any popup still open.
+- The app and window switchers (`AltTab.AppSwitcherPopup`,
+  `WindowSwitcherPopup`; Zorin binds Alt+Tab to the window one) get their
+  `_keyPressHandler` wrapped on the prototype: H hides the chosen item's app
+  (`shared/hider.ts`) and selects the next item of another app
+  (`logic/hide.ts afterHide`), closing the popup when none is left, so letting
+  go of Alt does not bring the hidden app back. Q in the window switcher quits
+  the chosen window's app (the app switcher's Q is GNOME's own). Every other
+  key goes to GNOME's handler.
+- Disable puts back both prototypes' handlers and takes the classes and blur
+  off any popup still open.
 
 ## Notifications
 
