@@ -247,7 +247,7 @@ export function pages(): PageInfo[] {
         {
             id: 'appearance', section: 2, icon: 'preferences-desktop-appearance-symbolic', color: 'orange',
             title: _('Appearance'),
-            description: _('Light, dark or auto, the accent colour, the desktop, app icons and the app switcher.'),
+            description: _('Light, dark or auto, the accent colour, the desktop, sounds, app icons and the app switcher.'),
             build: ({ settings }) => [
                 group('', [appearanceRow(settings), accentRow(settings)]),
                 group(_('Desktop'), [
@@ -256,6 +256,7 @@ export function pages(): PageInfo[] {
                     switchRow(settings, 'wallpaper-click-enabled', _('Click wallpaper to reveal desktop'), _('The windows slide aside; click again to bring them back. With desktop icons, clicking an icon does it too.')),
                 ]),
                 group(_('Pointer'), [switchRow(settings, 'shake-to-find-enabled', _('Shake to find'), _('Wiggle the mouse or touchpad quickly and the pointer grows for a moment'))]),
+                group(_('Sounds'), [switchRow(settings, 'sounds-enabled', _('macOS-style system sounds'), _('A pop when the volume changes, a shutter for screenshots, a crumple when the Trash is emptied, a chime when power is plugged in'))]),
                 group(_('App icons'), [switchRow(settings, 'app-icon-tiles', _('macOS tiles for other icons'), _('Apps your icon theme does not cover get their icon on a macOS tile'))]),
                 group(_('App switcher'), [switchRow(settings, 'switcher-enabled', _('macOS app switcher'), _('Alt+Tab as a frosted panel with big icons; Q quits the chosen app, H hides it'))]),
             ],

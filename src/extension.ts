@@ -28,6 +28,7 @@ import { NotificationsModule } from './features/notifications/index.js';
 import { OsdModule } from './features/osd/index.js';
 import { ScreenshotModule } from './features/screenshot/index.js';
 import { FullscreenSpacesModule } from './features/spaces/index.js';
+import { SoundsModule } from './features/sounds/index.js';
 import { SpotlightModule } from './features/spotlight/index.js';
 import { StageManagerModule } from './features/stagemanager/index.js';
 import { SwitcherModule } from './features/switcher/index.js';
@@ -55,6 +56,7 @@ const MODULES: ModuleEntry[] = [
     { key: 'hot-corners-enabled', create: (context) => new HotCornersModule(context.settings) },
     { key: 'gestures-enabled', create: () => new GesturesModule() },
     { key: 'shake-to-find-enabled', create: () => new ShakeToFindModule() },
+    { key: 'sounds-enabled', screens: ['desktop', 'lock'], create: (context) => new SoundsModule(context) },
     { key: 'wallpaper-click-enabled', create: () => new WallpaperClickModule() },
     { key: 'window-corners-enabled', create: (context) => new WindowCornersModule(context.settings) },
     { key: 'traffic-lights-enabled', create: (context) => new TrafficLightsModule(context.settings) },

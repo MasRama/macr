@@ -773,6 +773,26 @@ schemas/                GSettings schema
   `logic/xcursor.ts`) at its biggest size, so it stays sharp. It shrinks
   back 900 ms after the last shake.
 
+## System sounds
+
+- `sounds-enabled` (runs on the lock screen too, so locking does not swap the
+  theme back and forth): Macr's sounds are a freedesktop sound theme, so
+  GNOME, gsd-media-keys and apps play them through libcanberra by event name
+  (`audio-volume-change`, `screen-capture`, `camera-shutter`, `trash-empty`,
+  `power-plug`, `bell`, `dialog-warning`, `dialog-error`,
+  `message-new-instant`, `message`, `complete`).
+- The `.oga` files in `sounds/stereo/` are synthesized by
+  `tools/sounds/make.py` (numpy and ffmpeg), not taken from macOS; rerun it
+  after changing a sound.
+- Enable writes `$XDG_DATA_HOME/sounds/macr/index.theme`
+  (`logic/theme.ts indexTheme`, `Inherits=` the user's theme so every other
+  sound still plays) and links `stereo/` to the extension's copy, saves
+  `org.gnome.desktop.sound theme-name` in `sounds-saved-theme` and picks
+  `macr` (`takeTheme`; a theme already `macr` after a crash keeps the saved
+  one).
+- Disable puts the saved theme back while `macr` is still picked (a theme the
+  user chose since stays), clears the key and removes the folder.
+
 ## Wallpaper click
 
 - `wallpaper-click-enabled`: a left click (no drag, under

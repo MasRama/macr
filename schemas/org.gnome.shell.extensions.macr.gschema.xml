@@ -147,6 +147,16 @@
       <summary>Shake the pointer to find it</summary>
       <description>A quick wiggle of the mouse or touchpad makes the pointer three times as big for a moment.</description>
     </key>
+    <key name="sounds-enabled" type="b">
+      <default>true</default>
+      <summary>macOS-style system sounds</summary>
+      <description>A pop when the volume changes, a shutter for screenshots, a crumple when the Trash is emptied, a chime when power is plugged in, and softer alerts and notifications. Macr adds its own sound theme and picks it in org.gnome.desktop.sound; the previous theme covers every other sound.</description>
+    </key>
+    <key name="sounds-saved-theme" type="s">
+      <default>''</default>
+      <summary>The sound theme before Macr's</summary>
+      <description>Put back in org.gnome.desktop.sound theme-name when Macr's sounds are turned off. Empty when nothing is saved.</description>
+    </key>
     <key name="wallpaper-click-enabled" type="b">
       <default>true</default>
       <summary>Click the wallpaper to reveal the desktop</summary>

@@ -167,6 +167,9 @@ are laid out like macOS System Settings.
 - **Trackpad gestures** with four fingers, following your fingers as they
   move.
 - **Shake to find** the pointer.
+- **System sounds**: macOS-style sounds for the volume pop, screenshots,
+  emptying the Trash, plugging in power, alerts and notifications. Your own
+  sound theme comes back when you turn them off.
 
 ### Lock and login screens
 
