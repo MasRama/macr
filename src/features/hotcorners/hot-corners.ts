@@ -1,13 +1,11 @@
 import Gio from 'gi://Gio';
 import GLib from 'gi://GLib';
-import Meta from 'gi://Meta';
 import St from 'gi://St';
 import * as Main from 'resource:///org/gnome/shell/ui/main.js';
 
+import { releaseDesktopReveal, useDesktopReveal } from '../../shared/desktop-reveal.js';
 import { launchpad } from '../../shared/launchpad-link.js';
-import { stageManager } from '../../shared/stage-link.js';
 import { type CornerName, outerCorners } from './logic/corners.js';
-import { toggleDesktop } from './logic/desktop.js';
 
 /** The setting that holds each corner's action. */
 export const CORNER_KEYS: Record<CornerName, string> = {
@@ -36,7 +34,7 @@ export class HotCorners {
     private readonly interface = new Gio.Settings({ schema_id: 'org.gnome.desktop.interface' });
     private readonly ids: [Signals, number][] = [];
     private corners: St.Widget[] = [];
-    private hidden: number[] = [];
+    private readonly reveal = useDesktopReveal();
     private lastFired = 0;
 
     constructor(private readonly settings: Gio.Settings) {
@@ -58,6 +56,7 @@ export class HotCorners {
         for (const [object, id] of this.ids) object.disconnect(id);
         this.ids.length = 0;
         this.clear();
+        releaseDesktopReveal();
         delete (this.layout as Partial<LayoutManager>)._updateHotCorners;
         this.layout._updateHotCorners();
     }
@@ -103,7 +102,8 @@ export class HotCorners {
             break;
         }
         case 'desktop':
-            this.toggleDesktop();
+            if (Main.overview.visible) Main.overview.hide();
+            this.reveal.toggle();
             break;
         case 'notification-center':
             this.toggleNotificationCenter();
@@ -112,21 +112,6 @@ export class HotCorners {
             Main.screenShield?.lock(true);
             break;
         }
-    }
-
-    private toggleDesktop(): void {
-        if (Main.overview.visible) Main.overview.hide();
-        const windows = global.workspace_manager.get_active_workspace().list_windows()
-            .filter((w) => w.get_window_type() === Meta.WindowType.NORMAL && !w.skip_taskbar);
-        const byId = new Map(windows.map((w) => [w.get_id(), w]));
-        const plan = toggleDesktop(windows.map((w) => ({ id: w.get_id(), minimized: w.minimized })), this.hidden);
-        // Not the user minimizing the middle app: Stage Manager sets the windows aside as one stage.
-        const stage = stageManager();
-        stage?.pause();
-        for (const id of plan.minimize) byId.get(id)?.minimize();
-        for (const id of plan.restore) byId.get(id)?.unminimize();
-        stage?.resume();
-        this.hidden = plan.hidden;
     }
 
     /** Opens the clock's calendar and notifications, on Macr's clock if it is there. */
