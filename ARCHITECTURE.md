@@ -77,6 +77,20 @@ schemas/                GSettings schema
   anchored on the clicked button and handed back to its owner on close.
 - A clone scales its source to its own size, measured only when the clone is
   laid out, so each clone is laid out again when its source resizes.
+- Status menus (`status-menus.ts`, `menubar-status-menus`): Wi-Fi, Bluetooth
+  and the battery get buttons of their own left of the Control Center, as on
+  macOS. GNOME's own indicators are moved out of `quickSettings._indicators`
+  into them (and put back before the sibling they had, in reverse order, on
+  disable), and each button shows only while its indicator does.
+  - Wi-Fi and Bluetooth borrow the Control Center (`BorrowedMenu`) and open
+    the menu of its first visible toggle of that kind straight away (the
+    network list, the device list); closing that list closes the Control
+    Center.
+  - The battery has its own menu (`logic/battery.ts`), read from the power
+    toggle's UPower proxy: the percentage, Power Source, the time remaining
+    or until full, and Battery Settings. Not done: the apps using significant
+    energy (Linux has no source for it).
+  - `macr-status-*` buttons are mirrored on the other monitors' bars.
 
 ## Dock
 
@@ -121,6 +135,14 @@ schemas/                GSettings schema
   overrides `_redisplay` and, for that one pass, hands GNOME's code an app
   system whose running apps are followed by the recent ones that are not
   running, so they get the same icons, separator and drag handling.
+- Badges (`launcher.ts`): apps send a count and a progress over the Unity
+  launcher API (`com.canonical.Unity.LauncherEntry` `Update` signals on the
+  session bus). Telegram and others send them only while a dock owns
+  `com.canonical.Unity`, so the module owns that name (replaceable, as Dash
+  to Dock does) and apps send their state again. `logic/launcher.ts` merges
+  each update per app id and drops a sender's entries when it leaves the
+  bus. Each `MacrDash` icon has a red `macr-dock-badge` label at its top
+  right and a progress bar under it.
 - Show All Windows in an app icon's menu (after GNOME's window list) opens
   App Exposé through `src/shared/expose-link.ts`, while that module runs.
 - Genie: GNOME's minimize and unminimize handlers on `global.window_manager`
@@ -162,6 +184,25 @@ schemas/                GSettings schema
 - Super+Y or Ctrl+Y (Cmd+Y on a Mac) opens Quick Look on the selected result
   when it is a file (a `file://` id, as the Files provider gives); the
   previewer's arrow keys go through the other files listed.
+- The Top Hit stays selected as slower providers fill in, until the user
+  picks another result with the arrows or the pointer.
+- Macr's own answers (`answers.ts`) are providers with the same interface,
+  around GNOME's: conversions first, so they become the Top Hit, then a
+  definition and the web last.
+  - Conversions (`logic/convert.ts`): "10 km to mi", "100 f in c", units of
+    length, weight, temperature, volume, speed, data, time and area, worked
+    out offline. Currencies ("$20 in rupiah", ISO codes, signs and names)
+    use the European Central Bank's rates from Frankfurter, kept for 12 hours.
+    Enter copies the result.
+  - Definitions: a single English word is looked up in the Free Dictionary
+    API (Wiktionary's definitions); Enter opens the word's Wiktionary page.
+  - The web: "Search the web for …" (always there, offline too) and up to
+    three Google suggestions; Enter opens a Google search.
+  - HTTP is one Soup 3 session (`online.ts`, local typings in
+    `soup-typings.d.ts`) with a 3 s timeout, a generic user agent and no
+    cookies; each query's `Gio.Cancellable` cancels its requests.
+    `spotlight-online` off keeps everything offline: no exchange rates,
+    definitions or suggestions.
 
 ## Quick Look
 
@@ -370,6 +411,15 @@ schemas/                GSettings schema
   (today in red), world clocks and weather as widget cards on the right.
 - GNOME's message list, Do Not Disturb and the Focus toggle keep working
   unchanged; only classes and effects are added and taken off on disable.
+- Stacks (`stacks.ts`): an app's notifications move up under its newest one
+  in the message list (`_notificationSection._list`), and only that card
+  shows until the stack is opened (`logic/stacks.ts`). The top card of a
+  closed stack (`macr-nc-stack`) draws the cards peeking out under it with
+  its list item's background, since the item is an `St.Bin` with room for one
+  child. A click opens the stack, Show Less in its header closes it, and its
+  close button clears the whole stack. Stacks close again with the
+  Notification Center. Messages are only moved, hidden and styled; on
+  destroy GNOME's order (critical first, then newest first) is put back.
 
 ## Mission Control
 
@@ -432,6 +482,21 @@ schemas/                GSettings schema
   remembers them per app (`logic/hide.ts`); when that app gets focus again
   (`notify::focus-app`: dock, Alt+Tab, launching it) the rest come back
   too. Show All and `Macr.disable()` forget them.
+
+## Emoji & Symbols
+
+- `emoji-picker-shortcut` (Ctrl+Super+Space, as Ctrl+Cmd+Space on a Mac)
+  opens a modal frosted picker under the text cursor
+  (`Main.inputMethod`'s cursor rectangle while a text field has focus), else
+  at the top of the monitor: a search field, a grid of emoji and the macOS
+  categories along the bottom, with Frequently Used first.
+- The emoji are generated from Unicode's `emoji-test.txt` by
+  `scripts/emoji-data.mjs` into `logic/data.ts` (fully qualified, no skin
+  tone variants). `logic/emoji.ts` searches names by word prefix, exact and
+  shorter names first, and keeps the recent picks (`emoji-recent`).
+- A pick is typed into the focused field with `Main.inputMethod.commit()`
+  once the field has focus back; with no text field it is copied and an OSD
+  says so.
 
 ## Stage Manager
 
@@ -566,6 +631,14 @@ schemas/                GSettings schema
   are reopened. Qt 6 apps on Wayland (the bradient decoration) and Electron
   apps with a custom title bar draw their own buttons and are left as they
   are.
+- The green light's menu (`zoom-menu.ts`): the app draws the light, so the
+  shell follows the pointer (`Meta.CursorTracker` `position-invalidated`)
+  and finds the light from the focused window's frame (`logic/zoom.ts`,
+  measured for libadwaita and GTK 3 apps and X11 frames). After resting
+  there 600 ms, with no shell actor or other window over it, a menu takes no
+  focus and offers Move & Resize, Fill & Arrange (through the tiler), Enter
+  Full Screen and Return to Previous Size. It closes when the pointer leaves
+  it or the focus moves.
 
 ## Window tiling
 
@@ -618,9 +691,7 @@ schemas/                GSettings schema
   Super+Left/Right keep GNOME's half tiling. Both are saved in Macr's
   settings (`tiling-saved-edge-tiling`, `tiling-saved-toggle-tiled`) and put
   back on disable unless the user changed them since.
-- Not done: the green traffic light's hover menu (the app draws the button,
-  so the shell never sees the hover), size animations, and tile targets in
-  the middle of the screen.
+- Not done: size animations and tile targets in the middle of the screen.
 
 ## Screenshots
 
