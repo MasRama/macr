@@ -95,6 +95,14 @@ KEYFILE
     # A bare session bus: no system service directories, so the shell does
     # not start gvfs, portals or evolution in here.
     mkdir -p "$STATE/services"
+    # GNOME's file previewer (Sushi), for Quick Look, on the devshell's display.
+    if [ -x /usr/libexec/org.gnome.NautilusPreviewer ]; then
+        cat > "$STATE/services/org.gnome.NautilusPreviewer.service" <<SERVICE
+[D-BUS Service]
+Name=org.gnome.NautilusPreviewer
+Exec=/usr/bin/env WAYLAND_DISPLAY=macr-devshell GDK_BACKEND=wayland GSETTINGS_BACKEND=keyfile HOME=$STATE/home /usr/libexec/org.gnome.NautilusPreviewer
+SERVICE
+    fi
     cat > "$STATE/bus.conf" <<BUSCONF
 <!DOCTYPE busconfig PUBLIC "-//freedesktop//DTD D-Bus Bus Configuration 1.0//EN"
  "http://www.freedesktop.org/standards/dbus/1.0/busconfig.dtd">
