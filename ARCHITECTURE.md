@@ -107,8 +107,9 @@ schemas/                GSettings schema
   a modal popup (`Main.pushModal`) placed from where the icon rests, with
   the dock's slide and magnification taken off, and the dock stays shown
   while it is open (`open-changed`). Its menu opens the folder and sets
-  `dock-downloads-view`. Not done: dragging items out (a shell actor cannot
-  start a Wayland drag on 46).
+  `dock-downloads-view`. Space opens Quick Look on the item under the
+  pointer (see Quick Look). Not done: dragging items out (a shell actor
+  cannot start a Wayland drag on 46).
 - Show All Windows in an app icon's menu (after GNOME's window list) opens
   App Exposé through `src/shared/expose-link.ts`, while that module runs.
 - Genie: GNOME's minimize and unminimize handlers on `global.window_manager`
@@ -147,6 +148,57 @@ schemas/                GSettings schema
 - `logic/results.ts` picks the Top Hit (the first app, else the first result)
   and caps each provider's section. Activating a result calls the provider's
   own `activateResult`.
+- Super+Y or Ctrl+Y (Cmd+Y on a Mac) opens Quick Look on the selected result
+  when it is a file (a `file://` id, as the Files provider gives); the
+  previewer's arrow keys go through the other files listed.
+
+## Quick Look
+
+- `src/shared/quick-look.ts`: GNOME's file previewer, Sushi (the one Files
+  opens with Space), over D-Bus: `org.gnome.NautilusPreviewer2.ShowFile`
+  with no parent window. No previewer of Macr's own; without Sushi it logs
+  and does nothing.
+- The previewer is a normal window, which a Macr overlay would cover, so
+  the stack or Spotlight closes first and Macr focuses the previewer's
+  window when it maps (no parent window to hand focus over).
+- Sushi reports its arrow keys as `SelectionEvent` (a `Gtk.DirectionType`);
+  `logic/quick-look.ts` turns that into a step through the list Macr
+  opened, clamped at both ends. Its `Visible` property going false ends it.
+  `resetQuickLook()` runs in `Macr.disable()`.
+- The devshell starts Sushi on its own display. Keys do not always reach
+  Sushi's GTK 3 window there, even when Sushi is called directly, so check
+  them in a real session.
+
+## Accent colour
+
+- `accent-color`: one of the macOS accents (blue, the look Macr ships,
+  purple, pink, red, orange, yellow, green, graphite) or `wallpaper`. The
+  module (`accent-enabled`, no switch in the window) colours Macr's own
+  surfaces only: GTK apps on GNOME 46 have no accent to set.
+- `logic/accent.ts` lists every accent rule of `stylesheet.css` (a test
+  fails when one is missing) and writes them again in the accent's colour to
+  `~/.cache/macr/accent-<name>.css`, loaded with `St.Theme.load_stylesheet`.
+  St lets the stylesheet loaded first win a tie, so each selector repeats
+  its first class to be one class stronger. Text on yellow turns dark.
+- Wallpaper: the picture GNOME draws (`picture-uri-dark` under the dark
+  style), read at 48 px with GdkPixbuf off the main loop; vivid pixels vote
+  for the accent nearest their hue, pale reds count as pink, and a grey
+  picture gives graphite. A slideshow (XML) or a missing file gives blue.
+
+## Dynamic desktop
+
+- `dynamic-desktop-enabled` (off by default): the user's own wallpaper
+  follows the time of day, since Apple's dynamic pictures cannot ship.
+  A `Shell.GLSLEffect` (`grade-effect.ts`) grades every `Meta.BackgroundActor`:
+  brightness, a warm or cool shift and saturation.
+- `BackgroundManager.prototype._createBackgroundActor` is wrapped while the
+  module runs, so pictures made later (wallpaper change, overview, Mission
+  Control, the lock screen) get the effect; the stage is walked once for the
+  ones already there.
+- `logic/grade.ts`: keyframes around sunrise and sunset (night, dawn, day,
+  golden hour, dusk), eased in between and wrapping past midnight. Sunrise
+  and sunset come from gsd's Night Light (`org.gnome.SettingsDaemon.Color`),
+  -1 without a location, then 6:00 and 18:00. Updated every minute.
 
 ## Control Center
 
