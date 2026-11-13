@@ -499,6 +499,35 @@ schemas/                GSettings schema
   swapped while the module runs (taken from the live instance, as 46 ships
   no typings for it) and its thumbnails are bigger (`_maxThumbnailScale`).
 - The search box is hidden (opacity 0, height 0); typing still searches.
+  Cards of Spaces added while it is open are hidden in a `BEFORE_REDRAW`
+  later after `workspace-added`, once GNOME has built them.
+- Fixed Spaces (`fixed-spaces.ts`): while the module runs,
+  `org.gnome.mutter dynamic-workspaces` is off, so an empty Space stays
+  until it is closed. On enable `logic/spaces.ts` decides: `takeOver()`
+  saves `num-workspaces` to `mission-control-saved-workspaces` only when
+  dynamic was on and nothing is saved yet (a crash leaves the user's
+  originals there), and `keptCount()` drops GNOME's trailing empty
+  workspace before dynamic goes off (mutter applies `num-workspaces` then).
+  Disable turns dynamic on first, then puts the count back and clears the
+  key. A user who already had fixed workspaces keeps them; nothing is
+  saved. `num-workspaces` follows every add and close, since mutter resets
+  the count to it whenever it changes.
+- `SpacesBar` (`spaces-bar.ts`), one per `ThumbnailsBox` (each monitor's):
+  a + `St.Button` in `overviewGroup` at the right edge of the box's
+  monitor, centred on the box (placed in a `BEFORE_REDRAW` later on the
+  box's `notify::allocation`, skipped while the box has no place; opacity
+  and visibility follow the box). Its `_delegate` takes a dropped window to
+  a new Space on that monitor. A × `St.Button` is added to each
+  `WorkspaceThumbnail` (on `child-added` and each `showing`, as thumbnails
+  are rebuilt) and shown on the one under the pointer (the box's
+  `motion-event` and `leave-event`) while there is more than one Space.
+  Closing sends the Space's windows (not those on all workspaces) to the
+  Space on its left, or the right for the first (`closeTarget()`),
+  switches there if it was showing, then `remove_workspace()`.
+- `shared/fixed-spaces.ts` lets Full-screen Spaces add and close Spaces
+  through the running `FixedSpaces`.
+- The module runs on the lock screen too: stopping there would turn
+  dynamic workspaces back on and drop the empty Spaces.
 
 ## App Exposé
 
@@ -520,11 +549,15 @@ schemas/                GSettings schema
 - `fullscreen-spaces-enabled`: a window's `notify::fullscreen` is handled
   in a `BEFORE_REDRAW` later. Going full screen, `logic/spaces.ts` lets a
   NORMAL window that is not on all workspaces and has other windows showing
-  on its workspace move, only with `dynamic-workspaces`: a workspace is
-  appended, reordered to just after the window's own, and activated with the
-  window. Leaving full screen moves it back (to the first workspace left if
-  its own is gone) and switches there; closing it while its Space shows
-  switches back. GNOME's dynamic workspaces remove the empty one.
+  on its workspace move, with `dynamic-workspaces` or Mission Control's
+  fixed Spaces (not with fixed workspaces the user set): a workspace is
+  appended (through `fixed-spaces` when fixed), reordered to just after the
+  window's own, and activated with the window. Leaving full screen moves it
+  back (to the first workspace left if its own is gone) and switches there;
+  closing it while its Space shows switches back. GNOME's dynamic
+  workspaces remove the empty one; with fixed Spaces the module closes it
+  itself once it is empty (after leaving full screen, on disable, and in a
+  later after the window is unmanaged).
 - A window moved to another workspace by hand meanwhile stays there. The
   module runs on the lock screen too, so locking does not move windows;
   `disable()` moves every window it moved back.

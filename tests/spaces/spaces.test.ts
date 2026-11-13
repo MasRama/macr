@@ -3,16 +3,16 @@ import { test } from 'node:test';
 
 import { returnIndex, shouldMove } from '../../src/features/spaces/logic/spaces.js';
 
-const base = { normal: true, onAllWorkspaces: false, dynamic: true, othersShowing: 2 };
+const base = { normal: true, onAllWorkspaces: false, addsSpaces: true, othersShowing: 2 };
 
 test('a normal full-screen window with company moves to its own Space', () => {
     assert.equal(shouldMove(base), true);
 });
 
-test('dialogs, sticky windows, static workspaces and lone windows stay', () => {
+test('dialogs, sticky windows, fixed workspaces Macr does not manage and lone windows stay', () => {
     assert.equal(shouldMove({ ...base, normal: false }), false);
     assert.equal(shouldMove({ ...base, onAllWorkspaces: true }), false);
-    assert.equal(shouldMove({ ...base, dynamic: false }), false);
+    assert.equal(shouldMove({ ...base, addsSpaces: false }), false);
     assert.equal(shouldMove({ ...base, othersShowing: 0 }), false);
 });
 

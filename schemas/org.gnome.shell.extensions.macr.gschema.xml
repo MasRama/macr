@@ -125,7 +125,12 @@
     <key name="mission-control-enabled" type="b">
       <default>true</default>
       <summary>Show the overview as macOS Mission Control</summary>
-      <description>Windows spread over the dimmed wallpaper, with the Spaces bar always at the top.</description>
+      <description>Windows spread over the dimmed wallpaper, with the Spaces bar always at the top. Spaces are added with + and closed with ×, and stay until closed: GNOME's dynamic workspaces are off while this is on.</description>
+    </key>
+    <key name="mission-control-saved-workspaces" type="i">
+      <default>0</default>
+      <summary>GNOME's number of workspaces before Mission Control's Spaces</summary>
+      <description>Mission Control turns org.gnome.mutter dynamic-workspaces off while it runs. When it was on, this holds org.gnome.desktop.wm.preferences num-workspaces from before, and both are put back when Mission Control is turned off. 0 when nothing is saved.</description>
     </key>
     <key name="stage-manager-enabled" type="b">
       <default>true</default>

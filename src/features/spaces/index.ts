@@ -1,6 +1,7 @@
 import Gio from 'gi://Gio';
 import Meta from 'gi://Meta';
 
+import { fixedSpaces, isEmpty } from '../../shared/fixed-spaces.js';
 import type { Module } from '../../shared/module.js';
 import { returnIndex, shouldMove } from './logic/spaces.js';
 
@@ -16,7 +17,8 @@ interface Moved {
  * Full-screen apps get their own Space, as on macOS: a window that goes full
  * screen moves to a new workspace right after its own, which becomes the
  * active one, and goes back when it leaves full screen. GNOME's dynamic
- * workspaces then remove the empty one.
+ * workspaces then remove the empty one; with Mission Control's fixed Spaces
+ * Macr closes it itself.
  */
 export class FullscreenSpacesModule implements Module {
     private readonly mutter = new Gio.Settings({ schema_id: 'org.gnome.mutter' });
@@ -71,16 +73,18 @@ export class FullscreenSpacesModule implements Module {
         const origin = window.get_workspace();
         if (!origin) return;
         const others = origin.list_windows().filter((other) => other !== window && other.showing_on_its_workspace() && other.get_window_type() === Meta.WindowType.NORMAL && !other.skip_taskbar);
+        const dynamic = this.mutter.get_boolean('dynamic-workspaces');
+        const fixed = dynamic ? null : fixedSpaces();
         const move = shouldMove({
             normal: window.get_window_type() === Meta.WindowType.NORMAL,
             onAllWorkspaces: window.is_on_all_workspaces(),
-            dynamic: this.mutter.get_boolean('dynamic-workspaces'),
+            addsSpaces: dynamic || fixed !== null,
             othersShowing: others.length,
         });
         if (!move) return;
         const manager = global.workspace_manager;
         const time = global.get_current_time();
-        const space = manager.append_new_workspace(false, time);
+        const space = fixed ? fixed.add(time) : manager.append_new_workspace(false, time);
         manager.reorder_workspace(space, origin.index() + 1);
         this.moved.set(window, { origin, originIndex: origin.index(), space });
         window.change_workspace(space);
@@ -93,16 +97,25 @@ export class FullscreenSpacesModule implements Module {
         if (!moved) return;
         this.moved.delete(window);
         // Moved elsewhere by hand since: leave it there.
-        if (window.get_workspace() !== moved.space) return;
-        const target = this.originOf(moved);
-        const manager = global.workspace_manager;
-        const showing = manager.get_active_workspace() === moved.space;
-        window.change_workspace(target);
-        if (showing) {
-            const time = global.get_current_time();
-            if (follow) target.activate_with_focus(window, time);
-            else target.activate(time);
+        if (window.get_workspace() === moved.space) {
+            const target = this.originOf(moved);
+            const showing = global.workspace_manager.get_active_workspace() === moved.space;
+            window.change_workspace(target);
+            if (showing) {
+                const time = global.get_current_time();
+                if (follow) target.activate_with_focus(window, time);
+                else target.activate(time);
+            }
         }
+        this.closeSpace(moved.space);
+    }
+
+    /** GNOME drops empty workspaces only when they are dynamic; with fixed Spaces Macr closes its own. */
+    private closeSpace(space: Meta.Workspace): void {
+        if (this.mutter.get_boolean('dynamic-workspaces')) return;
+        const fixed = fixedSpaces();
+        if (!fixed || !exists(space) || !isEmpty(space)) return;
+        fixed.close(space, global.get_current_time());
     }
 
     private onUnmanaged(window: Meta.Window): void {
@@ -111,13 +124,21 @@ export class FullscreenSpacesModule implements Module {
         this.windows.delete(window);
         const moved = this.moved.get(window);
         this.moved.delete(window);
-        if (moved && global.workspace_manager.get_active_workspace() === moved.space) this.originOf(moved).activate(global.get_current_time());
+        if (!moved) return;
+        if (global.workspace_manager.get_active_workspace() === moved.space) this.originOf(moved).activate(global.get_current_time());
+        // The window leaves its workspace as it goes.
+        this.later(() => this.closeSpace(moved.space));
     }
 
     private originOf(moved: Moved): Meta.Workspace {
         const manager = global.workspace_manager;
-        const count = manager.get_n_workspaces();
-        for (let i = 0; i < count; i++) if (manager.get_workspace_by_index(i) === moved.origin) return moved.origin;
-        return manager.get_workspace_by_index(returnIndex(moved.originIndex, count))!;
+        if (exists(moved.origin)) return moved.origin;
+        return manager.get_workspace_by_index(returnIndex(moved.originIndex, manager.get_n_workspaces()))!;
     }
+}
+
+function exists(workspace: Meta.Workspace): boolean {
+    const manager = global.workspace_manager;
+    for (let i = 0; i < manager.get_n_workspaces(); i++) if (manager.get_workspace_by_index(i) === workspace) return true;
+    return false;
 }

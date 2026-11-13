@@ -92,7 +92,9 @@ are laid out like macOS System Settings.
   to swap it in, or reach it from the Dock, Alt+Tab or Mission Control. Turn
   it off in the Control Center.
 - **Mission Control**: your windows spread over the dimmed wallpaper, above
-  the Dock, with the Spaces bar always at the top.
+  the Dock, with the Spaces bar always at the top. Add a Space with **+**
+  (or drop a window on it), close one with the **×** on its thumbnail; empty
+  Spaces stay until you close them, as on macOS.
 - **App Exposé**: all of one app's windows spread over the blurred screen,
   minimized ones in a row at the bottom. Super+Down, or Show All Windows in a
   Dock icon's menu.
