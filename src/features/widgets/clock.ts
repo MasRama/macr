@@ -2,7 +2,7 @@ import Cairo from 'cairo';
 import GLib from 'gi://GLib';
 import St from 'gi://St';
 
-import { cityCode, handAngles, type WidgetId } from './logic/widgets.js';
+import { cityCode, handAngles, type Box, type WidgetId, type WidgetSize } from './logic/widgets.js';
 import { DesktopWidget, type WidgetHost } from './widget.js';
 
 type Rgba = [number, number, number, number];
@@ -18,8 +18,8 @@ export class ClockWidget extends DesktopWidget {
     private light = false;
     private timerId = 0;
 
-    constructor(id: WidgetId, size: number, host: WidgetHost) {
-        super(id, size, host);
+    constructor(id: WidgetId, size: WidgetSize, box: Box, host: WidgetHost) {
+        super(id, size, box, host);
         this.area = new St.DrawingArea({ x_expand: true, y_expand: true });
         this.area.connect('repaint', () => this.draw());
         this.actor.add_child(this.area);

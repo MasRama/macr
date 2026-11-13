@@ -24,8 +24,11 @@ test('the photo changes every few hours and is the same within them', () => {
     assert.equal(photoFor([], 0), null);
 });
 
-test('a photo is scaled to cover the square, its short side to the size', () => {
-    assert.deepEqual(coverSize(4000, 3000, 300), { width: 400, height: 300 });
-    assert.deepEqual(coverSize(3000, 4000, 300), { width: 300, height: 400 });
-    assert.deepEqual(coverSize(200, 100, 300), { width: 600, height: 300 });
+test('a photo is scaled to cover the widget, cropping the rest', () => {
+    assert.deepEqual(coverSize(4000, 3000, 300, 300), { width: 400, height: 300 });
+    assert.deepEqual(coverSize(3000, 4000, 300, 300), { width: 300, height: 400 });
+    assert.deepEqual(coverSize(200, 100, 300, 300), { width: 600, height: 300 });
+    // A medium widget is twice as wide as it is high.
+    assert.deepEqual(coverSize(4000, 3000, 600, 300), { width: 600, height: 450 });
+    assert.deepEqual(coverSize(4000, 1000, 600, 300), { width: 1200, height: 300 });
 });

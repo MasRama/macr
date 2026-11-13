@@ -2249,3 +2249,82 @@
 .macr-widget-photos-empty {
   padding: 0 16px;
 }
+
+/* Medium widgets */
+.macr-widget-events {
+  padding: 13px 14px 12px 4px;
+  spacing: 8px;
+}
+
+.macr-widget-events-none {
+  font-size: 9pt;
+  font-weight: 600;
+  color: rgba(245, 245, 247, 0.5);
+}
+
+.macr-widget.macr-light .macr-widget-events-none {
+  color: rgba(29, 29, 31, 0.45);
+}
+
+.macr-widget-event {
+  spacing: 7px;
+}
+
+.macr-widget-event-bar {
+  width: 3px;
+  border-radius: 2px;
+  background-color: #ff453a;
+}
+
+.macr-widget.macr-light .macr-widget-event-bar {
+  background-color: #ff3b30;
+}
+
+.macr-widget-event-title {
+  font-size: 9pt;
+  font-weight: 700;
+}
+
+.macr-widget-event-time {
+  font-size: 8pt;
+  font-weight: 600;
+  color: rgba(245, 245, 247, 0.55);
+}
+
+.macr-widget.macr-light .macr-widget-event-time {
+  color: rgba(29, 29, 31, 0.5);
+}
+
+.macr-widget-weather-hours {
+  padding-top: 6px;
+}
+
+.macr-widget-weather-hour {
+  spacing: 3px;
+}
+
+.macr-widget-weather-hour-time {
+  font-size: 8pt;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.75);
+}
+
+.macr-widget-weather-hour-icon {
+  icon-size: 14px;
+}
+
+.macr-widget-weather-hour-temp {
+  font-size: 9pt;
+  font-weight: 700;
+}
+
+.macr-widget-batteries-row {
+  padding: 0 14px;
+  spacing: 18px;
+}
+
+.macr-widget-battery-small-percent {
+  font-size: 10pt;
+  font-weight: 700;
+  margin-top: 8px;
+}

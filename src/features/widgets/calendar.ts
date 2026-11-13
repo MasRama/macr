@@ -1,24 +1,69 @@
 import Clutter from 'gi://Clutter';
+import Gio from 'gi://Gio';
 import GLib from 'gi://GLib';
+import Pango from 'gi://Pango';
 import Shell from 'gi://Shell';
 import St from 'gi://St';
+import { gettext as _ } from 'resource:///org/gnome/shell/extensions/extension.js';
+import * as Main from 'resource:///org/gnome/shell/ui/main.js';
 
-import { monthGrid, type WidgetId } from './logic/widgets.js';
+import { type Box, monthGrid, upcomingEvents, type WidgetId, type WidgetSize } from './logic/widgets.js';
 import { DesktopWidget, type WidgetHost } from './widget.js';
 
-/** Checks for a new day this often (seconds). */
+/** Checks for a new day, and asks for events again, this often (seconds). */
 const TICK_SECONDS = 30;
+/** The medium widget lists the events of this many days, at most this many. */
+const EVENT_DAYS = 7;
+const EVENT_ROWS = 3;
 
-/** The macOS month widget: the month in red, its days, today in a red circle. */
+/** The parts of GNOME's calendar event source (ui/calendar.js) the widget uses. */
+interface CalendarEvent {
+    summary: string;
+    date: Date;
+    end: Date;
+}
+interface EventSource {
+    readonly isLoading: boolean;
+    requestRange(begin: Date, end: Date): void;
+    getEvents(begin: Date, end: Date): CalendarEvent[];
+    connect(signal: 'changed', callback: () => void): number;
+    disconnect(id: number): void;
+}
+
+/**
+ * The shell's own event source, from the date menu: Evolution Data Server's
+ * calendars through gnome-shell-calendar-server. Shared rather than made
+ * anew, as that server keeps one time range for all its clients.
+ */
+function shellEvents(): EventSource | null {
+    const dateMenu = Main.panel.statusArea.dateMenu as unknown as { _eventSource?: EventSource } | undefined;
+    return dateMenu?._eventSource ?? null;
+}
+
+/**
+ * The macOS calendar widget: the month in red, its days, today in a red
+ * circle; the medium one lists the next events beside it.
+ */
 export class CalendarWidget extends DesktopWidget {
-    private readonly box: St.BoxLayout;
+    private readonly row: St.BoxLayout;
+    private readonly month: St.BoxLayout;
+    private readonly events: St.BoxLayout | null = null;
+    private source: EventSource | null = null;
+    private sourceId = 0;
     private shown = '';
     private timerId = 0;
+    private readonly clockSettings = new Gio.Settings({ schema_id: 'org.gnome.desktop.interface' });
 
-    constructor(id: WidgetId, size: number, host: WidgetHost) {
-        super(id, size, host);
-        this.box = new St.BoxLayout({ style_class: 'macr-widget-calendar-box', vertical: true, x_expand: true, y_expand: true });
-        this.actor.add_child(this.box);
+    constructor(id: WidgetId, size: WidgetSize, box: Box, host: WidgetHost) {
+        super(id, size, box, host);
+        this.row = new St.BoxLayout({ x_expand: true, y_expand: true });
+        this.month = new St.BoxLayout({ style_class: 'macr-widget-calendar-box', vertical: true, width: box.height, y_expand: true });
+        this.row.add_child(this.month);
+        if (size === 'medium') {
+            this.events = new St.BoxLayout({ style_class: 'macr-widget-events', vertical: true, x_expand: true, y_expand: true });
+            this.row.add_child(this.events);
+        }
+        this.actor.add_child(this.row);
         this.update();
         this.timerId = GLib.timeout_add_seconds(GLib.PRIORITY_LOW, TICK_SECONDS, () => {
             this.update();
@@ -29,6 +74,7 @@ export class CalendarWidget extends DesktopWidget {
     override destroy(): void {
         if (this.timerId) GLib.source_remove(this.timerId);
         this.timerId = 0;
+        this.unwatch();
         super.destroy();
     }
 
@@ -36,21 +82,27 @@ export class CalendarWidget extends DesktopWidget {
         this.openApp('org.gnome.Calendar.desktop');
     }
 
-    /** Builds the month again when the day has changed. */
     private update(): void {
         const now = GLib.DateTime.new_now_local();
         const today = now.format('%F') ?? '';
-        if (today === this.shown) return;
-        this.shown = today;
-        this.box.destroy_all_children();
+        if (today !== this.shown) {
+            this.shown = today;
+            this.buildMonth(now);
+        }
+        if (this.events) this.requestEvents();
+    }
 
-        this.box.add_child(new St.Label({ text: (now.format('%B') ?? '').toUpperCase(), style_class: 'macr-widget-month' }));
+    /** Builds the month again when the day has changed. */
+    private buildMonth(now: GLib.DateTime): void {
+        this.month.destroy_all_children();
+        this.month.add_child(new St.Label({ text: (now.format('%B') ?? '').toUpperCase(), style_class: 'macr-widget-month' }));
         const layout = new Clutter.GridLayout({ orientation: Clutter.Orientation.HORIZONTAL });
         const grid = new St.Widget({ layout_manager: layout, style_class: 'macr-widget-month-grid', x_expand: true, y_expand: true });
-        // Fixed cells: the grid fills the widget whatever the labels' widths.
+        // Fixed cells: the grid fills the square whatever the labels' widths.
         const scale = this.host.scale;
-        const cellWidth = Math.floor((this.size - 24 * scale) / 7);
-        const cellHeight = Math.floor((this.size - 46 * scale) / 7);
+        const unit = this.box.height;
+        const cellWidth = Math.floor((unit - 24 * scale) / 7);
+        const cellHeight = Math.floor((unit - 46 * scale) / 7);
         const firstWeekday = Shell.util_get_week_start();
         // 1 November 2026 is a Sunday: its week gives the weekdays' initials.
         const sunday = GLib.DateTime.new_local(2026, 11, 1, 12, 0, 0);
@@ -68,6 +120,71 @@ export class CalendarWidget extends DesktopWidget {
                 layout.attach(cell, column, row + 1, 1, 1);
             });
         });
-        this.box.add_child(grid);
+        this.month.add_child(grid);
+    }
+
+    /** The next days' events, asked of the server only when its range does not hold them. */
+    private requestEvents(): void {
+        const source = shellEvents();
+        if (source !== this.source) {
+            this.unwatch();
+            this.source = source;
+            this.sourceId = source?.connect('changed', () => this.buildEvents()) ?? 0;
+        }
+        if (source) {
+            const [begin, end] = this.range();
+            const asked = source as unknown as { _lastRequestBegin?: Date | null; _lastRequestEnd?: Date | null };
+            const covered = asked._lastRequestBegin && asked._lastRequestEnd && asked._lastRequestBegin <= begin && asked._lastRequestEnd >= end;
+            if (!covered) source.requestRange(begin, end);
+        }
+        this.buildEvents();
+    }
+
+    private unwatch(): void {
+        if (this.source && this.sourceId) this.source.disconnect(this.sourceId);
+        this.source = null;
+        this.sourceId = 0;
+    }
+
+    private range(): [Date, Date] {
+        const begin = new Date();
+        begin.setHours(0, 0, 0, 0);
+        const end = new Date(begin);
+        end.setDate(end.getDate() + EVENT_DAYS);
+        return [begin, end];
+    }
+
+    private buildEvents(): void {
+        const box = this.events;
+        if (!box) return;
+        box.destroy_all_children();
+        const [begin, end] = this.range();
+        const all = (this.source?.getEvents(begin, end) ?? []).map((event) => ({ summary: event.summary, start: event.date.getTime(), end: event.end.getTime() }));
+        const shown = upcomingEvents(all, Date.now(), EVENT_ROWS);
+        if (shown.length === 0) {
+            box.add_child(new St.Label({ text: _('No Events'), style_class: 'macr-widget-events-none', x_expand: true, y_expand: true, y_align: Clutter.ActorAlign.CENTER, x_align: Clutter.ActorAlign.CENTER }));
+            return;
+        }
+        for (const event of shown) {
+            const row = new St.BoxLayout({ style_class: 'macr-widget-event' });
+            row.add_child(new St.Widget({ style_class: 'macr-widget-event-bar' }));
+            const text = new St.BoxLayout({ vertical: true, x_expand: true });
+            const title = new St.Label({ text: event.summary || _('Untitled Event'), style_class: 'macr-widget-event-title' });
+            title.clutter_text.ellipsize = Pango.EllipsizeMode.END;
+            text.add_child(title);
+            text.add_child(new St.Label({ text: this.when(event.start, event.allDay), style_class: 'macr-widget-event-time' }));
+            row.add_child(text);
+            box.add_child(row);
+        }
+    }
+
+    /** "All Day" or the time, with the day when it is not today. */
+    private when(start: number, allDay: boolean): string {
+        const time = GLib.DateTime.new_from_unix_local(Math.floor(start / 1000));
+        const days = Math.round((new Date(start).setHours(0, 0, 0, 0) - new Date().setHours(0, 0, 0, 0)) / 86400000);
+        const clock = allDay ? _('All Day') : (time.format(this.clockSettings.get_string('clock-format') === '12h' ? '%l:%M %p' : '%R') ?? '').trim();
+        if (days <= 0) return clock;
+        const day = days === 1 ? _('Tomorrow') : (time.format('%A') ?? '');
+        return `${day}, ${clock}`;
     }
 }

@@ -1,11 +1,12 @@
 import Clutter from 'gi://Clutter';
+import Gio from 'gi://Gio';
 import GLib from 'gi://GLib';
 import Pango from 'gi://Pango';
 import St from 'gi://St';
 import { gettext as _ } from 'resource:///org/gnome/shell/extensions/extension.js';
 import * as Main from 'resource:///org/gnome/shell/ui/main.js';
 
-import { dayRange, type WidgetId } from './logic/widgets.js';
+import { type Box, dayRange, hourlyForecast, type WidgetId, type WidgetSize } from './logic/widgets.js';
 import { DesktopWidget, type WidgetHost } from './widget.js';
 
 /** GWeather's TemperatureUnit.DEFAULT: the unit of the user's locale. */
@@ -57,24 +58,45 @@ export class WeatherWidget extends DesktopWidget {
     private readonly icon: St.Icon;
     private readonly sky: St.Label;
     private readonly range: St.Label;
+    private readonly hours: St.BoxLayout | null = null;
     private timerId = 0;
+    private readonly clockSettings = new Gio.Settings({ schema_id: 'org.gnome.desktop.interface' });
 
-    constructor(id: WidgetId, size: number, host: WidgetHost) {
-        super(id, size, host);
-        const box = new St.BoxLayout({ style_class: 'macr-widget-weather-box', vertical: true, x_expand: true, y_expand: true });
+    constructor(id: WidgetId, size: WidgetSize, box: Box, host: WidgetHost) {
+        super(id, size, box, host);
         this.place = new St.Label({ style_class: 'macr-widget-weather-place' });
         this.temperature = new St.Label({ style_class: 'macr-widget-weather-temp' });
-        this.icon = new St.Icon({ style_class: 'macr-widget-weather-icon', x_align: Clutter.ActorAlign.START });
+        this.icon = new St.Icon({ style_class: 'macr-widget-weather-icon', x_align: size === 'medium' ? Clutter.ActorAlign.END : Clutter.ActorAlign.START });
         this.sky = new St.Label({ style_class: 'macr-widget-weather-sky' });
         this.range = new St.Label({ style_class: 'macr-widget-weather-range' });
         for (const label of [this.place, this.sky]) label.clutter_text.ellipsize = Pango.EllipsizeMode.END;
-        box.add_child(this.place);
-        box.add_child(this.temperature);
-        box.add_child(new St.Widget({ y_expand: true }));
-        box.add_child(this.icon);
-        box.add_child(this.sky);
-        box.add_child(this.range);
-        this.actor.add_child(box);
+        const content = new St.BoxLayout({ style_class: 'macr-widget-weather-box', vertical: true, x_expand: true, y_expand: true });
+        if (size === 'medium') {
+            // The place and temperature on the left, the sky on the right, the next hours under them.
+            const top = new St.BoxLayout({ x_expand: true });
+            const left = new St.BoxLayout({ vertical: true, x_expand: true });
+            left.add_child(this.place);
+            left.add_child(this.temperature);
+            const right = new St.BoxLayout({ vertical: true, x_align: Clutter.ActorAlign.END, y_align: Clutter.ActorAlign.END });
+            for (const label of [this.sky, this.range]) label.x_align = Clutter.ActorAlign.END;
+            right.add_child(this.icon);
+            right.add_child(this.sky);
+            right.add_child(this.range);
+            top.add_child(left);
+            top.add_child(right);
+            content.add_child(top);
+            content.add_child(new St.Widget({ y_expand: true }));
+            this.hours = new St.BoxLayout({ style_class: 'macr-widget-weather-hours', x_expand: true });
+            content.add_child(this.hours);
+        } else {
+            content.add_child(this.place);
+            content.add_child(this.temperature);
+            content.add_child(new St.Widget({ y_expand: true }));
+            content.add_child(this.icon);
+            content.add_child(this.sky);
+            content.add_child(this.range);
+        }
+        this.actor.add_child(content);
 
         this.client = shellWeather();
         this.clientId = this.client?.connect('changed', () => this.sync()) ?? 0;
@@ -105,6 +127,10 @@ export class WeatherWidget extends DesktopWidget {
         this.temperature.visible = ready;
         this.icon.visible = ready;
         this.range.visible = ready;
+        if (this.hours) {
+            this.hours.visible = ready;
+            this.hours.destroy_all_children();
+        }
         if (!client || !info || !ready) {
             this.actor.remove_style_class_name('night');
             this.place.text = _('Weather');
@@ -127,6 +153,28 @@ export class WeatherWidget extends DesktopWidget {
         this.sky.text = conditions && conditions !== '-' ? conditions : info.get_sky();
         const range = dayRange([now, ...this.todaysForecast(info)]);
         this.range.text = range ? _('H:%s° L:%s°').format(String(range.high), String(range.low)) : '';
+        if (this.hours) this.buildHours(info);
+    }
+
+    /** Medium: the next six hours, each with its time, sky and temperature. */
+    private buildHours(info: WeatherInfo): void {
+        const hours = this.hours;
+        if (!hours) return;
+        const items = [];
+        for (const forecast of info.get_forecast_list()) {
+            const [valid, time] = forecast.get_value_update();
+            const [ok, temperature] = forecast.get_value_temp(DEFAULT_UNIT);
+            if (valid && ok) items.push({ time, temperature, icon: forecast.get_symbolic_icon_name() });
+        }
+        const twelve = this.clockSettings.get_string('clock-format') === '12h';
+        for (const item of hourlyForecast(items, Math.floor(Date.now() / 1000), 6)) {
+            const column = new St.BoxLayout({ style_class: 'macr-widget-weather-hour', vertical: true, x_expand: true });
+            const time = GLib.DateTime.new_from_unix_local(item.time).format(twelve ? '%l %p' : '%H') ?? '';
+            column.add_child(new St.Label({ text: time.trim(), style_class: 'macr-widget-weather-hour-time', x_align: Clutter.ActorAlign.CENTER }));
+            column.add_child(new St.Icon({ icon_name: item.icon, style_class: 'macr-widget-weather-hour-icon', x_align: Clutter.ActorAlign.CENTER }));
+            column.add_child(new St.Label({ text: `${Math.round(item.temperature)}°`, style_class: 'macr-widget-weather-hour-temp', x_align: Clutter.ActorAlign.CENTER }));
+            hours.add_child(column);
+        }
     }
 
     /** The forecast temperatures for the rest of today. */

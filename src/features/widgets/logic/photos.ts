@@ -19,8 +19,8 @@ export function photoFor(paths: readonly string[], seconds: number): string | nu
     return paths[hash % paths.length];
 }
 
-/** The size to load a `width` x `height` photo at so it covers a `size` square. */
-export function coverSize(width: number, height: number, size: number): { width: number; height: number } {
-    const scale = size / Math.min(width, height);
+/** The size to load a `width` x `height` photo at so it covers a `boxWidth` x `boxHeight` widget. */
+export function coverSize(width: number, height: number, boxWidth: number, boxHeight: number): { width: number; height: number } {
+    const scale = Math.max(boxWidth / width, boxHeight / height);
     return { width: Math.round(width * scale), height: Math.round(height * scale) };
 }

@@ -21,30 +21,66 @@ export function widgetIds(list: readonly string[]): WidgetId[] {
     return ids;
 }
 
+export type WidgetSize = 'small' | 'medium';
+
+/** The sizes macOS has for each widget; the first is the default. */
+const SIZES: Record<WidgetId, WidgetSize[]> = {
+    clock: ['small'],
+    calendar: ['small', 'medium'],
+    weather: ['small', 'medium'],
+    batteries: ['small', 'medium'],
+    photos: ['small', 'medium'],
+};
+
+export function sizesOf(id: WidgetId): WidgetSize[] {
+    return SIZES[id];
+}
+
+/** The size a widget shows at: the one saved for it when it has that size, else small. */
+export function widgetSize(id: WidgetId, saved: string | undefined): WidgetSize {
+    return (SIZES[id] as string[]).includes(saved ?? '') ? (saved as WidgetSize) : 'small';
+}
+
+export interface Box {
+    width: number;
+    height: number;
+}
+
+/** A small widget is `unit` square; a medium one is two of them and the `gap` wide. */
+export function boxOf(size: WidgetSize, unit: number, gap: number): Box {
+    return size === 'medium' ? { width: 2 * unit + gap, height: unit } : { width: unit, height: unit };
+}
+
 /**
- * Where `count` widgets of `size` go before any is dragged: a column down
- * the right of the work area, `margin` in from its corner, the next column
- * to the left when one is full.
+ * Where widgets go before any is dragged: a column down the right of the
+ * work area, `margin` in from its corner, each against the column's right
+ * edge; the next column starts left of the widest one when one is full.
  */
-export function defaultSlots(count: number, area: Rect, size: number, gap: number, margin: number): Point[] {
-    const step = size + gap;
-    const perColumn = Math.max(1, Math.floor((area.height - 2 * margin + gap) / step));
+export function defaultSlots(boxes: readonly Box[], area: Rect, gap: number, margin: number): Point[] {
     const slots: Point[] = [];
-    for (let i = 0; i < count; i++) {
-        const column = Math.floor(i / perColumn);
-        const row = i % perColumn;
-        slots.push({ x: area.x + area.width - margin - size - column * step, y: area.y + margin + row * step });
+    let right = area.x + area.width - margin;
+    let y = area.y + margin;
+    let widest = 0;
+    for (const box of boxes) {
+        if (widest > 0 && y + box.height > area.y + area.height - margin) {
+            right -= widest + gap;
+            y = area.y + margin;
+            widest = 0;
+        }
+        slots.push({ x: right - box.width, y });
+        y += box.height + gap;
+        widest = Math.max(widest, box.width);
     }
     return slots;
 }
 
 /** A dropped widget's place: on the `grid`, and wholly inside the work area. */
-export function placeWidget(x: number, y: number, size: number, area: Rect, grid = 8): Point {
+export function placeWidget(x: number, y: number, box: Box, area: Rect, grid = 8): Point {
     const snap = (v: number, origin: number) => origin + Math.round((v - origin) / grid) * grid;
     const clamp = (v: number, low: number, high: number) => Math.min(Math.max(v, low), high);
     return {
-        x: clamp(snap(x, area.x), area.x, area.x + area.width - size),
-        y: clamp(snap(y, area.y), area.y, area.y + area.height - size),
+        x: clamp(snap(x, area.x), area.x, area.x + area.width - box.width),
+        y: clamp(snap(y, area.y), area.y, area.y + area.height - box.height),
     };
 }
 
@@ -103,3 +139,55 @@ export function isDesktopIconsTitle(title: string | null): boolean {
     const flags = title.indexOf('@!');
     return flags >= 0 && /B/i.test(title.slice(flags + 2).replace(/^[^;]*;/, ''));
 }
+
+export interface WidgetEvent {
+    summary: string;
+    /** Milliseconds since the epoch. */
+    start: number;
+    end: number;
+}
+
+/** A local midnight, as Date.getTime(). */
+function isMidnight(ms: number): boolean {
+    const date = new Date(ms);
+    return date.getHours() === 0 && date.getMinutes() === 0 && date.getSeconds() === 0;
+}
+
+/** The local day `ms` falls on, as its midnight's Date.getTime(). */
+function dayOf(ms: number): number {
+    return new Date(ms).setHours(0, 0, 0, 0);
+}
+
+/**
+ * The events the medium calendar lists: those not over at `now`, day by
+ * day (one already under way counts as today's), each day's all-day ones
+ * first, then by start, at most `limit`.
+ */
+export function upcomingEvents<T extends WidgetEvent>(events: readonly T[], now: number, limit: number): (T & { allDay: boolean })[] {
+    return events
+        .filter((event) => event.end > now)
+        .map((event) => ({ ...event, allDay: isMidnight(event.start) && isMidnight(event.end) && event.end > event.start }))
+        .sort((a, b) => dayOf(Math.max(a.start, now)) - dayOf(Math.max(b.start, now)) || Number(b.allDay) - Number(a.allDay) || a.start - b.start)
+        .slice(0, limit);
+}
+
+export interface ForecastItem {
+    /** Seconds since the epoch. */
+    time: number;
+    temperature: number;
+    icon: string;
+}
+
+/** The next `count` hours' forecast after `now` (seconds), one per hour. */
+export function hourlyForecast<T extends ForecastItem>(items: readonly T[], now: number, count: number): T[] {
+    const next: T[] = [];
+    let last = -Infinity;
+    for (const item of [...items].sort((a, b) => a.time - b.time)) {
+        if (item.time <= now || item.time - last < 3600) continue;
+        next.push(item);
+        last = item.time;
+        if (next.length === count) break;
+    }
+    return next;
+}
+

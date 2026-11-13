@@ -419,6 +419,11 @@
       <summary>The widgets on the desktop</summary>
       <description>Which widgets show, in order: clock, calendar, weather, batteries, photos.</description>
     </key>
+    <key name="desktop-widget-sizes" type="a{ss}">
+      <default>{}</default>
+      <summary>Each widget's size</summary>
+      <description>small or medium for each widget that has a medium size; widgets not listed are small.</description>
+    </key>
     <key name="desktop-widget-positions" type="a{s(dd)}">
       <default>{}</default>
       <summary>Where each widget was dragged</summary>

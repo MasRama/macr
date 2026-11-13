@@ -6,7 +6,7 @@ import * as Main from 'resource:///org/gnome/shell/ui/main.js';
 import * as PopupMenu from 'resource:///org/gnome/shell/ui/popupMenu.js';
 
 import { styleMenu, syncMenuScheme } from '../../shared/menu-style.js';
-import type { Point, WidgetId } from './logic/widgets.js';
+import { type Box, type Point, sizesOf, type WidgetId, type WidgetSize } from './logic/widgets.js';
 
 /** Pointer travel (logical px) before a press becomes a drag. */
 const DRAG_THRESHOLD = 6;
@@ -18,6 +18,7 @@ export interface WidgetHost {
     /** The widget was dropped at `point` (stage px). */
     moved(id: WidgetId, point: Point): void;
     remove(id: WidgetId): void;
+    resize(id: WidgetId, size: WidgetSize): void;
     editWidgets(): void;
     /** Device pixels per logical pixel. */
     readonly scale: number;
@@ -44,14 +45,15 @@ export abstract class DesktopWidget {
 
     constructor(
         readonly id: WidgetId,
-        readonly size: number,
+        readonly size: WidgetSize,
+        readonly box: Box,
         protected readonly host: WidgetHost,
     ) {
         this.actor = new St.Widget({
-            style_class: `macr-widget macr-widget-${id}`,
+            style_class: `macr-widget macr-widget-${id} macr-widget-${size}`,
             reactive: true,
-            width: size,
-            height: size,
+            width: box.width,
+            height: box.height,
             layout_manager: new Clutter.BinLayout(),
         });
         this.actor.add_effect_with_name(TINT, new Clutter.DesaturateEffect({ factor: 0 }));
@@ -65,6 +67,19 @@ export abstract class DesktopWidget {
         this.menu.actor.hide();
         this.menuManager = new PopupMenu.PopupMenuManager(this.actor, {});
         this.menuManager.addMenu(this.menu, -1);
+        const names: Record<WidgetSize, string> = { small: _('Small'), medium: _('Medium') };
+        const sizes = sizesOf(id);
+        if (sizes.length > 1) {
+            for (const choice of sizes) {
+                const item = new PopupMenu.PopupMenuItem(names[choice]);
+                this.menu.addMenuItem(item);
+                item.setOrnament(choice === size ? PopupMenu.Ornament.CHECK : PopupMenu.Ornament.NONE);
+                item.connect('activate', () => {
+                    if (choice !== this.size) this.host.resize(this.id, choice);
+                });
+            }
+            this.menu.addMenuItem(new PopupMenu.PopupSeparatorMenuItem());
+        }
         const edit = new PopupMenu.PopupMenuItem(_('Edit Widgets…'));
         edit.connect('activate', () => this.host.editWidgets());
         this.menu.addMenuItem(edit);

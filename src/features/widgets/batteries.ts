@@ -7,7 +7,7 @@ import UPower from 'gi://UPowerGlib';
 import { gettext as _ } from 'resource:///org/gnome/shell/extensions/extension.js';
 
 import { batteryIcon, type BatteryDevice, batteryLevel, shownBatteries } from './logic/batteries.js';
-import type { WidgetId } from './logic/widgets.js';
+import type { Box, WidgetId, WidgetSize } from './logic/widgets.js';
 import { DesktopWidget, type WidgetHost } from './widget.js';
 
 type Rgba = [number, number, number, number];
@@ -103,7 +103,7 @@ class Ring {
  * big ring with its charge under it.
  */
 export class BatteriesWidget extends DesktopWidget {
-    private readonly box: St.Widget;
+    private readonly content: St.Widget;
     private client: UPower.Client | null = null;
     private readonly cancellable = new Gio.Cancellable();
     private clientIds: number[] = [];
@@ -111,10 +111,10 @@ export class BatteriesWidget extends DesktopWidget {
     private light = false;
     private syncId = 0;
 
-    constructor(id: WidgetId, size: number, host: WidgetHost) {
-        super(id, size, host);
-        this.box = new St.Widget({ style_class: 'macr-widget-batteries-box', layout_manager: new Clutter.BinLayout(), x_expand: true, y_expand: true });
-        this.actor.add_child(this.box);
+    constructor(id: WidgetId, size: WidgetSize, box: Box, host: WidgetHost) {
+        super(id, size, box, host);
+        this.content = new St.Widget({ style_class: 'macr-widget-batteries-box', layout_manager: new Clutter.BinLayout(), x_expand: true, y_expand: true });
+        this.actor.add_child(this.content);
         const client = new UPower.Client();
         // UPower 1.90's client is a GAsyncInitable; the typings are 0.99's.
         const initable = client as unknown as Gio.AsyncInitable;
@@ -186,8 +186,9 @@ export class BatteriesWidget extends DesktopWidget {
             ),
         );
         for (const { device } of shown) this.deviceIds.push([device, device.connect('notify', () => this.queueSync())]);
-        this.box.destroy_all_children();
-        if (shown.length <= 1) this.buildOne(shown[0] ?? null);
+        this.content.destroy_all_children();
+        if (this.size === 'medium') this.buildRow(shown);
+        else if (shown.length <= 1) this.buildOne(shown[0] ?? null);
         else this.buildGrid(shown);
     }
 
@@ -201,7 +202,25 @@ export class BatteriesWidget extends DesktopWidget {
         column.add_child(ring.actor);
         const text = device ? `${Math.round(device.percentage)}%` : _('No Batteries');
         column.add_child(new St.Label({ text, style_class: device ? 'macr-widget-battery-percent' : 'macr-widget-battery-none', x_align: Clutter.ActorAlign.CENTER }));
-        this.box.add_child(column);
+        this.content.add_child(column);
+    }
+
+    /** Medium: four rings in a row, each with its charge under it. */
+    private buildRow(devices: Shown[]): void {
+        const scale = this.host.scale;
+        const row = new St.BoxLayout({ style_class: 'macr-widget-batteries-row', x_expand: true, y_align: Clutter.ActorAlign.CENTER });
+        for (let i = 0; i < 4; i++) {
+            const device = devices[i] ?? null;
+            const column = new St.BoxLayout({ vertical: true, x_expand: true });
+            const ring = new Ring(Math.round(62 * scale), Math.round(24 * scale));
+            ring.set(device, this.light);
+            ring.actor.x_align = Clutter.ActorAlign.CENTER;
+            column.add_child(ring.actor);
+            const text = device ? `${Math.round(device.percentage)}%` : '';
+            column.add_child(new St.Label({ text, style_class: 'macr-widget-battery-small-percent', x_align: Clutter.ActorAlign.CENTER }));
+            row.add_child(column);
+        }
+        this.content.add_child(row);
     }
 
     /** Two to four rings in a square, empty places as dim rings. */
@@ -216,6 +235,6 @@ export class BatteriesWidget extends DesktopWidget {
             ring.set(devices[i] ?? null, this.light);
             layout.attach(ring.actor, i % 2, Math.floor(i / 2), 1, 1);
         }
-        this.box.add_child(grid);
+        this.content.add_child(grid);
     }
 }

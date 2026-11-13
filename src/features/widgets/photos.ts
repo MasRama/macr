@@ -6,7 +6,7 @@ import St from 'gi://St';
 import { gettext as _ } from 'resource:///org/gnome/shell/extensions/extension.js';
 
 import { coverSize, isPhoto, photoFor } from './logic/photos.js';
-import type { WidgetId } from './logic/widgets.js';
+import type { Box, WidgetId, WidgetSize } from './logic/widgets.js';
 import { DesktopWidget, type WidgetHost } from './widget.js';
 
 /** Looks this many folders deep into Pictures, and stops after this many photos. */
@@ -32,8 +32,8 @@ export class PhotosWidget extends DesktopWidget {
     private timerId = 0;
     private scannedAt = 0;
 
-    constructor(id: WidgetId, size: number, host: WidgetHost) {
-        super(id, size, host);
+    constructor(id: WidgetId, size: WidgetSize, box: Box, host: WidgetHost) {
+        super(id, size, box, host);
         this.actor.add_style_class_name('macr-widget-photos');
         this.empty = new St.Label({
             text: _('Add photos to your Pictures folder'),
@@ -140,25 +140,29 @@ export class PhotosWidget extends DesktopWidget {
     }
 
     /**
-     * The photo scaled to cover the widget, cropped square and turned upright,
+     * The photo scaled to cover the widget, turned upright and cropped to it,
      * as a small PNG in Macr's cache: the theme loads it without stalling.
      */
     private async render(path: string): Promise<string> {
-        const size = this.size;
+        const { width: boxWidth, height: boxHeight } = this.box;
         const [format, width, height] = await fileInfo(path, this.cancellable);
         if (!format || width <= 0 || height <= 0) throw new Error('not a picture');
-        const target = coverSize(width, height, size);
+        // Covering a square of the widget's longer side, the photo still
+        // covers it once EXIF turns it upright, whichever way.
+        const longer = Math.max(boxWidth, boxHeight);
+        const target = coverSize(width, height, longer, longer);
         const stream = await readFile(Gio.File.new_for_path(path), this.cancellable);
         let pixbuf = await loadAtScale(stream, target.width, target.height, this.cancellable);
         stream.close(null);
         pixbuf = pixbuf.apply_embedded_orientation() ?? pixbuf;
-        const side = Math.min(pixbuf.get_width(), pixbuf.get_height(), size);
-        const square = pixbuf.new_subpixbuf(Math.floor((pixbuf.get_width() - side) / 2), Math.floor((pixbuf.get_height() - side) / 2), side, side);
+        const cropWidth = Math.min(pixbuf.get_width(), boxWidth);
+        const cropHeight = Math.min(pixbuf.get_height(), boxHeight);
+        const cropped = pixbuf.new_subpixbuf(Math.floor((pixbuf.get_width() - cropWidth) / 2), Math.floor((pixbuf.get_height() - cropHeight) / 2), cropWidth, cropHeight);
         const dir = GLib.build_filenamev([GLib.get_user_cache_dir(), 'macr']);
         GLib.mkdir_with_parents(dir, 0o700);
         // A new name each time: the theme keeps images by file name.
         const file = GLib.build_filenamev([dir, `photo-widget-${GLib.get_real_time()}.png`]);
-        square.savev(file, 'png', [], []);
+        cropped.savev(file, 'png', [], []);
         return file;
     }
 

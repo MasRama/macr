@@ -7,12 +7,8 @@ import * as Main from 'resource:///org/gnome/shell/ui/main.js';
 
 import type { Module } from '../../shared/module.js';
 import { isLight } from '../../shared/scheme.js';
-import { BatteriesWidget } from './batteries.js';
-import { CalendarWidget } from './calendar.js';
-import { ClockWidget } from './clock.js';
-import { defaultSlots, fromFraction, isDesktopIconsTitle, placeWidget, type Point, type Rect, toFraction, type WidgetId, widgetIds } from './logic/widgets.js';
-import { PhotosWidget } from './photos.js';
-import { WeatherWidget } from './weather.js';
+import { type Box, boxOf, defaultSlots, fromFraction, isDesktopIconsTitle, placeWidget, type Point, type Rect, toFraction, type WidgetId, widgetIds, type WidgetSize, widgetSize } from './logic/widgets.js';
+import { WIDGETS } from './registry.js';
 import type { DesktopWidget, WidgetHost } from './widget.js';
 
 const UUID = 'macr@masrama.github.io';
@@ -23,14 +19,7 @@ const MARGIN = 28;
 
 type Disconnectable = { disconnect(id: number): void };
 type Positions = Record<string, [number, number]>;
-
-const WIDGETS: Record<WidgetId, new (id: WidgetId, size: number, host: WidgetHost) => DesktopWidget> = {
-    clock: ClockWidget,
-    calendar: CalendarWidget,
-    weather: WeatherWidget,
-    batteries: BatteriesWidget,
-    photos: PhotosWidget,
-};
+type Sizes = Record<string, string>;
 
 /**
  * macOS Sonoma's desktop widgets: a clock, a calendar, the weather, the
@@ -59,6 +48,7 @@ export class DesktopWidgetsModule implements Module, WidgetHost {
             this.ids.push([object, object.connect(signal, callback)]);
         };
         listen(this.settings, 'changed::desktop-widgets', () => this.build());
+        listen(this.settings, 'changed::desktop-widget-sizes', () => this.build());
         listen(this.settings, 'changed::desktop-widget-positions', () => this.place());
         listen(this.desktop, 'changed::color-scheme', () => this.syncScheme());
         listen(global.display, 'restacked', () => this.queueRestack());
@@ -81,12 +71,7 @@ export class DesktopWidgetsModule implements Module, WidgetHost {
     }
 
     moved(id: WidgetId, point: Point): void {
-        const area = this.area();
-        const size = SIZE * this.scale;
-        const placed = placeWidget(point.x, point.y, size, area, 8 * this.scale);
-        const positions = this.positions();
-        positions[id] = toFraction(placed, area);
-        this.settings.set_value('desktop-widget-positions', new GLib.Variant('a{s(dd)}', positions));
+        this.savePosition(id, point);
         // Unchanged settings send no signal: put it on the grid anyway.
         this.place();
     }
@@ -95,16 +80,39 @@ export class DesktopWidgetsModule implements Module, WidgetHost {
         this.settings.set_strv('desktop-widgets', this.settings.get_strv('desktop-widgets').filter((name) => name !== id));
     }
 
+    resize(id: WidgetId, size: WidgetSize): void {
+        const sizes = this.sizes();
+        sizes[id] = size;
+        this.settings.set_value('desktop-widget-sizes', new GLib.Variant('a{ss}', sizes));
+    }
+
     editWidgets(): void {
         Main.extensionManager.openExtensionPrefs(UUID, '', {});
+    }
+
+    /** One widget's box in stage px. */
+    boxFor(size: WidgetSize): Box {
+        const scale = this.scale;
+        const box = boxOf(size, SIZE, GAP);
+        return { width: Math.round(box.width * scale), height: Math.round(box.height * scale) };
+    }
+
+    private savePosition(id: WidgetId, point: Point, size?: WidgetSize): void {
+        const area = this.area();
+        const box = this.boxFor(size ?? this.widgets.find((widget) => widget.id === id)?.size ?? 'small');
+        const placed = placeWidget(point.x, point.y, box, area, 8 * this.scale);
+        const positions = this.positions();
+        positions[id] = toFraction(placed, area);
+        this.settings.set_value('desktop-widget-positions', new GLib.Variant('a{s(dd)}', positions));
     }
 
     private build(): void {
         for (const widget of this.widgets) widget.destroy();
         this.widgets = [];
-        const size = Math.round(SIZE * this.scale);
+        const sizes = this.sizes();
         for (const id of widgetIds(this.settings.get_strv('desktop-widgets'))) {
-            const widget = new WIDGETS[id](id, size, this);
+            const size = widgetSize(id, sizes[id]);
+            const widget = new WIDGETS[id](id, size, this.boxFor(size), this);
             this.layer?.add_child(widget.actor);
             this.widgets.push(widget);
         }
@@ -117,15 +125,23 @@ export class DesktopWidgetsModule implements Module, WidgetHost {
     private place(): void {
         const area = this.area();
         const scale = this.scale;
-        const size = SIZE * scale;
         const positions = this.positions();
-        const slots = defaultSlots(this.widgets.length, area, size, GAP * scale, MARGIN * scale);
+        const slots = defaultSlots(
+            this.widgets.map((widget) => widget.box),
+            area,
+            GAP * scale,
+            MARGIN * scale,
+        );
         this.widgets.forEach((widget, index) => {
             const saved = positions[widget.id];
             const at = saved ? fromFraction(saved, area) : slots[index];
-            const { x, y } = placeWidget(at.x, at.y, size, area, 1);
+            const { x, y } = placeWidget(at.x, at.y, widget.box, area, 1);
             widget.actor.set_position(x, y);
         });
+    }
+
+    private sizes(): Sizes {
+        return this.settings.get_value('desktop-widget-sizes').deepUnpack() as Sizes;
     }
 
     private positions(): Positions {
