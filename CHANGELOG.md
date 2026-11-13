@@ -1,5 +1,28 @@
 # Changelog
 
+## [0.6.0](https://github.com/MasRama/macr/compare/v0.5.0...v0.6.0) (2026-11-13)
+
+
+### Features
+
+* **clipboard:** keep a clipboard history on Ctrl+Super+V ([af6c0bc](https://github.com/MasRama/macr/commit/af6c0bc301f5a0fb29f0bc3e8d0d58667f482399))
+* **cursor:** shake the pointer to find it ([295ab16](https://github.com/MasRama/macr/commit/295ab169cf5e43675bce6f7d18d8c0202c94d9ab))
+* **desktop:** click the wallpaper to reveal the desktop ([292e29b](https://github.com/MasRama/macr/commit/292e29b85473e73205a0998cbd189afb1cf129f4))
+* **dock:** bounce an app's icon while it opens and when it needs attention ([913b48a](https://github.com/MasRama/macr/commit/913b48a27b70472b88a009e44ecc92269fe51396))
+* **dock:** keep minimized windows as thumbnails before the Trash ([7c7aeb1](https://github.com/MasRama/macr/commit/7c7aeb16ac1f1c07645187b4af0374b03b58b3e2))
+* **dock:** put the dock on the left or right side of the screen ([a09b946](https://github.com/MasRama/macr/commit/a09b946d8f73911d763a990f2c91ac28ac4b3bc8))
+* **gestures:** pinch, spread and swipe with four fingers ([1d18662](https://github.com/MasRama/macr/commit/1d18662e6290f17a6f599e1077348600c32bb577))
+* **hotcorners:** show the desktop by sliding windows to the edges ([15cffa3](https://github.com/MasRama/macr/commit/15cffa3c4a2467763fd1178c9ef06aa0aaf4bf66))
+* **launchpad:** group apps in folders by dragging one onto another ([53d271f](https://github.com/MasRama/macr/commit/53d271fd6c18b12339615dd8b193c1d070e6e863))
+* **stagemanager:** keep stages on every monitor, not just the primary ([e3f0dae](https://github.com/MasRama/macr/commit/e3f0dae470364db9dfda92bcf214611059893826))
+
+
+### Bug Fixes
+
+* **dock:** keep Mission Control's windows above the dock ([b74255f](https://github.com/MasRama/macr/commit/b74255fa9ddd6144883195d402f95af2f61c333c))
+* **dock:** leave windows waiting in Stage Manager out of the minimized thumbnails ([e88c2bf](https://github.com/MasRama/macr/commit/e88c2bf743d25e5728153715af7d213a859e4ead))
+* **launchpad:** centre a folder's name over its apps ([3601001](https://github.com/MasRama/macr/commit/36010011730e21c36204560f13f017c079489713))
+
 ## [0.5.0](https://github.com/MasRama/macr/compare/v0.4.0...v0.5.0) (2026-11-13)
 
 
