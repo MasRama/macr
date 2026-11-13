@@ -8,7 +8,7 @@ import '@girs/clutter-14/clutter-14';
 declare module '@girs/clutter-14/clutter-14' {
     export namespace Clutter {
         type EaseProperties = Partial<
-            Pick<Actor, 'x' | 'y' | 'width' | 'height' | 'opacity' | 'scale_x' | 'scale_y' | 'translation_x' | 'translation_y'>
+            Pick<Actor, 'x' | 'y' | 'width' | 'height' | 'opacity' | 'scale_x' | 'scale_y' | 'translation_x' | 'translation_y' | 'rotation_angle_y'>
         >;
 
         interface EaseParams extends EaseProperties {

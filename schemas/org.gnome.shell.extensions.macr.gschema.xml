@@ -97,6 +97,11 @@
       <summary>Show the overview as macOS Mission Control</summary>
       <description>Windows spread over the dimmed wallpaper, with the Spaces bar always at the top.</description>
     </key>
+    <key name="stage-manager-enabled" type="b">
+      <default>false</default>
+      <summary>Use macOS Stage Manager</summary>
+      <description>The focused app stays in the middle of the primary monitor and the other apps' windows wait as stages in a strip on the left; clicking a stage swaps it in.</description>
+    </key>
     <key name="hot-corners-enabled" type="b">
       <default>true</default>
       <summary>Use macOS hot corners</summary>

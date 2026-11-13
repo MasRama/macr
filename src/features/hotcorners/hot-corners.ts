@@ -5,6 +5,7 @@ import St from 'gi://St';
 import * as Main from 'resource:///org/gnome/shell/ui/main.js';
 
 import { launchpad } from '../../shared/launchpad-link.js';
+import { stageManager } from '../../shared/stage-link.js';
 import { type CornerName, outerCorners } from './logic/corners.js';
 import { toggleDesktop } from './logic/desktop.js';
 
@@ -119,8 +120,12 @@ export class HotCorners {
             .filter((w) => w.get_window_type() === Meta.WindowType.NORMAL && !w.skip_taskbar);
         const byId = new Map(windows.map((w) => [w.get_id(), w]));
         const plan = toggleDesktop(windows.map((w) => ({ id: w.get_id(), minimized: w.minimized })), this.hidden);
+        // Not the user minimizing the middle app: Stage Manager sets the windows aside as one stage.
+        const stage = stageManager();
+        stage?.pause();
         for (const id of plan.minimize) byId.get(id)?.minimize();
         for (const id of plan.restore) byId.get(id)?.unminimize();
+        stage?.resume();
         this.hidden = plan.hidden;
     }
 

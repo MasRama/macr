@@ -16,6 +16,7 @@ import { NotificationsModule } from './features/notifications/index.js';
 import { OsdModule } from './features/osd/index.js';
 import { ScreenshotModule } from './features/screenshot/index.js';
 import { SpotlightModule } from './features/spotlight/index.js';
+import { StageManagerModule } from './features/stagemanager/index.js';
 import { SwitcherModule } from './features/switcher/index.js';
 import { TilingModule } from './features/tiling/index.js';
 import { TrafficLightsModule } from './features/trafficlights/index.js';
@@ -39,6 +40,8 @@ const MODULES: ModuleEntry[] = [
     { key: 'traffic-lights-enabled', create: (context) => new TrafficLightsModule(context.settings) },
     { key: 'tiling-enabled', create: (context) => new TilingModule(context.settings) },
     { key: 'screenshot-enabled', create: (context) => new ScreenshotModule(context) },
+    // Paused, not turned off, while locked: turning off would bring every window back.
+    { key: 'stage-manager-enabled', screens: ['desktop', 'lock'], create: () => new StageManagerModule() },
     { key: 'lock-screen-enabled', screens: ['desktop', 'lock'], create: () => new LockScreenModule() },
     { key: 'login-screen-enabled', screens: ['login'], create: () => new LoginScreenModule() },
 ];
