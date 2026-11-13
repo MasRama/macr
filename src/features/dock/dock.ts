@@ -286,6 +286,11 @@ export class Dock {
         this.updateVisibility();
     }
 
+    /** The bottom of the screen the overview leaves to this dock, once it is placed. */
+    get overviewSpace(): number {
+        return this.layout?.overviewSpace ?? 0;
+    }
+
     /** The dash's natural size: a row along the bottom, a column down a side. */
     private dashSize(): { width: number; height: number } {
         if (isSide(this.edge)) {

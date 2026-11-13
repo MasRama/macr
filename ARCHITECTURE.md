@@ -115,6 +115,9 @@ schemas/                GSettings schema
   dock records those handlers while the dash is built and destroys the menus
   with their icons, so turning Macr off leaves nothing behind.
 - The overview's own dash is hidden (not destroyed) and restored on disable.
+  Each time the overview shows, its height is set to the bottom the primary
+  dock takes (`overviewSpace` in `logic/edge.ts`, 0 for a side dock), so the
+  overview lays Mission Control's windows out above the dock.
 - Magnification moves and scales the icons along the dock with
   `translation_x` (`translation_y` down a side) and `set_scale`; the
   background grows with them. The maths is in `logic/magnify.ts`.

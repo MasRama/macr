@@ -63,6 +63,8 @@ export class DockModule implements Module {
         this.ids.push([this.interface, this.interface.connect('changed::color-scheme', () => this.syncScheme())]);
         const layout = Main.layoutManager as unknown as { connect(signal: string, callback: () => void): number } & Disconnectable;
         this.ids.push([layout, layout.connect('monitors-changed', () => this.build())]);
+        const overview = Main.overview as unknown as { connect(signal: string, callback: () => void): number } & Disconnectable;
+        this.ids.push([overview, overview.connect('showing', () => this.syncOverviewSpace())]);
         this.minimized = new MinimizedWindows(() => this.syncMinimized());
         this.stopStages = onStagesChanged(() => this.syncMinimized());
         this.build();
@@ -107,6 +109,15 @@ export class DockModule implements Module {
         });
         this.syncScheme();
         this.syncMinimized();
+    }
+
+    /**
+     * The overview keeps the hidden dash's height free at the bottom: the
+     * primary dock's, so Mission Control's windows stay above it.
+     */
+    private syncOverviewSpace(): void {
+        const dock = this.docks.find((item) => item.monitorIndex === Main.layoutManager.primaryIndex);
+        Main.overview.dash.set_height(dock?.overviewSpace ?? 0);
     }
 
     /** Each dock's minimized windows, unless they go into their app's icon. */

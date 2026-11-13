@@ -23,6 +23,12 @@ test('a bottom dock is centred above the bottom edge', () => {
     assert.deepEqual(layout.hidden, { x: 0, y: 80 });
 });
 
+test('Mission Control keeps its windows above a bottom dock only', () => {
+    assert.equal(dockLayout('bottom', monitor, { width: 600, height: 70 }, 6).overviewSpace, 76);
+    assert.equal(dockLayout('left', monitor, { width: 70, height: 600 }, 6).overviewSpace, 0);
+    assert.equal(dockLayout('right', monitor, { width: 70, height: 600 }, 6).overviewSpace, 0);
+});
+
 test('a left dock is centred beside the left edge and hides past it', () => {
     const layout = dockLayout('left', monitor, { width: 70, height: 500 }, 6);
     assert.deepEqual(layout.resting, { x: 1926, y: 290, width: 70, height: 500 });

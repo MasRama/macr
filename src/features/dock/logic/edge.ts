@@ -38,6 +38,8 @@ export interface DockLayout {
     strip: Rect;
     /** How far the dock slides to hide past its edge. */
     hidden: Point;
+    /** The bottom of the screen Mission Control leaves to the dock, so no window goes under it. */
+    overviewSpace: number;
 }
 
 /** The dock's shelf of `size`, centred along `edge`, `margin` from it. */
@@ -54,6 +56,7 @@ export function dockLayout(edge: DockEdge, monitor: Rect, size: Size, margin: nu
             resting: { x, y, width, height },
             strip: { x, y: monitor.y + monitor.height - 1, width, height: 1 },
             hidden: { x: 0, y: away(height) },
+            overviewSpace: height + margin,
         };
     }
     const y = Math.round(monitor.y + (monitor.height - height) / 2);
@@ -66,6 +69,7 @@ export function dockLayout(edge: DockEdge, monitor: Rect, size: Size, margin: nu
             resting: { x: x + margin, y, width, height },
             strip: { x, y, width: 1, height },
             hidden: { x: -away(width), y: 0 },
+            overviewSpace: 0,
         };
     }
     const x = Math.round(monitor.x + monitor.width - width - margin);
@@ -76,6 +80,7 @@ export function dockLayout(edge: DockEdge, monitor: Rect, size: Size, margin: nu
         resting: { x, y, width, height },
         strip: { x: monitor.x + monitor.width - 1, y, width: 1, height },
         hidden: { x: away(width), y: 0 },
+        overviewSpace: 0,
     };
 }
 
