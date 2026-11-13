@@ -655,9 +655,15 @@ schemas/                GSettings schema
 ## Hot corners
 
 - One 1 px reactive chrome actor per configured corner, on the corners the
-  pointer can be pushed into (`logic/corners.ts`: a corner where another
-  monitor continues is skipped). `trackFullscreen` hides them over
-  full-screen windows. Each corner fires at most once per 600 ms.
+  pointer can be pushed into (`logic/corners.ts`). `trackFullscreen` hides
+  them over full-screen windows. Each corner fires at most once per 600 ms.
+- A corner where another monitor continues is skipped, except on the
+  primary monitor, which keeps all four, as GNOME keeps its own corner
+  there. Such a shared corner is held like GNOME's: two `Meta.Barrier`s,
+  panel-height long, along the edges that meet there (`cornerBarriers()`),
+  each letting the pointer back into the monitor, and a GNOME
+  `PressureBarrier` (100 px, 1 s) that fires the corner. Left alone over a
+  full-screen window unless the overview is open.
 - Actions: Mission Control, Launchpad (through `launchpad-link`, else GNOME's
   app grid), Desktop (toggles Show Desktop, below), Notification Center (the
   dateMenu, anchored on Macr's clock) and Lock Screen.

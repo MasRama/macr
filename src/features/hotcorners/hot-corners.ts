@@ -1,11 +1,14 @@
 import Gio from 'gi://Gio';
 import GLib from 'gi://GLib';
+import Meta from 'gi://Meta';
+import Shell from 'gi://Shell';
 import St from 'gi://St';
+import * as Layout from 'resource:///org/gnome/shell/ui/layout.js';
 import * as Main from 'resource:///org/gnome/shell/ui/main.js';
 
 import { releaseDesktopReveal, useDesktopReveal } from '../../shared/desktop-reveal.js';
 import { launchpad } from '../../shared/launchpad-link.js';
-import { type CornerName, outerCorners } from './logic/corners.js';
+import { type Barrier, type CornerName, type Corner, cornerBarriers, hotCorners } from './logic/corners.js';
 
 /** The setting that holds each corner's action. */
 export const CORNER_KEYS: Record<CornerName, string> = {
@@ -17,6 +20,25 @@ export const CORNER_KEYS: Record<CornerName, string> = {
 
 /** A corner fires at most once in this many milliseconds. */
 const COOLDOWN = 600;
+
+/** How far, in pixels, the pointer is pushed into a shared corner, as GNOME's own. */
+const PRESSURE = 100;
+const PRESSURE_TIMEOUT = 1000;
+
+/** GNOME 46's pressure barrier, exported by layout.js but missing from the typings. */
+interface PressureBarrier {
+    addBarrier(barrier: Meta.Barrier): void;
+    destroy(): void;
+    connect(signal: 'trigger', callback: () => void): number;
+}
+type PressureBarrierClass = new (threshold: number, timeout: number, actionMode: Shell.ActionMode) => PressureBarrier;
+
+const DIRECTIONS: Record<Barrier['allow'], Meta.BarrierDirection> = {
+    'positive-x': Meta.BarrierDirection.POSITIVE_X,
+    'negative-x': Meta.BarrierDirection.NEGATIVE_X,
+    'positive-y': Meta.BarrierDirection.POSITIVE_Y,
+    'negative-y': Meta.BarrierDirection.NEGATIVE_Y,
+};
 
 type Signals = { connect(signal: string, callback: (...args: never[]) => void): number; disconnect(id: number): void };
 /** GNOME 46's layout manager, which owns GNOME's own (top-left) hot corner. */
@@ -34,6 +56,8 @@ export class HotCorners {
     private readonly interface = new Gio.Settings({ schema_id: 'org.gnome.desktop.interface' });
     private readonly ids: [Signals, number][] = [];
     private corners: St.Widget[] = [];
+    private barriers: Meta.Barrier[] = [];
+    private pressures: PressureBarrier[] = [];
     private readonly reveal = useDesktopReveal();
     private lastFired = 0;
 
@@ -69,12 +93,22 @@ export class HotCorners {
     private clear(): void {
         for (const corner of this.corners) corner.destroy();
         this.corners = [];
+        for (const pressure of this.pressures) pressure.destroy();
+        this.pressures = [];
+        for (const barrier of this.barriers) barrier.destroy();
+        this.barriers = [];
     }
 
     private build(): void {
         this.clear();
-        for (const { corner, x, y } of outerCorners(this.layout.monitors)) {
+        const barriers = (global.backend.capabilities & Meta.BackendCapabilities.BARRIERS) !== 0;
+        for (const spot of hotCorners(this.layout.monitors, this.layout.primaryIndex)) {
+            const { corner, x, y } = spot;
             if (this.settings.get_string(CORNER_KEYS[corner]) === 'none') continue;
+            if (spot.shared) {
+                if (barriers) this.holdShared(spot);
+                continue;
+            }
             const actor = new St.Widget({ name: 'macr-hot-corner', reactive: true, x, y, width: 1, height: 1 });
             actor.connect('enter-event', () => {
                 this.fire(corner);
@@ -84,6 +118,32 @@ export class HotCorners {
             this.layout.addChrome(actor, { affectsInputRegion: true, trackFullscreen: true });
             this.corners.push(actor);
         }
+    }
+
+    /**
+     * A corner another monitor continues past is held, as GNOME holds its
+     * own hot corner on the primary monitor: barriers along both edges stop
+     * the pointer there, and pushing on against them fires it.
+     */
+    private holdShared({ monitor, corner }: Corner): void {
+        const actionMode = Shell.ActionMode.NORMAL | Shell.ActionMode.OVERVIEW;
+        const pressure = new (Layout as unknown as { PressureBarrier: PressureBarrierClass }).PressureBarrier(PRESSURE, PRESSURE_TIMEOUT, actionMode);
+        pressure.connect('trigger', () => {
+            // Left alone over full-screen windows, like GNOME's own corner.
+            if (this.layout.monitors[monitor]?.inFullscreen && !Main.overview.visible) return;
+            this.fire(corner);
+        });
+        const size = this.layout.panelBox.height || 32;
+        for (const line of cornerBarriers(corner, this.layout.monitors[monitor], size)) {
+            const barrier = new Meta.Barrier({
+                backend: global.backend,
+                x1: line.x1, y1: line.y1, x2: line.x2, y2: line.y2,
+                directions: DIRECTIONS[line.allow],
+            });
+            pressure.addBarrier(barrier);
+            this.barriers.push(barrier);
+        }
+        this.pressures.push(pressure);
     }
 
     private fire(corner: CornerName): void {
