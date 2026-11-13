@@ -1517,6 +1517,57 @@
   spacing: 8px !important;
 }
 
+.macr-nc .macr-nc-stack-item {
+  padding-bottom: 8px;
+  border-radius: 20px;
+  background-color: rgba(255, 255, 255, 0.065);
+}
+
+/* Over the stack's own background it adds up to a card's usual colour. */
+.macr-nc .message-list .message.macr-nc-stack {
+  background-color: rgba(255, 255, 255, 0.027) !important;
+}
+
+.macr-nc .message-list .message.macr-nc-stack:hover,
+.macr-nc .message-list .message.macr-nc-stack:focus {
+  background-color: rgba(255, 255, 255, 0.08) !important;
+}
+
+.macr-nc .macr-nc-show-less {
+  padding: 1px 8px;
+  border-radius: 10px;
+  background-color: rgba(255, 255, 255, 0.12);
+  color: rgba(255, 255, 255, 0.85);
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.macr-nc .macr-nc-show-less:hover {
+  background-color: rgba(255, 255, 255, 0.2);
+}
+
+.macr-nc.macr-light .macr-nc-stack-item {
+  background-color: rgba(0, 0, 0, 0.045);
+}
+
+.macr-nc.macr-light .message-list .message.macr-nc-stack {
+  background-color: rgba(0, 0, 0, 0.005) !important;
+}
+
+.macr-nc.macr-light .message-list .message.macr-nc-stack:hover,
+.macr-nc.macr-light .message-list .message.macr-nc-stack:focus {
+  background-color: rgba(0, 0, 0, 0.047) !important;
+}
+
+.macr-nc.macr-light .macr-nc-show-less {
+  background-color: rgba(0, 0, 0, 0.07);
+  color: rgba(0, 0, 0, 0.7);
+}
+
+.macr-nc.macr-light .macr-nc-show-less:hover {
+  background-color: rgba(0, 0, 0, 0.12);
+}
+
 .macr-nc .message-list-placeholder {
   color: rgba(255, 255, 255, 0.45) !important;
 }

@@ -4,6 +4,7 @@ import St from 'gi://St';
 import * as Main from 'resource:///org/gnome/shell/ui/main.js';
 
 import { isLight } from '../../shared/scheme.js';
+import { NotificationStacks } from './stacks.js';
 
 const BLUR = 'macr-notifications-blur';
 
@@ -18,13 +19,15 @@ type DateMenu = { menu: Signals & { actor: St.Widget; box: St.Widget } };
  * right, and the clock's calendar and notification list as the macOS
  * Notification Center. GNOME's message tray, list and Do Not Disturb do all
  * the work; the look is in the stylesheet under `macr-notifications` (the
- * banners) and `macr-nc` (the popover). Everything is put back on destroy.
+ * banners) and `macr-nc` (the popover), and each app's notifications stack
+ * (`NotificationStacks`). Everything is put back on destroy.
  */
 export class Notifications {
     private readonly tray = Main.messageTray as unknown as MessageTray;
     private readonly menu = (Main.panel.statusArea.dateMenu as unknown as DateMenu).menu;
     private readonly alignment: Clutter.ActorAlign;
     private readonly ids: [Signals, number][] = [];
+    private readonly stacks: NotificationStacks;
 
     constructor() {
         this.alignment = this.tray.bannerAlignment;
@@ -43,9 +46,11 @@ export class Notifications {
         this.connect(this.menu, 'open-state-changed', (_menu: unknown, open: boolean) => {
             if (open) this.syncScheme(this.menu.actor);
         });
+        this.stacks = new NotificationStacks(this.menu);
     }
 
     destroy(): void {
+        this.stacks.destroy();
         for (const [object, id] of this.ids) object.disconnect(id);
         this.ids.length = 0;
 
