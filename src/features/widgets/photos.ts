@@ -49,7 +49,6 @@ export class PhotosWidget extends DesktopWidget {
             else void this.show();
             return GLib.SOURCE_CONTINUE;
         });
-        removeOldPictures();
         void this.scan();
     }
 
@@ -176,8 +175,12 @@ export class PhotosWidget extends DesktopWidget {
     }
 }
 
-/** Pictures a widget left in the cache when the shell stopped without disabling it. */
-function removeOldPictures(): void {
+/**
+ * Pictures a widget left in the cache when the shell stopped without
+ * disabling it. Called once as the module starts: gallery previews must not
+ * take the desktop widget's picture away.
+ */
+export function removeOldPictures(): void {
     const dir = GLib.build_filenamev([GLib.get_user_cache_dir(), 'macr']);
     let listing: GLib.Dir;
     try {

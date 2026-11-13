@@ -88,6 +88,11 @@ export abstract class DesktopWidget {
         this.menu.addMenuItem(remove);
     }
 
+    /** In the widget gallery: drawn, but the gallery takes the clicks. */
+    setPreview(): void {
+        this.actor.reactive = false;
+    }
+
     /** Light or dark, as GNOME's style is. */
     setLight(light: boolean): void {
         if (light) this.actor.add_style_class_name('macr-light');

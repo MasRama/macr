@@ -8,10 +8,11 @@ import * as Main from 'resource:///org/gnome/shell/ui/main.js';
 import type { Module } from '../../shared/module.js';
 import { isLight } from '../../shared/scheme.js';
 import { type Box, boxOf, defaultSlots, fromFraction, isDesktopIconsTitle, placeWidget, type Point, type Rect, toFraction, type WidgetId, widgetIds, type WidgetSize, widgetSize } from './logic/widgets.js';
+import { WidgetGallery } from './gallery.js';
+import { removeOldPictures } from './photos.js';
 import { WIDGETS } from './registry.js';
 import type { DesktopWidget, WidgetHost } from './widget.js';
 
-const UUID = 'macr@masrama.github.io';
 /** Logical pixels: macOS's small widget, the gap between widgets and their margin from the screen's edge. */
 const SIZE = 164;
 const GAP = 20;
@@ -32,6 +33,7 @@ export class DesktopWidgetsModule implements Module, WidgetHost {
     private widgets: DesktopWidget[] = [];
     private ids: [Disconnectable, number][] = [];
     private laterId = 0;
+    private gallery: WidgetGallery | null = null;
     private readonly desktop = new Gio.Settings({ schema_id: 'org.gnome.desktop.interface' });
 
     constructor(private readonly settings: Gio.Settings) {}
@@ -41,6 +43,7 @@ export class DesktopWidgetsModule implements Module, WidgetHost {
     }
 
     enable(): void {
+        removeOldPictures();
         this.layer = new Clutter.Actor({ name: 'macrDesktopWidgets' });
         global.window_group.add_child(this.layer);
         const listen = (target: unknown, signal: string, callback: () => void) => {
@@ -60,6 +63,8 @@ export class DesktopWidgetsModule implements Module, WidgetHost {
     }
 
     disable(): void {
+        this.gallery?.destroy();
+        this.gallery = null;
         for (const [target, id] of this.ids) target.disconnect(id);
         this.ids = [];
         if (this.laterId) global.compositor.get_laters().remove(this.laterId);
@@ -86,8 +91,31 @@ export class DesktopWidgetsModule implements Module, WidgetHost {
         this.settings.set_value('desktop-widget-sizes', new GLib.Variant('a{ss}', sizes));
     }
 
+    /**
+     * From the gallery: puts `id` on the desktop at `size`, at `point` (stage
+     * px) when it was dragged there, else where it was or in the column.
+     */
+    add(id: WidgetId, size: WidgetSize, point: Point | null): void {
+        if (point) this.savePosition(id, point, size);
+        const sizes = this.sizes();
+        if (sizes[id] !== size) {
+            sizes[id] = size;
+            this.settings.set_value('desktop-widget-sizes', new GLib.Variant('a{ss}', sizes));
+        }
+        const list = this.settings.get_strv('desktop-widgets');
+        if (!list.includes(id)) this.settings.set_strv('desktop-widgets', [...list, id]);
+    }
+
+    /** The widgets on the desktop and their sizes, for the gallery. */
+    onDesktop(): Map<WidgetId, WidgetSize> {
+        return new Map(this.widgets.map((widget) => [widget.id, widget.size]));
+    }
+
     editWidgets(): void {
-        Main.extensionManager.openExtensionPrefs(UUID, '', {});
+        if (this.gallery) return;
+        this.gallery = new WidgetGallery(this, this.layer, () => {
+            this.gallery = null;
+        });
     }
 
     /** One widget's box in stage px. */

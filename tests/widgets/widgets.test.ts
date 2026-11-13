@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 
-import { boxOf, cityCode, dayRange, defaultSlots, fromFraction, handAngles, hourlyForecast, isDesktopIconsTitle, monthGrid, placeWidget, sizesOf, toFraction, upcomingEvents, widgetIds, widgetSize } from '../../src/features/widgets/logic/widgets.js';
+import { boxOf, cityCode, dayRange, defaultSlots, droppedOnDesktop, fitScale, fromFraction, galleryTiles, handAngles, hourlyForecast, isDesktopIconsTitle, monthGrid, placeWidget, sizesOf, toFraction, upcomingEvents, widgetIds, widgetSize } from '../../src/features/widgets/logic/widgets.js';
 
 const area = { x: 0, y: 32, width: 1920, height: 1048 };
 
@@ -140,4 +140,31 @@ test('hourly forecast: the next hours from now, one per hour', () => {
     assert.equal(next[0].temperature, 21);
     assert.equal(next[4].temperature, 25);
     assert.deepEqual(hourlyForecast([], now, 5), []);
+});
+
+test('the gallery shows every widget at each of its sizes, in order', () => {
+    assert.deepEqual(galleryTiles(), [
+        { id: 'clock', size: 'small' },
+        { id: 'calendar', size: 'small' },
+        { id: 'calendar', size: 'medium' },
+        { id: 'weather', size: 'small' },
+        { id: 'weather', size: 'medium' },
+        { id: 'batteries', size: 'small' },
+        { id: 'batteries', size: 'medium' },
+        { id: 'photos', size: 'small' },
+        { id: 'photos', size: 'medium' },
+    ]);
+});
+
+test('gallery previews shrink to fit the screen, never above their size', () => {
+    assert.equal(fitScale(1000, 2000, 0.5), 0.5);
+    assert.equal(fitScale(1000, 800, 0.5), 0.4);
+    assert.equal(fitScale(0, 800, 0.5), 0.5);
+});
+
+test('a widget dragged out of the gallery is added where it was dropped', () => {
+    const panel = { x: 200, y: 800, width: 1000, height: 250 };
+    assert.equal(droppedOnDesktop({ x: 500, y: 300 }, panel), true);
+    assert.equal(droppedOnDesktop({ x: 500, y: 900 }, panel), false);
+    assert.equal(droppedOnDesktop({ x: 100, y: 900 }, panel), true);
 });

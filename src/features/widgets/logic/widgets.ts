@@ -191,3 +191,19 @@ export function hourlyForecast<T extends ForecastItem>(items: readonly T[], now:
     return next;
 }
 
+/** The Edit Widgets gallery's previews: each widget at each of its sizes. */
+export function galleryTiles(): { id: WidgetId; size: WidgetSize }[] {
+    return WIDGET_IDS.flatMap((id) => sizesOf(id).map((size) => ({ id, size })));
+}
+
+/** The scale that fits `natural` into `available`, at most `max`. */
+export function fitScale(natural: number, available: number, max: number): number {
+    if (natural <= 0) return max;
+    return Math.min(max, (available / natural) * max);
+}
+
+/** A preview dropped outside the gallery's panel lands on the desktop. */
+export function droppedOnDesktop(point: Point, panel: Rect): boolean {
+    const inside = point.x >= panel.x && point.x < panel.x + panel.width && point.y >= panel.y && point.y < panel.y + panel.height;
+    return !inside;
+}
