@@ -3,17 +3,20 @@ import Gio from 'gi://Gio';
 import GLib from 'gi://GLib';
 import type Meta from 'gi://Meta';
 import St from 'gi://St';
+import { gettext as _ } from 'resource:///org/gnome/shell/extensions/extension.js';
 import * as PanelMenu from 'resource:///org/gnome/shell/ui/panelMenu.js';
 import * as PopupMenu from 'resource:///org/gnome/shell/ui/popupMenu.js';
 
 import { styleMenu, syncMenuScheme } from '../../shared/menu-style.js';
 import type { FocusTracker } from './focus.js';
 import { arrangeMenus, groupEntries, readMenu, type MenuNode, type MenuReader, type SubmenuNode } from './logic/app-menus.js';
+import { searchMenus, submenuActions, type FoundItem } from './logic/menu-search.js';
 import { separator, type MenuLike } from './menu-kit.js';
 
 type Signals = { connect(signal: string, callback: (...args: never[]) => void): number; disconnect(id: number): void };
 
 type AddEntry = (entry: PopupMenu.PopupBaseMenuItem) => void;
+type ItemNode = Extract<MenuNode, { kind: 'item' }>;
 
 /** Where a bar puts the app's menus: before its Window menu, or after it (Help). */
 export type PlaceMenu = (button: PanelMenu.Button, afterWindow: boolean) => void;
@@ -49,9 +52,22 @@ class MenuSource {
         }
     }
 
-    /** The app's menus as the bar shows them, read now. */
-    menus(): { menus: SubmenuNode[]; help: SubmenuNode | null } {
-        return arrangeMenus(readMenu(reader(this.model, new Set())));
+    /** The app's menus as the bar shows them, read now; `seen` gets every model read. */
+    menus(seen = new Set<Gio.MenuModel>()): { menus: SubmenuNode[]; help: SubmenuNode | null } {
+        return arrangeMenus(readMenu(reader(this.model, seen)));
+    }
+
+    /** An item's action, whether the app has it and whether it is enabled now. */
+    state(node: ItemNode): { group: Gio.DBusActionGroup | null; name: string; exists: boolean; enabled: boolean } {
+        const [group, name] = (node.action ? this.resolve(node.action) : null) ?? [null, ''];
+        const exists = !!group?.has_action(name);
+        return { group, name, exists, enabled: exists && !!group?.get_action_enabled(name) };
+    }
+
+    /** Whether an item shows at all, by its hidden-when rule. */
+    shows(node: ItemNode): boolean {
+        const { exists, enabled } = this.state(node);
+        return !(node.hiddenWhen === 'action-missing' && !exists) && !(node.hiddenWhen === 'action-disabled' && !enabled);
     }
 
     /** "win.copy" as its group and name. */
@@ -84,14 +100,21 @@ function reader(model: Gio.MenuModel, seen: Set<Gio.MenuModel>): MenuReader {
     };
 }
 
+/** Most items the Help menu's search lists. */
+const FOUND = 12;
+
 /**
  * One of the app's menus in the bar. Its items are read from the app each
  * time it opens and re-read while open when the app changes them (apps such
- * as LibreOffice fill a menu only once it is shown).
+ * as LibreOffice fill a menu only once it is shown). Help starts with a
+ * search field that finds items in all of the app's menus, as on macOS.
  */
 class AppMenuButton {
     readonly button: PanelMenu.Button;
     private readonly menu: PopupMenu.PopupMenu;
+    /** The app's own items; Help's search sits above them. */
+    private readonly body = new PopupMenu.PopupMenuSection();
+    private readonly search: HelpSearch | null;
     private watched: [Signals, number][] = [];
     private refillId = 0;
     private openSubmenu: string | null = null;
@@ -102,16 +125,21 @@ class AppMenuButton {
     /** Submenus made by the last fill, with their open-state handler. */
     private submenus: [PopupMenu.PopupSubMenuMenuItem, number][] = [];
 
-    constructor(private readonly source: MenuSource, private readonly node: SubmenuNode) {
+    constructor(private readonly source: MenuSource, private readonly node: SubmenuNode, help: boolean) {
         this.button = new PanelMenu.Button(0.0, `Macr ${node.label} Menu`, false);
         this.button.add_style_class_name('macr-menu-button');
         this.button.add_child(new St.Label({ text: node.label, y_align: Clutter.ActorAlign.CENTER }));
         this.menu = this.button.menu as PopupMenu.PopupMenu;
         styleMenu(this.menu);
+        this.search = help ? new HelpSearch(this.menu, source, (action) => this.setShown(action, true)) : null;
+        this.menu.addMenuItem(this.body);
         (this.menu as unknown as Signals).connect('open-state-changed', (_menu: never, open: never) => this.onOpen(open as unknown as boolean));
         // A menu with no items never opens.
-        this.menu.addMenuItem(new PopupMenu.PopupMenuItem(node.label));
-        this.button.connect('destroy', () => this.stop());
+        if (!this.search) this.body.addMenuItem(new PopupMenu.PopupMenuItem(node.label));
+        this.button.connect('destroy', () => {
+            this.stop();
+            this.search?.destroy();
+        });
     }
 
     /** The menu as the app has it now; it may have replaced it since. */
@@ -125,8 +153,10 @@ class AppMenuButton {
             syncMenuScheme(this.menu);
             this.setShown(this.current().submenuAction, true);
             this.fill();
+            this.search?.open();
         } else {
             this.stop();
+            this.search?.close();
         }
     }
 
@@ -167,9 +197,10 @@ class AppMenuButton {
     private fill(): void {
         this.unwatch();
         const model = this.current().source as Gio.MenuModel | undefined;
-        if (!model) return;
+        if (!model && !this.search) return;
         const seen = new Set<Gio.MenuModel>();
-        const nodes = readMenu(reader(model, seen));
+        // An app with no Help menu of its own still gets Help's search.
+        const nodes = model ? readMenu(reader(model, seen)) : [];
         for (const watched of seen) this.watch(watched, 'items-changed');
         for (const group of this.source.actionGroups) {
             for (const signal of ['action-added', 'action-removed', 'action-enabled-changed', 'action-state-changed']) this.watch(group, signal);
@@ -177,15 +208,17 @@ class AppMenuButton {
 
         const reopen = this.openSubmenu;
         this.dropSubmenus();
-        this.menu.removeAll();
+        this.body.removeAll();
         this.plain = [];
         this.checkable = false;
-        this.addNodes(this.menu, nodes, reopen);
+        this.addNodes(this.body, nodes, reopen);
         // macOS keeps a check column for every item once one can be checked.
         if (this.checkable) {
             for (const item of this.plain) item.setOrnament(PopupMenu.Ornament.NONE);
         }
-        if (this.menu.isEmpty()) {
+        if (this.search) {
+            if (!this.body.isEmpty()) this.body.addMenuItem(new PopupMenu.PopupSeparatorMenuItem(), 0);
+        } else if (this.body.isEmpty()) {
             const empty = new PopupMenu.PopupMenuItem('');
             empty.setSensitive(false);
             this.menu.addMenuItem(empty);
@@ -238,13 +271,9 @@ class AppMenuButton {
         if (node.label === reopen) entry.setSubmenuShown(true);
     }
 
-    private addItem(add: AddEntry, node: Extract<MenuNode, { kind: 'item' }>): void {
-        const resolved = node.action ? this.source.resolve(node.action) : null;
-        const [group, name] = resolved ?? [null, ''];
-        const exists = !!group?.has_action(name);
-        const enabled = exists && !!group?.get_action_enabled(name);
-        if (node.hiddenWhen === 'action-missing' && !exists) return;
-        if (node.hiddenWhen === 'action-disabled' && !enabled) return;
+    private addItem(add: AddEntry, node: ItemNode): void {
+        if (!this.source.shows(node)) return;
+        const { group, name, exists, enabled } = this.source.state(node);
 
         // Added first: an item changed while out of the stage logs criticals.
         const entry = new PopupMenu.PopupMenuItem(node.label);
@@ -262,8 +291,122 @@ class AppMenuButton {
 }
 
 /**
+ * The search field at the top of Help. As the user types it reads all of the
+ * app's menus (asking the app to fill the ones it fills only when shown) and
+ * lists the matching items under it; Enter or a click picks one.
+ */
+class HelpSearch {
+    private readonly section = new PopupMenu.PopupMenuSection();
+    private readonly results = new PopupMenu.PopupMenuSection();
+    private readonly entry: St.Entry;
+    private watched: [Signals, number][] = [];
+    private searchId = 0;
+    private focusId = 0;
+
+    constructor(private readonly menu: PopupMenu.PopupMenu, private readonly source: MenuSource, private readonly fill: (action: string) => void) {
+        const row = new PopupMenu.PopupBaseMenuItem({ activate: false, hover: false, can_focus: false, style_class: 'macr-help-search' });
+        row.add_child(new St.Label({ text: _('Search'), y_align: Clutter.ActorAlign.CENTER }));
+        this.entry = new St.Entry({ style_class: 'macr-help-search-entry', can_focus: true, x_expand: true });
+        row.add_child(this.entry);
+        this.section.addMenuItem(row);
+        this.section.addMenuItem(this.results);
+        menu.addMenuItem(this.section);
+        const text = this.entry.clutter_text;
+        text.connect('text-changed', () => this.queueSearch());
+        text.connect('activate', () => this.pickFirst());
+        text.connect('key-press-event', (_text: Clutter.Actor, event: Clutter.Event) => {
+            if (event.get_key_symbol() !== Clutter.KEY_Down) return Clutter.EVENT_PROPAGATE;
+            const first = this.results.firstMenuItem as PopupMenu.PopupBaseMenuItem | null;
+            if (first) first.grab_key_focus();
+            return first ? Clutter.EVENT_STOP : Clutter.EVENT_PROPAGATE;
+        });
+    }
+
+    /** The field takes the keyboard as the menu opens, so typing searches. */
+    open(): void {
+        if (this.focusId) GLib.source_remove(this.focusId);
+        this.focusId = GLib.idle_add(GLib.PRIORITY_DEFAULT_IDLE, () => {
+            this.focusId = 0;
+            if (this.menu.isOpen) this.entry.grab_key_focus();
+            return GLib.SOURCE_REMOVE;
+        });
+    }
+
+    close(): void {
+        this.stop();
+        this.entry.set_text('');
+        this.results.removeAll();
+    }
+
+    /** With the menu: its actors are gone already, so only what Macr started is stopped. */
+    destroy(): void {
+        this.stop();
+        if (this.focusId) GLib.source_remove(this.focusId);
+        this.focusId = 0;
+    }
+
+    private stop(): void {
+        this.unwatch();
+        if (this.searchId) GLib.source_remove(this.searchId);
+        this.searchId = 0;
+    }
+
+    private unwatch(): void {
+        for (const [object, id] of this.watched) object.disconnect(id);
+        this.watched = [];
+    }
+
+    private queueSearch(): void {
+        if (this.searchId) return;
+        this.searchId = GLib.idle_add(GLib.PRIORITY_DEFAULT_IDLE, () => {
+            this.searchId = 0;
+            if (this.menu.isOpen) this.search();
+            return GLib.SOURCE_REMOVE;
+        });
+    }
+
+    private search(): void {
+        this.unwatch();
+        this.results.removeAll();
+        const query = this.entry.get_text();
+        if (!query.trim()) return;
+        const seen = new Set<Gio.MenuModel>();
+        const { menus } = this.source.menus(seen);
+        // Menus filled as they are shown fill now, and the search runs again.
+        for (const action of submenuActions(menus)) this.fill(action);
+        for (const model of seen) {
+            const target = model as unknown as Signals;
+            this.watched.push([target, target.connect('items-changed', () => this.queueSearch())]);
+        }
+        const found = searchMenus(menus, query, FOUND).filter((node) => this.source.shows(node));
+        if (found.length === 0) {
+            const none = new PopupMenu.PopupMenuItem(_('No menu items found'));
+            this.results.addMenuItem(none);
+            none.setSensitive(false);
+            return;
+        }
+        for (const node of found) this.add(node);
+    }
+
+    private add(node: FoundItem): void {
+        const { group, name, enabled } = this.source.state(node);
+        const entry = new PopupMenu.PopupMenuItem(node.label);
+        this.results.addMenuItem(entry);
+        entry.add_child(new St.Label({ text: node.path.join(' ▸ '), style_class: 'macr-accel', x_expand: true, x_align: Clutter.ActorAlign.END }));
+        entry.setSensitive(enabled);
+        entry.connect('activate', () => group?.activate_action(name, node.target as GLib.Variant | null));
+    }
+
+    private pickFirst(): void {
+        const first = this.results.firstMenuItem as PopupMenu.PopupBaseMenuItem | null;
+        if (first?.sensitive) first.activate(Clutter.get_current_event());
+    }
+}
+
+/**
  * The focused app's own menus (File, Edit, View…) in the menu bar, between
  * the app name and the Window menu, with Help after Window, as on macOS.
+ * Help is there for every app that shares menus, with its search on top.
  * Apps that share no menus keep only Macr's app and Window menus.
  */
 export class AppMenus {
@@ -311,7 +454,8 @@ export class AppMenus {
     /** New buttons only when the list of menus changed, so an open menu stays open. */
     private rebuild(): void {
         const source = this.source;
-        const { menus, help } = source ? source.menus() : { menus: [], help: null };
+        const { menus, help: own } = source ? source.menus() : { menus: [], help: null };
+        const help = own ?? (menus.length > 0 ? { kind: 'submenu' as const, label: _('Help'), submenuAction: null, children: [] } : null);
         const labels = [...menus, ...(help ? [help] : [])].map((menu) => menu.label).join('\n');
         if (labels === this.labels && this.buttons.length > 0) return;
         this.clear();
@@ -322,7 +466,7 @@ export class AppMenus {
     }
 
     private add(source: MenuSource, node: SubmenuNode, afterWindow: boolean): void {
-        const { button } = new AppMenuButton(source, node);
+        const { button } = new AppMenuButton(source, node, afterWindow);
         this.place(button, afterWindow);
         this.buttons.push(button);
     }

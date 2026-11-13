@@ -45,7 +45,8 @@ are laid out like macOS System Settings.
 
 - A logo menu, the focused app's name and its menu, and the app's
   own File, Edit and View menus when it shares them (GTK apps with a menu bar,
-  LibreOffice), plus a Window menu.
+  LibreOffice), plus a Window menu and a Help menu whose search field finds
+  any item in the app's menus.
 - Wi-Fi, Bluetooth and battery menus of their own, a macOS clock and a
   translucent bar, on every monitor.
 - **Control Center**: GNOME's quick settings as macOS tiles, toggles first,

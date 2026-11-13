@@ -2066,6 +2066,48 @@
   color: rgba(255, 255, 255, 0.85);
 }
 
+/* Help's search field, as on macOS. */
+.macr-menu .macr-help-search {
+  spacing: 10px;
+  padding-top: 4px;
+  padding-bottom: 6px;
+}
+
+.macr-menu .macr-help-search-entry,
+.macr-menu .macr-help-search-entry:hover,
+.macr-menu .macr-help-search-entry:focus {
+  min-width: 190px;
+  min-height: 0;
+  padding: 3px 8px;
+  border-radius: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background-color: rgba(255, 255, 255, 0.08);
+  box-shadow: none;
+  color: rgba(255, 255, 255, 0.95);
+  caret-color: rgba(255, 255, 255, 0.95);
+  selection-background-color: rgba(10, 132, 255, 0.6);
+  selected-color: #ffffff;
+}
+
+/* A thicker ring, not a shadow: the field is see-through. */
+.macr-menu .macr-help-search-entry:focus {
+  padding: 2px 7px;
+  border: 2px solid rgba(10, 132, 255, 0.85);
+}
+
+.macr-menu.macr-light .macr-help-search-entry,
+.macr-menu.macr-light .macr-help-search-entry:hover,
+.macr-menu.macr-light .macr-help-search-entry:focus {
+  border-color: rgba(0, 0, 0, 0.15);
+  background-color: rgba(255, 255, 255, 0.7);
+  color: rgba(0, 0, 0, 0.88);
+  caret-color: rgba(0, 0, 0, 0.88);
+}
+
+.macr-menu.macr-light .macr-help-search-entry:focus {
+  border-color: rgba(10, 132, 255, 0.85);
+}
+
 /* ---------- Lock and login screens ---------- */
 /* Date over a big time at the top; user and password low in the middle.
    .unlock-dialog.macr-lock and .login-dialog.macr-login outrank GNOME's and

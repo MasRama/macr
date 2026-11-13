@@ -62,6 +62,15 @@ schemas/                GSettings schema
   - `submenu-action` is set while a menu or submenu is shown, as GTK does,
     because LibreOffice fills its submenus only then. Before a refill, the
     open submenu is closed and reopened.
+  - Help is there for every app that shares at least one menu (an empty one
+    when the app has none) and starts with a search field (`HelpSearch`)
+    that takes the keyboard as Help opens. Typing reads all of the app's
+    menus and lists up to 12 matches with the menus that lead to them
+    (`logic/menu-search.ts searchMenus`: every word in the label, labels
+    starting with the search first). It sets every `submenu-action` shown
+    (`submenuActions`) and searches again as the models fill, so LibreOffice's
+    lazy menus are found too. Down moves into the results, Enter picks the
+    first; items whose action is disabled show greyed.
   - Qt, Electron and other apps that do not share their menus keep only
     Macr's menus.
 - Other monitors (`menubar-all-monitors`, on by default) get a
