@@ -1,5 +1,26 @@
 # Changelog
 
+## [0.8.0](https://github.com/MasRama/macr/compare/v0.7.0...v0.8.0) (2026-11-14)
+
+
+### Features
+
+* **controlcenter:** Focus modes with allowed apps and schedules ([8dc9c01](https://github.com/MasRama/macr/commit/8dc9c010a420d287f94040128e0d66f9624e81c9))
+* **controlcenter:** Now Playing tile, and a choice of which tiles show ([3212841](https://github.com/MasRama/macr/commit/3212841aabf3818fbd2fd24b471a7de01c556c29))
+* **dock:** assign an app to all desktops or one, from its Options menu ([a105dfc](https://github.com/MasRama/macr/commit/a105dfcd2218709a43d2dcbe5e913ada2139aa1b))
+* **dock:** bounce the Downloads stack when a download finishes ([1f67d9f](https://github.com/MasRama/macr/commit/1f67d9f0d41ecd7399e6361b98744219d0b86c30))
+* **dock:** pile a stack's newest files on its Dock icon, as macOS does ([37b5cf2](https://github.com/MasRama/macr/commit/37b5cf285188ecb953d3645a8d3ce63bded2529e))
+* **hotcorners:** Quick Note, a new sticky note from a screen corner ([2b1c104](https://github.com/MasRama/macr/commit/2b1c104082be994eb54416c2d321dc47f7713df4))
+* **spotlight:** Apps, Files, Actions and Clipboard views, as in macOS Tahoe ([c3b7c82](https://github.com/MasRama/macr/commit/c3b7c824a2cc25e8bf7b546910e46bda5ef9215e))
+* **widgets:** Stickies and Reminders widgets ([a3e4683](https://github.com/MasRama/macr/commit/a3e468373496e5bd1ea2b948971fb58d7ab06ce6))
+
+
+### Bug Fixes
+
+* **prefs:** no warning when the Focus settings first list allowed apps ([35ecf9e](https://github.com/MasRama/macr/commit/35ecf9e05926f0b132541bac254cd58351eff081))
+* **screenshot:** open the toolbar on the monitor with the pointer ([25c4569](https://github.com/MasRama/macr/commit/25c4569ca95a2bdb583fb44382d1afe1bb750607))
+* **stagemanager:** keep tilted thumbnails in shape on every monitor ([2ba8cd8](https://github.com/MasRama/macr/commit/2ba8cd887a9b7a7683ea795a845a68245538d8a6))
+
 ## [0.7.0](https://github.com/MasRama/macr/compare/v0.6.0...v0.7.0) (2026-11-13)
 
 
