@@ -8,39 +8,34 @@ One GNOME Shell extension that turns GNOME into macOS: the menu bar, the Dock,
 Launchpad, Spotlight, Stage Manager, Mission Control and the small touches in
 between, instead of a stack of tweak extensions that each fix one corner.
 
-[Install](#install) · [What's new](#whats-new-in-07) · [Features](#features) · [Shortcuts](#keyboard-shortcuts)
+[Install](#install) · [What's new](#whats-new-in-08) · [Features](#features) · [Shortcuts](#keyboard-shortcuts)
 
 </div>
 
 ![A GNOME desktop with Macr: the menu bar, a Files window with traffic lights, desktop widgets and the Dock](docs/screenshots/hero.webp)
 
-## What's new in 0.7
+## What's new in 0.8
 
-- **Screen saver.** After a few idle minutes your wallpaper drifts slowly
-  under a big clock until you touch a key or the mouse. A playing video keeps
-  it away.
-- **A wallpaper for each desktop.** Pick a wallpaper and only the desktop on
-  screen gets it; switching desktops crossfades to each one's.
-- **Add and close Spaces in Mission Control.** A **+** at the end of the
-  Spaces bar adds a desktop that stays until you close it with the **×** on
-  its thumbnail. Drop a window on **+** to give it a desktop of its own.
-- **Search the menus from Help.** Type in the Help menu's search field to find
-  any item in the app's menus, and press Enter to run it.
-- **Widgets in the Notification Center**, under your notifications. Batteries
-  and photos at first; pick others in Macr's settings.
-- **Quit or hide from Alt+Tab.** Press Q to quit the chosen app or H to hide it
-  without letting go.
-- **macOS-style system sounds** for the volume pop, screenshots, emptying the
-  Trash, plugging in power, alerts and notifications.
-- **Two more hot corner actions**: the focused app's windows, and putting the
-  displays to sleep.
-- **Every feature is on from the start**, and a notification tells you when
-  another extension clashes with Macr, with a button to turn it off.
-- **Clear the Dock's recent apps**: right-click one for Remove from Dock or
-  Clear Recent Apps.
-- Fixes: the wallpaper shows on every monitor in Mission Control, the hot
-  corner on the side next to a second monitor works, magnified Dock icons stay
-  sharp at 100% scale, and the traffic lights keep their size in Chrome.
+- **Spotlight views, as in macOS Tahoe.** Super+1 to Super+4, or the round
+  buttons by the search field, narrow Spotlight to Apps, Files, Actions
+  (Lock Screen, Dark Mode, Empty Trash, an app's "New Window"…) or your
+  Clipboard.
+- **Focus modes** in the Control Center: Do Not Disturb, Work, Personal and
+  Sleep, each with the apps still allowed to show banners and an optional
+  daily schedule. The menu bar shows the mode's icon.
+- **A Now Playing tile** in the Control Center with the song's cover and
+  controls, and a choice in Macr's settings of which tiles show.
+- **Stickies and Reminders widgets**: click a note and type, it saves as you
+  go, in five colours; type a reminder and tick it off when it is done. On
+  the desktop and in the Notification Center.
+- **Quick Note** from a hot corner: a new sticky note by the corner, ready to
+  type in.
+- **Stacks pile up on the Dock** like macOS: a folder's newest files show on
+  its icon, and the Downloads stack bounces when a download finishes.
+- **Assign To** from a Dock icon's Options: an app's windows open on All
+  Desktops, on This Desktop, or wherever you are.
+- Fixes: the screenshot toolbar opens on the monitor with the pointer, and
+  Stage Manager's tilted thumbnails keep their shape on every monitor.
 
 ## Features
 
@@ -99,7 +94,7 @@ are laid out like macOS System Settings.
 - **Quick Look**: Space on a file in the Downloads stack, or Super+Y on a file
   in Spotlight, previews it; the arrow keys go to the next file.
 
-<p align="center"><img src="docs/screenshots/spotlight.webp" width="640" alt="Spotlight converting 10 km to miles"></p>
+<p align="center"><img src="docs/screenshots/spotlight.webp" width="640" alt="Spotlight converting 10 km to miles, with its Apps, Files, Actions and Clipboard buttons"></p>
 
 ### Windows
 
@@ -138,7 +133,7 @@ are laid out like macOS System Settings.
 
 ### Desktop
 
-![Desktop widgets: Now Playing, world clocks, a calendar with events and a weather forecast](docs/screenshots/desktop-widgets.webp)
+![Desktop widgets: Now Playing, a sticky note, Reminders, world clocks, a calendar with events and a weather forecast](docs/screenshots/desktop-widgets.webp)
 
 - **Desktop widgets**: clock, calendar, weather, batteries, photo and
   Now Playing widgets under your windows, in small, medium or large (world
