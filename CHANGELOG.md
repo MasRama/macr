@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.8.1](https://github.com/MasRama/macr/compare/v0.8.0...v0.8.1) (2026-11-15)
+
+
+### Bug Fixes
+
+* **desktop:** show the wallpaper on the monitor left of the primary one ([d5480e6](https://github.com/MasRama/macr/commit/d5480e6baf380770e8a6fb9cee327cf5bbe45f28))
+
 ## [0.8.0](https://github.com/MasRama/macr/compare/v0.7.0...v0.8.0) (2026-11-14)
 
 
