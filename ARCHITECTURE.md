@@ -354,6 +354,12 @@ schemas/                GSettings schema
   follows the time of day, since Apple's dynamic pictures cannot ship.
   A `Shell.GLSLEffect` (`grade-effect.ts`) grades every `Meta.BackgroundActor`:
   brightness, a warm or cool shift and saturation.
+- The effect draws offscreen on every paint (`vfunc_paint` adds
+  `ACTOR_DIRTY`) instead of keeping its picture. Each monitor has its own
+  frame clock, and the actor is only dirty for the first view that paints
+  it; mutter clips a wallpaper actor at the stage origin to that view's
+  redraw clip, so when another monitor painted first the kept picture was
+  empty and the monitor left of the primary one showed no wallpaper.
 - `BackgroundManager.prototype._createBackgroundActor` is wrapped while the
   module runs, so pictures made later (wallpaper change, overview, Mission
   Control, the lock screen) get the effect; the stage is walked once for the
