@@ -3,7 +3,7 @@ import { test } from 'node:test';
 
 import { returnIndex, shouldMove } from '../../src/features/spaces/logic/spaces.js';
 
-const base = { normal: true, onAllWorkspaces: false, addsSpaces: true, othersShowing: 2 };
+const base = { normal: true, onAllWorkspaces: false, addsSpaces: true, othersHere: 2, othersElsewhere: 0 };
 
 test('a normal full-screen window with company moves to its own Space', () => {
     assert.equal(shouldMove(base), true);
@@ -13,7 +13,15 @@ test('dialogs, sticky windows, fixed workspaces Macr does not manage and lone wi
     assert.equal(shouldMove({ ...base, normal: false }), false);
     assert.equal(shouldMove({ ...base, onAllWorkspaces: true }), false);
     assert.equal(shouldMove({ ...base, addsSpaces: false }), false);
-    assert.equal(shouldMove({ ...base, othersShowing: 0 }), false);
+    assert.equal(shouldMove({ ...base, othersHere: 0 }), false);
+});
+
+test('a window alone on its monitor stays, whatever the other monitors show', () => {
+    assert.equal(shouldMove({ ...base, othersHere: 0, othersElsewhere: 3 }), false);
+});
+
+test('a window stays when switching Space would hide windows on another monitor', () => {
+    assert.equal(shouldMove({ ...base, othersElsewhere: 1 }), false);
 });
 
 test('a window goes back to where it came from, or the nearest workspace left', () => {

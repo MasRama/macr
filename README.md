@@ -112,7 +112,8 @@ are laid out like macOS System Settings.
   minimized ones in a row at the bottom. Super+Down, or Show All Windows in a
   Dock icon's menu.
 - **Full-screen Spaces**: an app that goes full screen gets a workspace of its
-  own next to the one it left, and goes back when it leaves full screen.
+  own next to the one it left, and goes back when it leaves full screen. Your
+  other monitors keep showing what they showed.
 - **Traffic lights**: red, yellow and green buttons on the left of app windows,
   grey in background windows, with their symbols on hover and the macOS Move &
   Resize, Fill & Arrange and Full Screen menu when the pointer rests on the

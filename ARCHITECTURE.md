@@ -691,16 +691,22 @@ schemas/                GSettings schema
 
 - `fullscreen-spaces-enabled`: a window's `notify::fullscreen` is handled
   in a `BEFORE_REDRAW` later. Going full screen, `logic/spaces.ts` lets a
-  NORMAL window that is not on all workspaces and has other windows showing
-  on its workspace move, with `dynamic-workspaces` or Mission Control's
-  fixed Spaces (not with fixed workspaces the user set): a workspace is
-  appended (through `fixed-spaces` when fixed), reordered to just after the
+  NORMAL window that is not on all workspaces and has other windows of its
+  workspace showing on its own monitor move, with `dynamic-workspaces` or
+  Mission Control's fixed Spaces (not with fixed workspaces the user set):
+  a workspace is appended (through `fixed-spaces` when fixed), reordered to just after the
   window's own, and activated with the window. Leaving full screen moves it
   back (to the first workspace left if its own is gone) and switches there;
   closing it while its Space shows switches back. GNOME's dynamic
   workspaces remove the empty one; with fixed Spaces the module closes it
   itself once it is empty (after leaving full screen, on disable, and in a
   later after the window is unmanaged).
+- Full screen changes only its own monitor. With workspaces on every
+  monitor (`workspaces-only-on-primary` off), activating the new Space
+  switches every monitor, so a window stays where it is (full screen, no
+  Space of its own) while another monitor shows windows of its workspace.
+  Windows on all workspaces never count: with workspaces on the primary
+  monitor only, that is every window on the other monitors.
 - A window moved to another workspace by hand meanwhile stays there. The
   module runs on the lock screen too, so locking does not move windows;
   `disable()` moves every window it moved back.

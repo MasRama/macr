@@ -72,14 +72,21 @@ export class FullscreenSpacesModule implements Module {
         if (this.moved.has(window)) return;
         const origin = window.get_workspace();
         if (!origin) return;
-        const others = origin.list_windows().filter((other) => other !== window && other.showing_on_its_workspace() && other.get_window_type() === Meta.WindowType.NORMAL && !other.skip_taskbar);
+        // Windows on every workspace (and, with workspaces on the primary
+        // monitor only, every window on the other monitors) stay put.
+        const others = origin
+            .list_windows()
+            .filter((other) => other !== window && !other.is_on_all_workspaces() && other.showing_on_its_workspace() && other.get_window_type() === Meta.WindowType.NORMAL && !other.skip_taskbar);
+        const monitor = window.get_monitor();
+        const here = others.filter((other) => other.get_monitor() === monitor).length;
         const dynamic = this.mutter.get_boolean('dynamic-workspaces');
         const fixed = dynamic ? null : fixedSpaces();
         const move = shouldMove({
             normal: window.get_window_type() === Meta.WindowType.NORMAL,
             onAllWorkspaces: window.is_on_all_workspaces(),
             addsSpaces: dynamic || fixed !== null,
-            othersShowing: others.length,
+            othersHere: here,
+            othersElsewhere: others.length - here,
         });
         if (!move) return;
         const manager = global.workspace_manager;
