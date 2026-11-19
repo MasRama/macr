@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.8.2](https://github.com/MasRama/macr/compare/v0.8.1...v0.8.2) (2026-11-19)
+
+
+### Bug Fixes
+
+* **spaces:** keep other monitors' windows when an app goes full screen ([679021e](https://github.com/MasRama/macr/commit/679021e9771eae1da014f74664c4b4dc31d081d9))
+
 ## [0.8.1](https://github.com/MasRama/macr/compare/v0.8.0...v0.8.1) (2026-11-15)
 
 
