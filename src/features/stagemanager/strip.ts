@@ -117,6 +117,11 @@ class StageView {
  * Control, over full-screen windows and while paused.
  */
 export class Strip {
+    /**
+     * Its monitor's rectangle, clipping the strip as the screen's edge
+     * would: slid away, it shows and takes clicks on no monitor to the left.
+     */
+    private readonly frame: St.Widget;
     private readonly actor: St.Widget;
     private readonly edge: St.Widget;
     private readonly ids: [Signals, number][] = [];
@@ -133,10 +138,13 @@ export class Strip {
         private readonly monitor: number,
         private readonly onSelect: (app: string) => void,
     ) {
+        this.frame = new St.Widget({ name: 'macrStageFrame', clip_to_allocation: true });
         this.actor = new St.Widget({ name: 'macrStageStrip', style_class: 'macr-stage-strip', reactive: true, track_hover: true, visible: false });
         this.edge = new St.Widget({ name: 'macrStageEdge', reactive: true, track_hover: true, width: 1, visible: false });
+        this.frame.add_child(this.actor);
         // Not trackFullscreen: the layout manager would set `visible` behind the strip's back.
-        Main.layoutManager.addChrome(this.actor, { affectsInputRegion: true });
+        Main.layoutManager.addChrome(this.frame, { affectsInputRegion: false });
+        Main.layoutManager.trackChrome(this.actor, { affectsInputRegion: true });
         Main.layoutManager.addChrome(this.edge, { affectsInputRegion: true });
 
         this.listen(this.actor, 'notify::hover', () => this.updateVisibility());
@@ -183,7 +191,7 @@ export class Strip {
         this.focusIds = [];
         this.clear();
         this.edge.destroy();
-        this.actor.destroy();
+        this.frame.destroy();
     }
 
     private listen(target: unknown, signal: string, callback: (...args: never[]) => unknown): void {
@@ -214,7 +222,11 @@ export class Strip {
         const top = slots[0].y - ICON_SIZE / 2;
         const bottom = slots[slots.length - 1].y + slots[slots.length - 1].height + ICON_SIZE / 2;
         this.rest = { x: area.x, y: Math.round(top), width: layout.width, height: Math.round(bottom - top) };
-        this.actor.set_position(this.rest.x, this.rest.y);
+        // Monitors may be going away: Stage Manager makes new strips once they have.
+        const bounds = Main.layoutManager.monitors[this.monitor] ?? area;
+        this.frame.set_position(bounds.x, bounds.y);
+        this.frame.set_size(bounds.width, bounds.height);
+        this.actor.set_position(this.rest.x - bounds.x, this.rest.y - bounds.y);
         this.actor.set_size(this.rest.width, this.rest.height);
         this.edge.set_position(area.x, area.y + 1);
         this.edge.height = Math.max(1, area.height - 2);
