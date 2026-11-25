@@ -7,7 +7,9 @@ import St from 'gi://St';
 import * as Main from 'resource:///org/gnome/shell/ui/main.js';
 
 import { windowCovers } from '../../shared/covered.js';
-import type { Rect } from '../../shared/logic/geometry.js';
+import { EdgeHover } from '../../shared/edge-hover.js';
+import { type Rect, touches } from '../../shared/logic/geometry.js';
+import { MonitorFrame } from '../../shared/monitor-frame.js';
 import { isLight } from '../../shared/scheme.js';
 import { fitPreview, perspectiveShear, stripLayout } from './logic/slots.js';
 
@@ -117,13 +119,11 @@ class StageView {
  * Control, over full-screen windows and while paused.
  */
 export class Strip {
-    /**
-     * Its monitor's rectangle, clipping the strip as the screen's edge
-     * would: slid away, it shows and takes clicks on no monitor to the left.
-     */
-    private readonly frame: St.Widget;
+    /** Slid away, the strip shows (and takes clicks) on no monitor to the left. */
+    private readonly frame: MonitorFrame;
     private readonly actor: St.Widget;
     private readonly edge: St.Widget;
+    private readonly edgeHover: EdgeHover;
     private readonly ids: [Signals, number][] = [];
     private focusIds: [Signals, number][] = [];
     private views: StageView[] = [];
@@ -138,19 +138,24 @@ export class Strip {
         private readonly monitor: number,
         private readonly onSelect: (app: string) => void,
     ) {
-        this.frame = new St.Widget({ name: 'macrStageFrame', clip_to_allocation: true });
+        // Not trackFullscreen: the layout manager would set `visible` behind the strip's back.
+        this.frame = new MonitorFrame('macrStageFrame');
         this.actor = new St.Widget({ name: 'macrStageStrip', style_class: 'macr-stage-strip', reactive: true, track_hover: true, visible: false });
         this.edge = new St.Widget({ name: 'macrStageEdge', reactive: true, track_hover: true, width: 1, visible: false });
-        this.frame.add_child(this.actor);
-        // Not trackFullscreen: the layout manager would set `visible` behind the strip's back.
-        Main.layoutManager.addChrome(this.frame, { affectsInputRegion: false });
-        Main.layoutManager.trackChrome(this.actor, { affectsInputRegion: true });
+        this.frame.add(this.actor);
         Main.layoutManager.addChrome(this.edge, { affectsInputRegion: true });
 
         this.listen(this.actor, 'notify::hover', () => this.updateVisibility());
-        this.listen(this.edge, 'notify::hover', () => {
-            if (this.edge.hover) this.reveal();
-        });
+        this.edgeHover = new EdgeHover(
+            this.edge,
+            () => {
+                const { monitors } = Main.layoutManager;
+                const monitor = monitors[this.monitor];
+                return Boolean(monitor) && touches(monitor, monitors, 'left');
+            },
+            () => this.reveal(),
+            () => this.updateVisibility(),
+        );
         this.listen(Main.overview, 'showing', () => this.updateVisibility());
         this.listen(Main.overview, 'hidden', () => this.updateVisibility());
         this.listen(global.display, 'in-fullscreen-changed', () => this.updateVisibility());
@@ -186,6 +191,7 @@ export class Strip {
 
     destroy(): void {
         this.cancelHide();
+        this.edgeHover.destroy();
         for (const [target, id] of [...this.ids, ...this.focusIds]) target.disconnect(id);
         this.ids.length = 0;
         this.focusIds = [];
@@ -224,8 +230,7 @@ export class Strip {
         this.rest = { x: area.x, y: Math.round(top), width: layout.width, height: Math.round(bottom - top) };
         // Monitors may be going away: Stage Manager makes new strips once they have.
         const bounds = Main.layoutManager.monitors[this.monitor] ?? area;
-        this.frame.set_position(bounds.x, bounds.y);
-        this.frame.set_size(bounds.width, bounds.height);
+        this.frame.place(bounds);
         this.actor.set_position(this.rest.x - bounds.x, this.rest.y - bounds.y);
         this.actor.set_size(this.rest.width, this.rest.height);
         this.edge.set_position(area.x, area.y + 1);

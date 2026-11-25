@@ -10,7 +10,28 @@ export function overlaps(a: Rect, b: Rect): boolean {
     return a.x < b.x + b.width && b.x < a.x + a.width && a.y < b.y + b.height && b.y < a.y + a.height;
 }
 
-export type Half = 'left' | 'right' | 'top' | 'bottom';
+export type Side = 'left' | 'right' | 'top' | 'bottom';
+
+/**
+ * Whether another of `monitors` sits right against `side` of `monitor`
+ * (sharing part of that edge, not just a corner): the pointer and anything
+ * sliding past that edge go on to it.
+ */
+export function touches(monitor: Rect, monitors: readonly Rect[], side: Side): boolean {
+    return monitors.some((other) => {
+        if (other === monitor) return false;
+        const across = side === 'left' || side === 'right';
+        const against =
+            side === 'left' ? other.x + other.width === monitor.x
+            : side === 'right' ? other.x === monitor.x + monitor.width
+            : side === 'top' ? other.y + other.height === monitor.y
+            : other.y === monitor.y + monitor.height;
+        const along = across ? other.y < monitor.y + monitor.height && monitor.y < other.y + other.height : other.x < monitor.x + monitor.width && monitor.x < other.x + other.width;
+        return against && along;
+    });
+}
+
+export type Half = Side;
 export type Quarter = 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right';
 export type Placement = Half | Quarter | 'fill' | 'center';
 

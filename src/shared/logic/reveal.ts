@@ -1,4 +1,4 @@
-import type { Rect } from './geometry.js';
+import { type Rect, touches } from './geometry.js';
 
 export interface Offset {
     x: number;
@@ -6,15 +6,6 @@ export interface Offset {
 }
 
 type Side = 'left' | 'right' | 'bottom';
-
-/** Whether another monitor touches `monitor` on its left or right. */
-function touched(monitor: Rect, monitors: readonly Rect[], side: 'left' | 'right'): boolean {
-    return monitors.some((other) => {
-        if (other === monitor) return false;
-        const sideways = side === 'left' ? other.x + other.width === monitor.x : other.x === monitor.x + monitor.width;
-        return sideways && other.y < monitor.y + monitor.height && monitor.y < other.y + other.height;
-    });
-}
 
 /**
  * How far Show Desktop moves a window, as on macOS: to the nearer side edge
@@ -27,7 +18,7 @@ export function revealOffset(frame: Rect, monitor: Rect, monitors: readonly Rect
     const nearer: 'left' | 'right' = centre < monitor.x + monitor.width / 2 ? 'left' : 'right';
     const other = nearer === 'left' ? 'right' : 'left';
     let side: Side = nearer;
-    if (touched(monitor, monitors, nearer)) side = touched(monitor, monitors, other) ? 'bottom' : other;
+    if (touches(monitor, monitors, nearer)) side = touches(monitor, monitors, other) ? 'bottom' : other;
     switch (side) {
         case 'left':
             return { x: Math.min(0, monitor.x + sliver - (frame.x + frame.width)), y: 0 };

@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 
-import { overlaps, placeWindow, reanchor, sameRect } from '../../src/shared/logic/geometry.js';
+import { overlaps, placeWindow, reanchor, sameRect, touches } from '../../src/shared/logic/geometry.js';
 
 const area = { x: 0, y: 28, width: 1535, height: 836 };
 const current = { x: 100, y: 100, width: 800, height: 500 };
@@ -111,4 +111,34 @@ test('rectangles overlap only when they share area', () => {
     assert.equal(overlaps(dock, { x: 0, y: 0, width: 1920, height: 800 }), false, 'touching the top edge');
     assert.equal(overlaps(dock, { x: 1000, y: 700, width: 300, height: 300 }), false, 'touching the right edge');
     assert.equal(overlaps(dock, { x: 999, y: 863, width: 10, height: 10 }), true);
+});
+
+test('a side touches another monitor only where one sits right against it', () => {
+    // Ren's layout: a 1920x1080 monitor on the left, a 1536x960 laptop (1.25) on the right.
+    const left = { x: 0, y: 0, width: 1920, height: 1080 };
+    const laptop = { x: 1920, y: 0, width: 1536, height: 960 };
+    const monitors = [left, laptop];
+    assert.equal(touches(laptop, monitors, 'left'), true);
+    assert.equal(touches(left, monitors, 'right'), true);
+    assert.equal(touches(laptop, monitors, 'right'), false);
+    assert.equal(touches(left, monitors, 'left'), false);
+    assert.equal(touches(laptop, monitors, 'bottom'), false);
+    assert.equal(touches(left, monitors, 'top'), false);
+});
+
+test('monitors that only meet at a corner, or not at all, do not touch', () => {
+    const a = { x: 0, y: 0, width: 100, height: 100 };
+    const corner = { x: 100, y: 100, width: 100, height: 100 };
+    const apart = { x: 150, y: 0, width: 100, height: 100 };
+    assert.equal(touches(a, [a, corner], 'right'), false);
+    assert.equal(touches(a, [a, corner], 'bottom'), false);
+    assert.equal(touches(a, [a, apart], 'right'), false);
+});
+
+test('a monitor stacked above or below touches that side', () => {
+    const top = { x: 0, y: 0, width: 1920, height: 1080 };
+    const below = { x: 400, y: 1080, width: 1920, height: 1080 };
+    assert.equal(touches(top, [top, below], 'bottom'), true);
+    assert.equal(touches(below, [top, below], 'top'), true);
+    assert.equal(touches(top, [top, below], 'top'), false);
 });

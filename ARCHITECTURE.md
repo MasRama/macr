@@ -834,9 +834,12 @@ schemas/                GSettings schema
   every monitor. The strip is rebuilt only when the stages change.
 - It floats over windows (no struts) and slides away when a showing window
   overlaps it (`src/shared/covered.ts`, shared with the dock); a 1 px edge
-  actor at the left of the work area brings it back. Chrome is not hidden in
-  the overview and `trackFullscreen` would set `visible` behind the strip's
-  back, so it hides itself in Mission Control and on `in-fullscreen-changed`.
+  actor at the left of the work area brings it back, as the dock's strip
+  does (a `MonitorFrame` clips the slide, `EdgeHover` waits on a shared
+  edge such as the primary monitor's left with a monitor beside it).
+  Chrome is not hidden in the overview and `trackFullscreen` would set
+  `visible` behind the strip's back, so it hides itself in Mission Control
+  and on `in-fullscreen-changed`.
 - Thumbnails freeze about 3 s after a window is minimized for clients that
   honour Wayland's suspended state (GTK 4, Firefox, Chromium): Mutter
   suspends hidden windows, mapped clones or not.
