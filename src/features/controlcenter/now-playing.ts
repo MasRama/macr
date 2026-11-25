@@ -1,8 +1,23 @@
 import Clutter from 'gi://Clutter';
+import GObject from 'gi://GObject';
 import Pango from 'gi://Pango';
 import St from 'gi://St';
 
 import { NowPlaying, type Player } from '../../shared/now-playing.js';
+
+/**
+ * The title and artist. Asks for no more width than it needs at least (an
+ * ellipsis): it fills what the grid gives the tile, so a long title is cut
+ * short rather than widening the whole Control Center.
+ */
+const TrackText = GObject.registerClass(
+    class TrackText extends St.BoxLayout {
+        override vfunc_get_preferred_width(forHeight: number): [number, number] {
+            const [minimum] = super.vfunc_get_preferred_width(forHeight);
+            return [minimum, minimum];
+        }
+    },
+);
 
 /**
  * macOS Control Center's Now Playing: a wide tile with the song's cover,
@@ -30,7 +45,7 @@ export class NowPlayingTile {
         this.placeholder = new St.Icon({ icon_name: 'audio-x-generic-symbolic', style_class: 'macr-cc-now-playing-placeholder', x_expand: true, y_expand: true, x_align: Clutter.ActorAlign.CENTER, y_align: Clutter.ActorAlign.CENTER });
         this.art.add_child(this.placeholder);
         info.add_child(this.art);
-        const text = new St.BoxLayout({ vertical: true, x_expand: true, y_align: Clutter.ActorAlign.CENTER, style_class: 'macr-cc-now-playing-text' });
+        const text = new TrackText({ vertical: true, x_expand: true, y_align: Clutter.ActorAlign.CENTER, style_class: 'macr-cc-now-playing-text' });
         this.title = new St.Label({ style_class: 'macr-cc-now-playing-title' });
         this.artist = new St.Label({ style_class: 'macr-cc-now-playing-artist' });
         for (const label of [this.title, this.artist]) {
