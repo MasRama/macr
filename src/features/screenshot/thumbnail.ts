@@ -9,6 +9,7 @@ import * as PopupMenu from 'resource:///org/gnome/shell/ui/popupMenu.js';
 
 import { CornerEffect } from '../../shared/corner-effect.js';
 import { styleMenu, syncMenuScheme } from '../../shared/menu-style.js';
+import { MonitorFrame } from '../../shared/monitor-frame.js';
 import { isLight } from '../../shared/scheme.js';
 import { newestScreenshot, type FileStamp } from './logic/files.js';
 import { fitSize, releaseAction, swipeOffset, thumbnailPosition } from './logic/thumbnail.js';
@@ -90,6 +91,8 @@ class Thumbnail {
     file: Gio.File | null;
     onGone: () => void = () => {};
     private readonly frame: St.Bin;
+    /** The primary monitor: sliding in and out, it never shows on a monitor to its right. */
+    private readonly screen: MonitorFrame;
     private readonly menu: PopupMenu.PopupMenu;
     private readonly menuManager: PopupMenu.PopupMenuManager;
     private readonly width: number;
@@ -121,11 +124,14 @@ class Thumbnail {
         this.frame = new St.Bin({ style_class: 'macr-screenshot-thumb', child: image, reactive: true, track_hover: true });
         if (isLight()) this.frame.add_style_class_name('macr-light');
         this.frame.accessible_name = _('Screenshot');
-        Main.layoutManager.addTopChrome(this.frame);
+        const primary = Main.layoutManager.primaryMonitor!;
+        this.screen = new MonitorFrame('macrScreenshotFrame', { top: true });
+        this.screen.place(primary);
+        this.screen.add(this.frame);
         // The border adds a pixel each side.
         const frameSize = { width: size.width + 2 * scale, height: size.height + 2 * scale };
         const position = thumbnailPosition(Main.layoutManager.getWorkAreaForMonitor(Main.layoutManager.primaryIndex), frameSize, MARGIN * scale);
-        this.frame.set_position(position.x, position.y);
+        this.frame.set_position(position.x - primary.x, position.y - primary.y);
         this.width = frameSize.width + MARGIN * scale;
         this.frame.translation_x = this.width;
         this.frame.ease({ translation_x: 0, duration: SLIDE, mode: Clutter.AnimationMode.EASE_OUT_QUAD });
@@ -159,8 +165,7 @@ class Thumbnail {
         this.menuManager.removeMenu(this.menu);
         this.menu.destroy();
         this.frame.remove_all_transitions();
-        Main.layoutManager.removeChrome(this.frame);
-        this.frame.destroy();
+        this.screen.destroy();
         // GNOME's notification is transient: without its banner nothing else would remove it.
         const notification = this.notification;
         if (notification) {

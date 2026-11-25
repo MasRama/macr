@@ -1114,7 +1114,8 @@ schemas/                GSettings schema
   `icon` names it) and, in `notification-added`, which runs before the
   banner request, sets `acknowledged` so no banner shows, and shows the
   notification's `St.ImageContent` at the bottom right of the primary work
-  area (`logic/thumbnail.ts`), its corners cut by the shared
+  area (`logic/thumbnail.ts`), in a top-chrome `MonitorFrame` so its slide
+  never shows on a monitor to the right, its corners cut by the shared
   `CornerEffect`. The file is the UI's `screenshot-taken` file,
   Super+Shift+3's result, or else the newest PNG GNOME just wrote
   (`logic/files.ts`; Shift+Print and Alt+Print hand nothing over). A click
