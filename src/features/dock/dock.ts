@@ -8,8 +8,10 @@ import type * as Dash from 'resource:///org/gnome/shell/ui/dash.js';
 import * as Main from 'resource:///org/gnome/shell/ui/main.js';
 
 import { windowCovers } from '../../shared/covered.js';
+import { EdgeHover } from '../../shared/edge-hover.js';
 import { launchpad, onLaunchpadChanged } from '../../shared/launchpad-link.js';
-import type { Rect } from '../../shared/logic/geometry.js';
+import { type Rect, touches } from '../../shared/logic/geometry.js';
+import { MonitorFrame } from '../../shared/monitor-frame.js';
 import { growAway, liftLabel, MacrDash } from './dash.js';
 import type { BounceKind } from './logic/bounce.js';
 import { type DockEdge, type DockLayout, dockLayout, isSide } from './logic/edge.js';
@@ -58,8 +60,11 @@ export class Dock {
     private readonly minimized = new Map<Meta.Window, MinimizedItem>();
     private readonly leaving = new Map<Meta.Window, MinimizedItem>();
     private readonly divider: St.Widget;
+    /** Its monitor: hidden, the dock shows (and takes clicks) on no monitor next to it. */
+    private readonly frame: MonitorFrame;
     /** Along the screen edge: brings a hidden dock back. */
     private readonly strip: St.Widget;
+    private readonly stripHover: EdgeHover;
     private readonly ids: [Disconnectable, number][] = [];
     private focusIds: [Disconnectable, number][] = [];
     private options: DockOptions;
@@ -108,7 +113,8 @@ export class Dock {
 
         this.strip = new St.Widget({ name: 'macrDockEdge', reactive: true, track_hover: true });
 
-        Main.layoutManager.addChrome(this.actor, { affectsInputRegion: true, trackFullscreen: true });
+        this.frame = new MonitorFrame('macrDockFrame', { trackFullscreen: true });
+        this.frame.add(this.actor);
         Main.layoutManager.addChrome(this.strip, { affectsInputRegion: true, trackFullscreen: true });
         // Sizing reads theme nodes, so the dock has to be on the stage first.
         this.dash._adjustIconSize();
@@ -119,9 +125,16 @@ export class Dock {
         this.listen(options.settings, 'changed::dock-stacks', () => this.buildStacks());
         this.listen(this.actor, 'motion-event', (_actor: unknown, event: Clutter.Event) => this.onMotion(event));
         this.listen(this.actor, 'scroll-event', (_actor: unknown, event: Clutter.Event) => Main.wm.handleWorkspaceScroll(event));
-        this.listen(this.strip, 'notify::hover', () => {
-            if (this.strip.hover) this.reveal();
-        });
+        this.stripHover = new EdgeHover(
+            this.strip,
+            () => {
+                const { monitors } = Main.layoutManager;
+                const monitor = monitors[this.monitorIndex];
+                return Boolean(monitor) && touches(monitor, monitors, this.edge);
+            },
+            () => this.reveal(),
+            () => this.updateVisibility(),
+        );
 
         const showApps = this.dash.showAppsButton;
         const overviewApps = Main.overview.dash.showAppsButton;
@@ -250,8 +263,9 @@ export class Dock {
         this.focusIds = [];
         this.unlinkLaunchpad?.();
         this.unlinkLaunchpad = null;
+        this.stripHover.destroy();
         this.strip.destroy();
-        this.actor.destroy();
+        this.frame.destroy();
     }
 
     private listen(target: unknown, signal: string, callback: (...args: never[]) => unknown): void {
@@ -283,7 +297,8 @@ export class Dock {
         const scale = St.ThemeContext.get_for_stage(global.stage as Clutter.Stage).scale_factor;
         if (isSide(this.edge)) this.divider.set_size(this.options.iconSize * 0.7 * scale, scale);
         else this.divider.height = this.options.iconSize * 0.7;
-        this.actor.set_position(layout.actor.x, layout.actor.y);
+        this.frame.place(monitor);
+        this.actor.set_position(layout.actor.x - monitor.x, layout.actor.y - monitor.y);
         this.strip.set_position(layout.strip.x, layout.strip.y);
         this.strip.set_size(layout.strip.width, layout.strip.height);
         if (this.hidden) this.actor.set_translation(layout.hidden.x, layout.hidden.y, 0);
@@ -309,7 +324,7 @@ export class Dock {
 
     /** Where the dock sits when shown, in stage coordinates. */
     private restingRect(): Rect {
-        return this.layout?.resting ?? { x: this.actor.x, y: this.actor.y, width: this.background.width, height: this.background.height };
+        return this.layout?.resting ?? { x: this.frame.actor.x + this.actor.x, y: this.frame.actor.y + this.actor.y, width: this.background.width, height: this.background.height };
     }
 
     private trackFocusWindow(): void {

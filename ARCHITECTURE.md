@@ -137,7 +137,16 @@ schemas/                GSettings schema
   scales it back down and takes its normal room. The docks are rebuilt when
   monitors change, so each picks the detail of its own monitor.
 - Autohide: the dock hides when the focused window overlaps it or is
-  fullscreen, and a 1 px strip along its screen edge brings it back.
+  fullscreen, and a 1 px strip along its screen edge brings it back. The
+  dock sits in a `MonitorFrame` (`src/shared/monitor-frame.ts`, shared with
+  the Stage Manager strip and the screenshot thumbnail): a monitor-sized
+  chrome actor that clips, so the hidden slide is cut off at the monitor's
+  edge instead of showing, and taking clicks, on a monitor next to it. On
+  an edge another monitor shares (`touches()` in
+  `src/shared/logic/geometry.ts`) the strip brings the dock back only after
+  the pointer rests there 300 ms (`src/shared/edge-hover.ts`), so passing
+  through to that monitor does not; leaving the strip checks again, so a
+  dock brought out goes when the pointer moves away instead of onto it.
 - Clicking the focused app minimizes its window, or cycles its windows on the
   workspace (`logic/rules.ts`). Everything else is GNOME's default.
 - Bounce (`dock-bounce`, on by default; `logic/bounce.ts`): an icon bounces
