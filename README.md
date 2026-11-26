@@ -34,8 +34,13 @@ between, instead of a stack of tweak extensions that each fix one corner.
   its icon, and the Downloads stack bounces when a download finishes.
 - **Assign To** from a Dock icon's Options: an app's windows open on All
   Desktops, on This Desktop, or wherever you are.
-- Fixes: the screenshot toolbar opens on the monitor with the pointer, and
-  Stage Manager's tilted thumbnails keep their shape on every monitor.
+- **At home on more than one monitor** (0.8.1 and 0.8.2): a full-screen app
+  leaves the windows on your other monitors alone; Stage Manager's strip and a
+  side Dock stay on their own monitor when hidden, and the pointer crossing a
+  shared edge no longer pops them out; the wallpaper shows on a monitor left of
+  the primary one; the screenshot toolbar opens on the monitor with the
+  pointer; and Stage Manager's tilted thumbnails keep their shape everywhere.
+- The Control Center keeps its size when a song has a long title.
 
 ## Features
 
@@ -72,7 +77,8 @@ are laid out like macOS System Settings.
 - Minimized windows go into their app's icon, or wait as thumbnails before the
   Trash, with the genie effect when you minimize.
 - Hides when a window covers it. Sits along the bottom or down the left or
-  right side, on every monitor.
+  right side, on every monitor. On an edge shared with another monitor it
+  waits for the pointer to rest there, so moving across does not bring it out.
 - **Assign To**: right-click an app, Options, and its windows open on All
   Desktops, on This Desktop, or wherever you are (None).
 
@@ -102,8 +108,9 @@ are laid out like macOS System Settings.
 
 - **Stage Manager**: the app you use stays in the middle and your
   other apps wait as tilted thumbnails on the left of each monitor. Click one
-  to swap it in, or reach it from the Dock, Alt+Tab or Mission Control. Turn
-  it off in the Control Center.
+  to swap it in, or reach it from the Dock, Alt+Tab or Mission Control. When a
+  window covers the strip it slides away and comes back as the pointer
+  reaches the screen's left edge. Turn it off in the Control Center.
 - **Mission Control**: your windows spread over the dimmed wallpaper, above
   the Dock, with the Spaces bar always at the top. Add a Space with **+**
   (or drop a window on it), close one with the **×** on its thumbnail; empty
