@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.8.2](https://github.com/MasRama/macr/compare/v0.8.1...v0.8.2) (2026-11-26)
+
+
+### Bug Fixes
+
+* **controlcenter:** keep the Control Center its size with a long song title ([ddd464f](https://github.com/MasRama/macr/commit/ddd464fe7fa5e9dfaab9393e5b42ff96aa4c86b6))
+* **dock:** keep a hidden side dock off the monitor next to it ([79efe3b](https://github.com/MasRama/macr/commit/79efe3b782c35e73a2e2fd81194222e850611537))
+* **screenshot:** keep the thumbnail's slide on the primary monitor ([78abe58](https://github.com/MasRama/macr/commit/78abe58f9a6292a79fc80baccc2afb1165f103a2))
+* **spaces:** keep other monitors' windows when an app goes full screen ([679021e](https://github.com/MasRama/macr/commit/679021e9771eae1da014f74664c4b4dc31d081d9))
+* **stagemanager:** keep a slid-away strip off the monitor to its left ([23e35c7](https://github.com/MasRama/macr/commit/23e35c71a29766f4e0f7e7845f8331010ea7153d))
+* **stagemanager:** stop the strip flashing as the pointer crosses to the next monitor ([c308356](https://github.com/MasRama/macr/commit/c308356f24d898180ada49c0b6e706777fd92ac5))
+
 ## [0.8.1](https://github.com/MasRama/macr/compare/v0.8.0...v0.8.1) (2026-11-15)
 
 
